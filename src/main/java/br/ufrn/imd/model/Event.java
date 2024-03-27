@@ -7,5 +7,4 @@ public class Event {
     private Date date;
     private String location;
     private int numberOfRounds;
-    // other attributes and methods
 }
