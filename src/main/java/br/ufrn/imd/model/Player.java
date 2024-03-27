@@ -4,7 +4,8 @@ public class Player extends User{
 
     private Deck deck;
     private long id;
-    private int points;
+    private int eventPoints;
+    private int rankPoints;
     
     public Player(long id, String username, String password) {
 		super(username, password);
@@ -27,12 +28,20 @@ public class Player extends User{
 		this.id = id;
 	}
 
-	public int getPoints() {
-		return points;
+	public int getRankPoints() {
+		return rankPoints;
 	}
 
-	public void setPoints(int points) {
-		this.points = points;
+	public void setRankPoints(int rankPoints) {
+		this.rankPoints = rankPoints;
+	}
+
+	public int getEventPoints() {
+		return eventPoints;
+	}
+
+	public void setEventPoints(int eventPoints) {
+		this.eventPoints = eventPoints;
 	}
     
     
