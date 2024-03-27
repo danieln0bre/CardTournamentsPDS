@@ -4,6 +4,7 @@ public class Player extends User{
 
     private Deck deck;
     private long id;
+    private int points;
     
     public Player(long id, String username, String password) {
 		super(username, password);
@@ -24,6 +25,14 @@ public class Player extends User{
 
 	public void setId(long id) {
 		this.id = id;
+	}
+
+	public int getPoints() {
+		return points;
+	}
+
+	public void setPoints(int points) {
+		this.points = points;
 	}
     
     
