@@ -1,4 +1,4 @@
-package br.ufrn.imd.manager;
+package br.ufrn.imd.controller;
 
 import java.time.LocalDate;
 

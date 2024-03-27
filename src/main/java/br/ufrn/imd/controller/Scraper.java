@@ -1,4 +1,4 @@
-package br.ufrn.imd.service;
+package br.ufrn.imd.controller;
 
 import java.util.ArrayList;
 import java.util.HashMap;
