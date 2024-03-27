@@ -1,5 +1,5 @@
 package br.ufrn.imd.controller;
 
-public class Ranking {
+public class RankingController {
 
 }
