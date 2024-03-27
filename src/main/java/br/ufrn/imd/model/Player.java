@@ -9,4 +9,22 @@ public class Player extends User{
 		super(username, password);
 		this.id = id;
 	}
+
+	public Deck getDeck() {
+		return deck;
+	}
+
+	public void setDeck(Deck deck) {
+		this.deck = deck;
+	}
+
+	public long getId() {
+		return id;
+	}
+
+	public void setId(long id) {
+		this.id = id;
+	}
+    
+    
 }
