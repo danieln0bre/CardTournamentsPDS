@@ -8,5 +8,4 @@ public class Player extends User{
     public Player(String username, String password) {
 		super(username, password);
 	}
-    // other attributes and methods
 }
