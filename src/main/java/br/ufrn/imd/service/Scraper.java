@@ -1,4 +1,4 @@
-package br.ufrn.imd.controller;
+package br.ufrn.imd.service;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -8,7 +8,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 public class Scraper {
@@ -53,38 +52,8 @@ public class Scraper {
         }
     }
 
-
-
-
-    public void printFrequency() {
-        for (Map.Entry<String, List<String>> entry : deckPositions.entrySet()) {
-            System.out.println("Deck: " + entry.getKey());
-            List<String> positions = entry.getValue();
-            
-            // Count frequencies of positions
-            Map<String, Integer> positionFrequency = new HashMap<>();
-            for (String position : positions) {
-                positionFrequency.put(position, positionFrequency.getOrDefault(position, 0) + 1);
-            }
-            
-            // Print positions and their frequencies
-            for (Map.Entry<String, Integer> positionEntry : positionFrequency.entrySet()) {
-                System.out.println("Position " + positionEntry.getKey() + ": " + positionEntry.getValue());
-            }
-            System.out.println();
-        }
-    }
-
-
-    public static void main(String[] args) {
-        String[] urls = {
-            "https://onepiecetopdecks.com/deck-list/jp-format-eb-01-memorial-set-op-07-500-years-into-the-future-decks/",
-            "https://onepiecetopdecks.com/deck-list/jp-format-op-06-twin-champions-decks/",
-            "https://onepiecetopdecks.com/deck-list/jp-format-op05-awakening-of-the-new-era/"
-        };
-        Scraper scraper = new Scraper(urls);
-        scraper.scrape();
-        scraper.printFrequency();
+    public Map<String, List<String>> getDeckPositions() {
+        return deckPositions;
     }
 }
 
