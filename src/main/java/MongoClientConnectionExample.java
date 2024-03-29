@@ -27,14 +27,12 @@ public class MongoClientConnectionExample {
                 .serverApi(serverApi)
                 .build();
 
-        // Create a new client and connect to the server
         try (MongoClient mongoClient = MongoClients.create(settings)) {
             try {
-                // Send a ping to confirm a successful connection
-                MongoDatabase database = mongoClient.getDatabase("CardTournament"); // Change to your database name
-                MongoCollection<Document> collection = database.getCollection("winning_decks"); // Change to your collection name
+                MongoDatabase database = mongoClient.getDatabase("CardTournament"); 
+                MongoCollection<Document> collection = database.getCollection("winning_decks"); 
 
-                // Instantiate Scraper class to scrape data
+
                 String[] urls = {
                         "https://onepiecetopdecks.com/deck-list/jp-format-eb-01-memorial-set-op-07-500-years-into-the-future-decks/",
                         "https://onepiecetopdecks.com/deck-list/jp-format-op-06-twin-champions-decks/",
@@ -43,10 +41,8 @@ public class MongoClientConnectionExample {
                 Scraper scraper = new Scraper(urls);
                 scraper.scrape();
 
-                // Retrieve deck positions
                 Map<String, List<String>> deckPositions = scraper.getDeckPositions();
 
-                // Insert deck positions into the collection
                 for (Map.Entry<String, List<String>> entry : deckPositions.entrySet()) {
                     Document document = new Document("deck_name", entry.getKey())
                             .append("positions", entry.getValue());
