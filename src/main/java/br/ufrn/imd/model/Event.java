@@ -92,7 +92,10 @@ public class Event {
     
 
     public void update(String name, Date date, String location, int numberOfRounds) {
-
+    	this.setName(name);
+    	this.setDate(date);
+    	this.setLocation(location);
+    	this.setNumberOfRounds(numberOfRounds);
     }
     
 }
