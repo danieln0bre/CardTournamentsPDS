@@ -7,8 +7,6 @@ import br.ufrn.imd.service.PlayerService;
 import br.ufrn.imd.model.EventRanking;
 
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Collections;
 
 public class Main {
     public static void main(String[] args) {

@@ -32,14 +32,30 @@ public class PairingService {
 
 	private static Player findMatchingPlayer(Player player, ArrayList<Player> players, int startIndex) {
 	    int targetEventPoints = player.getEventPoints();
+	    Player bestMatch = null;
+	    double minDifference = Double.MAX_VALUE;
+
 	    for (int i = startIndex; i < players.size(); i++) {
 	        Player opponent = players.get(i);
 	        if (opponent.getEventPoints() == targetEventPoints && !opponent.equals(player)) {
-	            return opponent;
+	            // Calculate the difference in rankPoints, opponentsMatchWinrate, and opponentsOpponentsMatchWinrate
+	            double rankPointsDiff = Math.abs(opponent.getRankPoints() - player.getRankPoints());
+	            double matchWinrateDiff = Math.abs(opponent.getOpponentsMatchWinrate() - player.getOpponentsMatchWinrate());
+	            double opponentsMatchWinrateDiff = Math.abs(opponent.getOpponentsOpponentsMatchWinrate() - player.getOpponentsOpponentsMatchWinrate());
+
+	            // Calculate a score based on the differences
+	            double score = rankPointsDiff + matchWinrateDiff + opponentsMatchWinrateDiff;
+
+	            // Update the best match if this opponent has a smaller score
+	            if (score < minDifference) {
+	                minDifference = score;
+	                bestMatch = opponent;
+	            }
 	        }
 	    }
-	    return null; // No matching player found
+	    return bestMatch;
 	}
+
 
 
 }
