@@ -31,7 +31,11 @@ public class Pairing {
         return result;
     }
     
-    public void setResult(int result) {
-        this.result = result;
+    public void player1Win() {
+        result = 0;
+    }
+    
+    public void player2Win() {
+    	result = 1;
     }
 }

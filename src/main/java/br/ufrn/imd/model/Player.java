@@ -1,48 +1,111 @@
+// Player.java
 package br.ufrn.imd.model;
 
-public class Player extends User{
+import java.util.ArrayList;
+import java.util.List;
 
-    private Deck deck;
+public class Player {
     private long id;
-    private int eventPoints;
+    private String username;
+    private String password;
     private int rankPoints;
-    
+    private int eventPoints;
+    private List<Player> opponents;
+    private double opponentsMatchWinrate;
+    private double opponentsOpponentsMatchWinrate;
+
     public Player(long id, String username, String password) {
-		super(username, password);
-		this.id = id;
-	}
+        this.id = id;
+        this.username = username;
+        this.password = password;
+        this.rankPoints = 0; // Default rankPoints
+        this.eventPoints = 0; // Default eventPoints
+        this.opponents = new ArrayList<>();
+        this.opponentsMatchWinrate = 0.0;
+        this.opponentsOpponentsMatchWinrate = 0.0;
+    }
 
-	public Deck getDeck() {
-		return deck;
-	}
+    public int getRankPoints() {
+        return rankPoints;
+    }
 
-	public void setDeck(Deck deck) {
-		this.deck = deck;
-	}
+    public void setRankPoints(int rankPoints) {
+        this.rankPoints = rankPoints;
+    }
 
-	public long getId() {
-		return id;
-	}
+    public int getEventPoints() {
+        return eventPoints;
+    }
 
-	public void setId(long id) {
-		this.id = id;
-	}
+    public void setEventPoints(int eventPoints) {
+        this.eventPoints = eventPoints;
+    }
 
-	public int getRankPoints() {
-		return rankPoints;
-	}
+    public List<Player> getOpponents() {
+        return opponents;
+    }
 
-	public void setRankPoints(int rankPoints) {
-		this.rankPoints = rankPoints;
-	}
+    public void addOpponent(Player opponent) {
+        opponents.add(opponent);
+    }
 
-	public int getEventPoints() {
-		return eventPoints;
-	}
+    public double getOpponentsMatchWinrate() {
+        return opponentsMatchWinrate;
+    }
 
-	public void setEventPoints(int eventPoints) {
-		this.eventPoints = eventPoints;
-	}
-    
-    
+    public double getOpponentsOpponentsMatchWinrate() {
+        return opponentsOpponentsMatchWinrate;
+    }
+
+    public void calculateOpponentsMatchWinrate() {
+        if (!opponents.isEmpty()) {
+            int totalOpponentsMatches = 0;
+            int totalWins = 0;
+            for (Player opponent : opponents) {
+                int winsAgainstOpponent = 0;
+                for (Player o : opponent.opponents) {
+                    if (o == this) {
+                        winsAgainstOpponent++;
+                    }
+                }
+                totalWins += winsAgainstOpponent;
+                totalOpponentsMatches += opponent.opponents.size();
+            }
+            opponentsMatchWinrate = (double) totalWins / totalOpponentsMatches;
+        }
+    }
+
+    public void calculateOpponentsOpponentsMatchWinrate() {
+        if (!opponents.isEmpty()) {
+            double totalOpponentsOpponentsWinrate = 0.0;
+            for (Player opponent : opponents) {
+                totalOpponentsOpponentsWinrate += opponent.opponentsMatchWinrate;
+            }
+            opponentsOpponentsMatchWinrate = totalOpponentsOpponentsWinrate / opponents.size();
+        }
+    }
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
 }
