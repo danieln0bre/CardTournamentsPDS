@@ -43,6 +43,12 @@ public class Main {
             PlayerService.calculateWinRates(player);
         }
 
+        // Display win rates for players
+        System.out.println("Win Rates:");
+        for (Player player : players) {
+            System.out.println(player.getUsername() + ": " + player.getOpponentsMatchWinrate());
+        }
+
         // Rank players based on event points
         EventRanking.rankPlayers(players);
 

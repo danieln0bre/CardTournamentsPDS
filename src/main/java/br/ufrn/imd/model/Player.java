@@ -10,7 +10,7 @@ public class Player {
     private String password;
     private int rankPoints;
     private int eventPoints;
-    private List<Player> opponents;
+    private ArrayList<Player> opponents;
     private double opponentsMatchWinrate;
     private double opponentsOpponentsMatchWinrate;
 
@@ -59,31 +59,33 @@ public class Player {
 
     public void calculateOpponentsMatchWinrate() {
         if (!opponents.isEmpty()) {
-            int totalOpponentsMatches = 0;
             int totalWins = 0;
+            int totalOpponentsMatches = 0;
             for (Player opponent : opponents) {
-                int winsAgainstOpponent = 0;
-                for (Player o : opponent.opponents) {
-                    if (o == this) {
-                        winsAgainstOpponent++;
-                    }
-                }
-                totalWins += winsAgainstOpponent;
-                totalOpponentsMatches += opponent.opponents.size();
+                totalWins += opponent.getEventPoints() / 3;
+                totalOpponentsMatches += opponent.getOpponents().size();
             }
-            opponentsMatchWinrate = (double) totalWins / totalOpponentsMatches;
+            opponentsMatchWinrate = totalWins / (double) totalOpponentsMatches;
         }
     }
 
+
     public void calculateOpponentsOpponentsMatchWinrate() {
         if (!opponents.isEmpty()) {
-            double totalOpponentsOpponentsWinrate = 0.0;
+            double totalOpponentsOpponentsMatchWinrate = 0.0;
+            int totalOpponents = 0;
             for (Player opponent : opponents) {
-                totalOpponentsOpponentsWinrate += opponent.opponentsMatchWinrate;
+                for (Player opponentsOpponent : opponent.getOpponents()) {
+                    totalOpponentsOpponentsMatchWinrate += opponentsOpponent.getOpponentsMatchWinrate();
+                    totalOpponents++;
+                }
             }
-            opponentsOpponentsMatchWinrate = totalOpponentsOpponentsWinrate / opponents.size();
+            if (totalOpponents > 0) {
+                opponentsOpponentsMatchWinrate = totalOpponentsOpponentsMatchWinrate / totalOpponents;
+            }
         }
     }
+
 
     public long getId() {
         return id;
