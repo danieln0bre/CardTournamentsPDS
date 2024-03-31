@@ -1,4 +1,3 @@
-// Player.java
 package br.ufrn.imd.model;
 
 import java.util.ArrayList;
@@ -10,7 +9,7 @@ public class Player {
     private String password;
     private int rankPoints;
     private int eventPoints;
-    private ArrayList<Player> opponents;
+    private List<Player> opponents;
     private double opponentsMatchWinrate;
     private double opponentsOpponentsMatchWinrate;
 
@@ -18,44 +17,37 @@ public class Player {
         this.id = id;
         this.username = username;
         this.password = password;
-        this.rankPoints = 0; // Default rankPoints
-        this.eventPoints = 0; // Default eventPoints
+        this.rankPoints = 0;
+        this.eventPoints = 0;
         this.opponents = new ArrayList<>();
         this.opponentsMatchWinrate = 0.0;
         this.opponentsOpponentsMatchWinrate = 0.0;
     }
 
-    public int getRankPoints() {
-        return rankPoints;
-    }
+    // Getters and setters
+    public long getId() { return id; }
+    public void setId(long id) { this.id = id; }
+    
+    public String getUsername() { return username; }
+    public void setUsername(String username) { this.username = username; }
+    
+    public String getPassword() { return password; }
+    public void setPassword(String password) { this.password = password; }
+    
+    public int getRankPoints() { return rankPoints; }
+    public void setRankPoints(int rankPoints) { this.rankPoints = rankPoints; }
+    
+    public int getEventPoints() { return eventPoints; }
+    public void setEventPoints(int eventPoints) { this.eventPoints = eventPoints; }
+    
+    public List<Player> getOpponents() { return opponents; }
 
-    public void setRankPoints(int rankPoints) {
-        this.rankPoints = rankPoints;
-    }
+    public double getOpponentsMatchWinrate() { return opponentsMatchWinrate; }
 
-    public int getEventPoints() {
-        return eventPoints;
-    }
+    public double getOpponentsOpponentsMatchWinrate() { return opponentsOpponentsMatchWinrate; }
 
-    public void setEventPoints(int eventPoints) {
-        this.eventPoints = eventPoints;
-    }
-
-    public List<Player> getOpponents() {
-        return opponents;
-    }
-
-    public void addOpponent(Player opponent) {
-        opponents.add(opponent);
-    }
-
-    public double getOpponentsMatchWinrate() {
-        return opponentsMatchWinrate;
-    }
-
-    public double getOpponentsOpponentsMatchWinrate() {
-        return opponentsOpponentsMatchWinrate;
-    }
+    // Methods
+    public void addOpponent(Player opponent) { opponents.add(opponent); }
 
     public void calculateOpponentsMatchWinrate() {
         if (!opponents.isEmpty()) {
@@ -68,7 +60,6 @@ public class Player {
             opponentsMatchWinrate = totalWins / (double) totalOpponentsMatches;
         }
     }
-
 
     public void calculateOpponentsOpponentsMatchWinrate() {
         if (!opponents.isEmpty()) {
@@ -84,30 +75,5 @@ public class Player {
                 opponentsOpponentsMatchWinrate = totalOpponentsOpponentsMatchWinrate / totalOpponents;
             }
         }
-    }
-
-
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
     }
 }

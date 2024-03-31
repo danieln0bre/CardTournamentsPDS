@@ -9,7 +9,6 @@ public class Event {
     private String location;
     private int numberOfRounds;
     private long id;
-    private ArrayList<Pairing> pairings;
     private int currentRound;
     private boolean finished;
     
@@ -53,14 +52,6 @@ public class Event {
         this.id = id;
     }
     
-    public ArrayList<Pairing> getPairings() {
-        return pairings;
-    }
-    
-    public void setPairings(ArrayList<Pairing> pairings) {
-        this.pairings = pairings;
-    }
-    
     public int getCurrentRound() {
         return currentRound;
     }
@@ -88,9 +79,8 @@ public class Event {
     }
     
     public void start() {
-    	
+        
     }
-    
 
     public void update(String name, Date date, String location, int numberOfRounds) {
     	this.setName(name);
