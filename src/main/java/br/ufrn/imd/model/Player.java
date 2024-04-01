@@ -3,11 +3,9 @@ package br.ufrn.imd.model;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Player {
+public class Player extends User{
 	
 	private long id;
-    private String username;
-    private String password;
     private int rankPoints;
     private int eventPoints;
     private List<Player> opponents;
@@ -15,9 +13,7 @@ public class Player {
     private double opponentsOpponentsMatchWinrate;
 
     public Player(long id, String username, String password) {
-        this.id = id;
-        this.username = username;
-        this.password = password;
+        super(username, password);
         this.rankPoints = 0;
         this.eventPoints = 0;
         this.opponents = new ArrayList<>();
@@ -25,20 +21,19 @@ public class Player {
         this.opponentsOpponentsMatchWinrate = 0.0;
     }
 
-    // Getters and setters
     public long getId() { return id; }
     public void setId(long id) { this.id = id; }
     
-    public String getUsername() { return username; }
+    public String getUsername() { return this.username; }
     public void setUsername(String username) { this.username = username; }
     
-    public String getPassword() { return password; }
+    public String getPassword() { return this.password; }
     public void setPassword(String password) { this.password = password; }
     
-    public int getRankPoints() { return rankPoints; }
+    public int getRankPoints() { return this.rankPoints; }
     public void setRankPoints(int rankPoints) { this.rankPoints = rankPoints; }
     
-    public int getEventPoints() { return eventPoints; }
+    public int getEventPoints() { return this.eventPoints; }
     public void setEventPoints(int eventPoints) { this.eventPoints = eventPoints; }
     
     public List<Player> getOpponents() { return opponents; }

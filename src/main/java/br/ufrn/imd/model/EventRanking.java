@@ -6,6 +6,8 @@ import java.util.Comparator;
 
 public class EventRanking {
 	
+	// ISSO NAO EH CLASSE MODEL E SIM SERVICE...
+	
 	// Sort players by event points, opponents' match win rate, and opponents' opponents match win rate
     public static void sortByEventPoints(ArrayList<Player> players) {
         Collections.sort(players, new EventPointsComparator());

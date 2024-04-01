@@ -2,8 +2,8 @@ package br.ufrn.imd.model;
 
 public class User {
 
-	private String username;
-    private String password;
+	protected String username;
+	protected String password;
     
     public User(String username, String password) {
     	this.username = username;

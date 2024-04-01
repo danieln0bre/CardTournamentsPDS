@@ -12,6 +12,15 @@ public class Event {
     private int currentRound;
     private boolean finished;
     
+    public Event(String name, Date date, String location, int numberOfRounds) {
+        this.name = name;
+        this.date = date;
+        this.location = location;
+        this.numberOfRounds = numberOfRounds;
+        this.currentRound = 1;
+        this.finished = false;
+    }
+    
     public String getName() {
         return name;
     }
@@ -68,24 +77,5 @@ public class Event {
         this.finished = finished;
     }
     
-    // Constructor
-    public Event(String name, Date date, String location, int numberOfRounds) {
-        this.name = name;
-        this.date = date;
-        this.location = location;
-        this.numberOfRounds = numberOfRounds;
-        this.currentRound = 1;
-        this.finished = false;
-    }
     
-    public void start() {
-        
-    }
-
-    public void update(String name, Date date, String location, int numberOfRounds) {
-    	this.setName(name);
-    	this.setDate(date);
-    	this.setLocation(location);
-    	this.setNumberOfRounds(numberOfRounds);
-    }
 }
