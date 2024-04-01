@@ -5,10 +5,7 @@ import java.util.Collections;
 import java.util.Comparator;
 
 public class EventRanking {
-	
-	// ISSO NAO EH CLASSE MODEL E SIM SERVICE...
-	
-	// Sort players by event points, opponents' match win rate, and opponents' opponents match win rate
+    // Sort players by event points, opponents' match win rate, and opponents' opponents match win rate
     public static void sortByEventPoints(ArrayList<Player> players) {
         Collections.sort(players, new EventPointsComparator());
     }
@@ -21,14 +18,9 @@ public class EventRanking {
             if (compareByEventPoints != 0) {
                 return compareByEventPoints;
             }
-
             int compareByOpponentsWinrate = Double.compare(p2.getOpponentsMatchWinrate(), p1.getOpponentsMatchWinrate());
-            if (compareByOpponentsWinrate != 0) {
-                return compareByOpponentsWinrate;
-            }
+            return compareByOpponentsWinrate;
 
-            return Double.compare(p2.getOpponentsOpponentsMatchWinrate(), p1.getOpponentsOpponentsMatchWinrate());
         }
     }
-
 }
