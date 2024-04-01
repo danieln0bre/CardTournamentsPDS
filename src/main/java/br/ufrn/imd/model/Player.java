@@ -1,14 +1,13 @@
 package br.ufrn.imd.model;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class Player extends User{
 	
 	private long id;
     private int rankPoints;
     private int eventPoints;
-    private List<Player> opponents;
+    private ArrayList<Player> opponents;
     private double opponentsMatchWinrate;
     private double opponentsOpponentsMatchWinrate;
 
@@ -36,7 +35,7 @@ public class Player extends User{
     public int getEventPoints() { return this.eventPoints; }
     public void setEventPoints(int eventPoints) { this.eventPoints = eventPoints; }
     
-    public List<Player> getOpponents() { return opponents; }
+    public ArrayList<Player> getOpponents() { return opponents; }
 
     public double getOpponentsMatchWinrate() { return opponentsMatchWinrate; }
 
