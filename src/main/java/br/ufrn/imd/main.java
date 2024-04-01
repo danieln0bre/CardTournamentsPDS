@@ -1,3 +1,4 @@
+package br.ufrn.imd;
 import java.util.ArrayList;
 
 import br.ufrn.imd.model.EventRanking;
@@ -8,7 +9,7 @@ import br.ufrn.imd.service.PlayerService;
 import br.ufrn.imd.service.GeneralRankingService;
 import br.ufrn.imd.view.TelaInicialView;
 
-public class Main {
+public class main {
 
 	public static void main(String[] args) {
 		
@@ -34,13 +35,13 @@ public class Main {
         players.get(3).setRankPoints(168);
         players.get(3).setEventPoints(0);
 
-//        // Adding opponents for each player (for testing purposes)
-//        for (int i = 0; i < players.size(); i++) {
-//            for (int j = i + 1; j < players.size(); j++) {
-//                players.get(i).addOpponent(players.get(j));
-//                players.get(j).addOpponent(players.get(i));
-//            }
-//        }
+        // Adding opponents for each player (for testing purposes)
+        for (int i = 0; i < players.size(); i++) {
+            for (int j = i + 1; j < players.size(); j++) {
+                players.get(i).addOpponent(players.get(j));
+                players.get(j).addOpponent(players.get(i));
+            }
+        }
 
         // Calculate win rates for players
         for (Player player : players) {
