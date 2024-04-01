@@ -1,25 +1,16 @@
 package br.ufrn.imd.service;
 
-import java.util.ArrayList;
-
 import br.ufrn.imd.model.Player;
 
+import java.util.ArrayList;
+
 public class GeneralRankingService {
-	// Display the ranking of players
     public static void displayRanking(ArrayList<Player> players) {
         System.out.println("Ranking:");
-        for (int i = 0; i < players.size(); i++) {
-            Player player = players.get(i);
-            displayPlayerRank(player, i + 1);
+        int rank = 1;
+        for (Player player : players) {
+            System.out.println(rank + ". " + player.getUsername() + " - Points: " + player.getEventPoints() + ", Opponents Winrate: " + player.getOpponentsMatchWinrate());
+            rank++;
         }
     }
-
-    // Display individual player's rank and relevant information
-    private static void displayPlayerRank(Player player, int rank) {
-        System.out.println(rank + ". " + player.getUsername() + 
-                           " - Points: " + player.getEventPoints() + 
-                           ", Opponents Winrate: " + player.getOpponentsMatchWinrate() + 
-                           ", Opponents Opponents Winrate: " + player.getOpponentsOpponentsMatchWinrate());
-    }
-
 }
