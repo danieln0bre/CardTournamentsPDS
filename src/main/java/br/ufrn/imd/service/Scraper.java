@@ -11,7 +11,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 
 public class Scraper {
-    private String[] urls;
+	private String[] urls;
     private Map<String, List<String>> deckPositions;
 
     public Scraper(String[] urls) {
@@ -56,4 +56,3 @@ public class Scraper {
         return deckPositions;
     }
 }
-

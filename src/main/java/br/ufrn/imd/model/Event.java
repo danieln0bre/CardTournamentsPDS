@@ -1,10 +1,10 @@
 package br.ufrn.imd.model;
 
-import java.util.ArrayList;
 import java.util.Date;
 
 public class Event {
-    private String name;
+
+	private String name;
     private Date date;
     private String location;
     private int numberOfRounds;
@@ -88,5 +88,4 @@ public class Event {
     	this.setLocation(location);
     	this.setNumberOfRounds(numberOfRounds);
     }
-    
 }

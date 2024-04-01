@@ -1,7 +1,8 @@
 package br.ufrn.imd.model;
 
 public class Pairing {
-    private Player player1;
+	
+	private Player player1;
     private Player player2;
     private int result;
 
@@ -23,4 +24,5 @@ public class Pairing {
     // Methods
     public void player1Win() { result = 0; }
     public void player2Win() { result = 1; }
+
 }

@@ -1,12 +1,13 @@
 package br.ufrn.imd.service;
 
-import br.ufrn.imd.model.Player;
-import br.ufrn.imd.model.Pairing;
-
 import java.util.ArrayList;
 import java.util.Collections;
 
+import br.ufrn.imd.model.Pairing;
+import br.ufrn.imd.model.Player;
+
 public class PairingService {
+	
 	public static ArrayList<Pairing> createPairings(ArrayList<Player> players) {
 	    ArrayList<Pairing> pairings = new ArrayList<>();
 
@@ -55,7 +56,5 @@ public class PairingService {
 	    }
 	    return bestMatch;
 	}
-
-
 
 }

@@ -5,7 +5,8 @@ import java.util.Collections;
 import java.util.Comparator;
 
 public class EventRanking {
-    // Sort players by event points, opponents' match win rate, and opponents' opponents match win rate
+	
+	// Sort players by event points, opponents' match win rate, and opponents' opponents match win rate
     public static void sortByEventPoints(ArrayList<Player> players) {
         Collections.sort(players, new EventPointsComparator());
     }
@@ -27,4 +28,5 @@ public class EventRanking {
             return Double.compare(p2.getOpponentsOpponentsMatchWinrate(), p1.getOpponentsOpponentsMatchWinrate());
         }
     }
+
 }

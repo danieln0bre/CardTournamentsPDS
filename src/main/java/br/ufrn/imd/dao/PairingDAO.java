@@ -1,5 +1,5 @@
 package br.ufrn.imd.dao;
 
-public class PlayerDAO {
+public class PairingDAO {
 
 }

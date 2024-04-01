@@ -1,7 +1,7 @@
 package br.ufrn.imd.model;
 
 public class Deck {
-    private String name;
+	private String name;
     //colocar imagem depois
     
 	public String getName() {

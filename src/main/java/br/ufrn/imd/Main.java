@@ -1,17 +1,20 @@
-package br.ufrn.imd;
-
-import br.ufrn.imd.model.Player;
-import br.ufrn.imd.model.Pairing;
-import br.ufrn.imd.service.PairingService;
-import br.ufrn.imd.service.PlayerService;
-import br.ufrn.imd.service.RankingService;
-import br.ufrn.imd.model.EventRanking;
-
 import java.util.ArrayList;
 
+import br.ufrn.imd.model.EventRanking;
+import br.ufrn.imd.model.Pairing;
+import br.ufrn.imd.model.Player;
+import br.ufrn.imd.service.PairingService;
+import br.ufrn.imd.service.PlayerService;
+import br.ufrn.imd.service.GeneralRankingService;
+import br.ufrn.imd.view.TelaInicialView;
+
 public class Main {
-    public static void main(String[] args) {
-        // Create players
+
+	public static void main(String[] args) {
+		
+		//TelaInicialView.start();
+		
+		// Create players
         ArrayList<Player> players = new ArrayList<>();
         players.add(new Player(1, "Player1", "password1"));
         players.add(new Player(2, "Player2", "password2"));
@@ -54,7 +57,7 @@ public class Main {
         EventRanking.sortByEventPoints(players);
 
         // Display event ranking
-        RankingService.displayRanking(players);
+        GeneralRankingService.displayRanking(players);
 
         // Create pairings
         ArrayList<Pairing> pairings = PairingService.createPairings(players);
@@ -64,5 +67,7 @@ public class Main {
         for (Pairing pairing : pairings) {
             System.out.println(pairing.getPlayer1().getUsername() + " vs " + pairing.getPlayer2().getUsername());
         }
-    }
+		
+	}
+
 }

@@ -1,8 +1,8 @@
 package br.ufrn.imd.service;
 
-import br.ufrn.imd.model.Player;
-
 import java.util.Comparator;
+
+import br.ufrn.imd.model.Player;
 
 public class PlayerService {
 	public static Comparator<Player> getRankComparator() {
@@ -28,4 +28,5 @@ public class PlayerService {
         player.calculateOpponentsMatchWinrate();
         player.calculateOpponentsOpponentsMatchWinrate();
     }
+
 }

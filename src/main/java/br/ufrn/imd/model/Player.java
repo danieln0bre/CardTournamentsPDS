@@ -4,7 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Player {
-    private long id;
+	
+	private long id;
     private String username;
     private String password;
     private int rankPoints;
@@ -76,4 +77,5 @@ public class Player {
             }
         }
     }
+
 }

@@ -1,7 +1,8 @@
 package br.ufrn.imd.model;
 
 public class User {
-    private String username;
+
+	private String username;
     private String password;
     
     public User(String username, String password) {
@@ -24,5 +25,4 @@ public class User {
 	public void setPassword(String password) {
 		this.password = password;
 	}
-    
 }
