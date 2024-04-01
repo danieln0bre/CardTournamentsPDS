@@ -2,9 +2,9 @@ package br.ufrn.imd;
 
 import br.ufrn.imd.model.Player;
 import br.ufrn.imd.model.Pairing;
+import br.ufrn.imd.service.GeneralRankingService;
 import br.ufrn.imd.service.PairingService;
 import br.ufrn.imd.service.PlayerService;
-import br.ufrn.imd.service.RankingService;
 import br.ufrn.imd.model.EventRanking;
 
 import java.util.ArrayList;
