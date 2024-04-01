@@ -1,13 +1,12 @@
 package br.ufrn.imd.service;
 
+import br.ufrn.imd.model.Player;
+import br.ufrn.imd.model.Pairing;
+
 import java.util.ArrayList;
 import java.util.Collections;
 
-import br.ufrn.imd.model.Pairing;
-import br.ufrn.imd.model.Player;
-
 public class PairingService {
-	
 	public static ArrayList<Pairing> createPairings(ArrayList<Player> players) {
 	    ArrayList<Pairing> pairings = new ArrayList<>();
 
@@ -42,10 +41,9 @@ public class PairingService {
 	            // Calculate the difference in rankPoints, opponentsMatchWinrate, and opponentsOpponentsMatchWinrate
 	            double rankPointsDiff = Math.abs(opponent.getRankPoints() - player.getRankPoints());
 	            double matchWinrateDiff = Math.abs(opponent.getOpponentsMatchWinrate() - player.getOpponentsMatchWinrate());
-	            double opponentsMatchWinrateDiff = Math.abs(opponent.getOpponentsOpponentsMatchWinrate() - player.getOpponentsOpponentsMatchWinrate());
 
 	            // Calculate a score based on the differences
-	            double score = rankPointsDiff + matchWinrateDiff + opponentsMatchWinrateDiff;
+	            double score = rankPointsDiff + matchWinrateDiff;
 
 	            // Update the best match if this opponent has a smaller score
 	            if (score < minDifference) {
@@ -56,5 +54,4 @@ public class PairingService {
 	    }
 	    return bestMatch;
 	}
-
 }
