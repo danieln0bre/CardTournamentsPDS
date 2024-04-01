@@ -48,7 +48,7 @@ public class Main {
         EventRanking.sortByEventPoints(players);
 
         // Display event ranking
-        RankingService.displayRanking(players);
+        GeneralRankingService.displayRanking(players);
 
         // Create pairings
         ArrayList<Pairing> pairings = PairingService.createPairings(players);
