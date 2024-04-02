@@ -4,43 +4,59 @@ import br.ufrn.imd.model.Player;
 
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashSet;
 
 public class PlayerService {
     public static Comparator<Player> getRankComparator() {
-        return new Comparator<Player>() {
-            @Override
-            public int compare(Player p1, Player p2) {
-                int compareByEventPoints = Integer.compare(p2.getEventPoints(), p1.getEventPoints()); // Sort in descending order of event points
-                if (compareByEventPoints != 0) {
-                    return compareByEventPoints;
-                }
-                int compareByRankPoints = Integer.compare(p1.getRankPoints(), p2.getRankPoints());
-                if (compareByRankPoints != 0) {
-                    return compareByRankPoints;
-                }
-                // Add additional comparisons if needed
-                return 0; // Default comparison
+        return (p1, p2) -> {
+            int compareByEventPoints = Integer.compare(p2.getEventPoints(), p1.getEventPoints()); // Sort in descending order of event points
+            if (compareByEventPoints != 0) {
+                return compareByEventPoints;
             }
+            return Integer.compare(p1.getRankPoints(), p2.getRankPoints());
         };
     }
+    
+    private static void calculateOpponentsMatchWinrate(Player player, ArrayList<Player> players) {
+        int totalOpponents = player.getOpponentIds().size();
+        double totalOpponentWinrate = 0;
 
-    public static void calculateOpponentsMatchWinrate(Player player) {
-        double totalOpponentsWins = 0;
-        int totalOpponentsMatches = player.getOpponents().size();
+        System.out.println("Calculating opponents match winrate for player: " + player.getUsername());
 
-        for (Player opponent : player.getOpponents()) {
-            if (opponent.getEventPoints() > 0) { // Assuming event points represent wins
-                totalOpponentsWins++;
+        for (Long opponentId : player.getOpponentIds()) {
+            Player opponent = getPlayerById(players, opponentId);
+            if (opponent != null && opponent.getEventPoints() > 0 && totalOpponents > 0) {
+                // Calculate winrate for the opponent
+                double opponentWinrate = opponent.getEventPoints() / (double) totalOpponents;
+                System.out.println("Winrate for opponent " + opponent.getUsername() + ": " + opponentWinrate);
+                totalOpponentWinrate += opponentWinrate; // Accumulate winrate
             }
         }
 
-        double winRate = calculateWinrate(totalOpponentsWins, totalOpponentsMatches);
-        player.setOpponentsMatchWinrate(winRate);
+        // Calculate mean value
+        double meanOpponentWinrate = totalOpponentWinrate / totalOpponents;
+        System.out.println("Mean opponent winrate for player " + player.getUsername() + ": " + meanOpponentWinrate);
+
+        // Set mean value as OpponentsMatchWinrate
+        player.setOpponentsMatchWinrate(meanOpponentWinrate);
     }
 
-    public static void calculateWinRates(Player player) {
-        calculateOpponentsMatchWinrate(player);
+
+    public static void calculateWinRates(Player player, ArrayList<Player> players) {
+        System.out.println("Calculating win rates for player: " + player.getUsername());
+        calculateOpponentsMatchWinrate(player, players);
+        System.out.println("Win rates calculated for player: " + player.getUsername());
+    }
+
+
+
+    // Method to get player by ID
+    private static Player getPlayerById(ArrayList<Player> players, long playerId) {
+        for (Player player : players) {
+            if (player.getId() == playerId) {
+                return player;
+            }
+        }
+        return null; // Player not found
     }
 
     // Utility method to calculate winrate
@@ -48,7 +64,7 @@ public class PlayerService {
         if (totalMatches > 0) {
             return wins / totalMatches;
         } else {
-            return 0.0;
+            return 0.0; // Handle division by zero gracefully
         }
     }
 }

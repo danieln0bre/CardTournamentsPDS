@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Player Pairing</title>
+</head>
+<body>
+    <h2>Player Pairing</h2>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Match</th>
+                <th>Player 1</th>
+                <th>Player 2</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Iterate over pairings and display data -->
+            <tr th:each="pairing, iterStat : ${pairings}">
+                <td th:text="${iterStat.count}">Match</td>
+                <td th:text="${pairing.player1.username}">Player 1</td>
+                <td th:text="${pairing.player2.username}">Player 2</td>
+            </tr>
+        </tbody>
+    </table>
+</body>
+</html>

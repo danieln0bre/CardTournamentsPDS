@@ -34,10 +34,14 @@ public class PairingService {
 	    int targetEventPoints = player.getEventPoints();
 	    Player bestMatch = null;
 	    double minDifference = Double.MAX_VALUE;
+	    boolean foundEqualEventPoints = false;
 
 	    for (int i = startIndex; i < players.size(); i++) {
 	        Player opponent = players.get(i);
 	        if (opponent.getEventPoints() == targetEventPoints && !opponent.equals(player)) {
+	            // Players with equal event points are found
+	            foundEqualEventPoints = true;
+
 	            // Calculate the difference in rankPoints, opponentsMatchWinrate, and opponentsOpponentsMatchWinrate
 	            double rankPointsDiff = Math.abs(opponent.getRankPoints() - player.getRankPoints());
 	            double matchWinrateDiff = Math.abs(opponent.getOpponentsMatchWinrate() - player.getOpponentsMatchWinrate());
@@ -52,6 +56,25 @@ public class PairingService {
 	            }
 	        }
 	    }
+
+	    // If no players with equal event points are found, match to the closest in descending order of event points
+	    if (!foundEqualEventPoints) {
+	        for (int i = startIndex; i < players.size(); i++) {
+	            Player opponent = players.get(i);
+	            if (opponent.getEventPoints() < targetEventPoints && !opponent.equals(player)) {
+	                // Calculate the difference in event points
+	                double eventPointsDiff = targetEventPoints - opponent.getEventPoints();
+
+	                // Update the best match if this opponent has a smaller difference in event points
+	                if (eventPointsDiff < minDifference) {
+	                    minDifference = eventPointsDiff;
+	                    bestMatch = opponent;
+	                }
+	            }
+	        }
+	    }
+
 	    return bestMatch;
 	}
+
 }

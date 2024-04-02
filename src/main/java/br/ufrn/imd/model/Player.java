@@ -1,6 +1,7 @@
 package br.ufrn.imd.model;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class Player {
     private long id;
@@ -9,7 +10,7 @@ public class Player {
     private int rankPoints;
     private int eventPoints;
     private double winrate;
-    private ArrayList<Player> opponents;
+    private ArrayList<Long> opponentIds; // Store opponent IDs using ArrayList
     private double opponentsMatchWinrate;
 
     public Player(long id, String username, String password) {
@@ -19,7 +20,7 @@ public class Player {
         this.rankPoints = 0;
         this.winrate = 0;
         this.eventPoints = 0;
-        this.opponents = new ArrayList<>();
+        this.opponentIds = new ArrayList<>();
         this.opponentsMatchWinrate = 0.0;
     }
 
@@ -39,13 +40,13 @@ public class Player {
     public int getEventPoints() { return eventPoints; }
     public void setEventPoints(int eventPoints) { this.eventPoints = eventPoints; }
     
-    public ArrayList<Player> getOpponents() { return opponents; }
+    public ArrayList<Long> getOpponentIds() { return opponentIds; } // Return ArrayList instead of List
     
     public double getWinrate() { return winrate; }
 
     public void setWinrate() {
-        if (opponents.size() > 0) {
-            this.winrate = (double) eventPoints / opponents.size();
+        if (opponentIds.size() > 0) {
+            this.winrate = (double) eventPoints / opponentIds.size();
         } else {
             this.winrate = 0.0;
         }
@@ -57,7 +58,11 @@ public class Player {
     	this.opponentsMatchWinrate = opponentsMatchWinrate;
     }
 
-    // Methods
-    public void addOpponent(Player opponent) { opponents.add(opponent); }
+    public void addOpponentId(long opponentId) {
+        opponentIds.add(opponentId);
+    }
 
+    public void removeOpponentId(long opponentId) {
+        opponentIds.remove(opponentId);
+    }
 }
