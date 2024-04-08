@@ -10,7 +10,7 @@ public class PairingService {
 	public static ArrayList<Pairing> createPairings(ArrayList<Player> players) {
 	    ArrayList<Pairing> pairings = new ArrayList<>();
 
-	    // Sorting players based on rankPoints, eventPoints, opponentsMatchWinrate, and opponentsOpponentsMatchWinrate
+	    // Sorting players based on rankPoints, eventPoints, opponentsMatchWinrate
 	    Collections.sort(players, PlayerService.getRankComparator());
 
 	    // Creating pairings

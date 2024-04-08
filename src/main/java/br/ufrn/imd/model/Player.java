@@ -5,6 +5,7 @@ import java.util.List;
 
 public class Player {
     private long id;
+    private String name;
     private String username;
     private String password;
     private int rankPoints;
@@ -25,6 +26,9 @@ public class Player {
     }
 
     // Getters and setters
+    
+    public void setName(String name) {this.name = name; }
+    public String getName() {return name; }
     public long getId() { return id; }
     public void setId(long id) { this.id = id; }
     
