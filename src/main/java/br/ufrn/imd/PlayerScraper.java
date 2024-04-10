@@ -45,8 +45,7 @@ public class PlayerScraper {
                 String username = playerName.toLowerCase().replaceAll(" ", "");
                 String email = username + "@card.com";
 
-                Player player = new Player(id++, username, "senha"); // ID incremental
-                player.setName(playerName);
+                Player player = new Player(playerName, username, "senha"); // ID incremental
                 player.setRankPoints(rankPoints);
                 // Adiciona o jogador à lista de todos os jogadores
                 allPlayers.add(player);

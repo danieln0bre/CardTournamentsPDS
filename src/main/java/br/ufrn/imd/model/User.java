@@ -2,12 +2,18 @@ package br.ufrn.imd.model;
 
 public class User {
 
-	protected String username;
-	protected String password;
+	private String name;
+	private String username;
+	private String password;
     
-    public User(String username, String password) {
+    public User(String name, String username, String password) {
+    	this.name = name;
     	this.username = username;
     	this.password = password;
+    }
+    
+    public String getName() {
+    	return name;
     }
 
 	public String getUsername() {

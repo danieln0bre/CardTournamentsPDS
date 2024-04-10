@@ -1,13 +1,13 @@
-package br.ufrn.imd.dao;
+package br.ufrn.imd.repository;
 
 import java.util.ArrayList;
 import br.ufrn.imd.model.Manager;
 
-public class ManagerDAO {
+public class ManagerRepository {
 
 	private ArrayList<Manager> managers;
 
-	public ManagerDAO() {
+	public ManagerRepository() {
 		this.managers = new ArrayList<>();
 	}
 	

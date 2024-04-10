@@ -1,13 +1,13 @@
-package br.ufrn.imd.dao;
+package br.ufrn.imd.repository;
 
 import java.util.ArrayList;
 import br.ufrn.imd.model.Pairing;
 
-public class PairingDAO {
+public class PairingRepository {
 
 	private ArrayList<Pairing> pairings;
 
-	public PairingDAO() {
+	public PairingRepository() {
 		this.pairings = new ArrayList<>();
 	}
 	

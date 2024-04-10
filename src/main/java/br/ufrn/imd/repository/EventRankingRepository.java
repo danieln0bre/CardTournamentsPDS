@@ -1,12 +1,12 @@
-package br.ufrn.imd.dao;
+package br.ufrn.imd.repository;
 
 import java.util.ArrayList;
 import br.ufrn.imd.model.Player;
 
-public class EventRankingDAO {
+public class EventRankingRepository {
 	private ArrayList<Player> playersEventRanking;
 
-	public EventRankingDAO() {
+	public EventRankingRepository() {
 		this.playersEventRanking = new ArrayList<>();
 	}
 	

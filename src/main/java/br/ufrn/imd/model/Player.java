@@ -1,23 +1,17 @@
 package br.ufrn.imd.model;
 
 import java.util.ArrayList;
-import java.util.List;
 
-public class Player {
-    private long id;
-    private String name;
-    private String username;
-    private String password;
+public class Player extends User{
+    private String id;  // MongoDB ID
     private int rankPoints;
     private int eventPoints;
     private double winrate;
-    private ArrayList<Long> opponentIds; // Store opponent IDs using ArrayList
+    private ArrayList<String> opponentIds; // Store opponent IDs using ArrayList
     private double opponentsMatchWinrate;
 
-    public Player(long id, String username, String password) {
-        this.id = id;
-        this.username = username;
-        this.password = password;
+    public Player(String name, String username, String password) {
+        super(name, username, password);
         this.rankPoints = 0;
         this.winrate = 0;
         this.eventPoints = 0;
@@ -25,27 +19,24 @@ public class Player {
         this.opponentsMatchWinrate = 0.0;
     }
 
-    // Getters and setters
-    
-    public void setName(String name) {this.name = name; }
-    public String getName() {return name; }
-    public long getId() { return id; }
-    public void setId(long id) { this.id = id; }
-    
-    public String getUsername() { return username; }
-    public void setUsername(String username) { this.username = username; }
-    
-    public String getPassword() { return password; }
-    public void setPassword(String password) { this.password = password; }
-    
+    // ID getter and setter
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    // Other getters and setters
     public int getRankPoints() { return rankPoints; }
     public void setRankPoints(int rankPoints) { this.rankPoints = rankPoints; }
-    
+
     public int getEventPoints() { return eventPoints; }
     public void setEventPoints(int eventPoints) { this.eventPoints = eventPoints; }
-    
-    public ArrayList<Long> getOpponentIds() { return opponentIds; } // Return ArrayList instead of List
-    
+
+    public ArrayList<String> getOpponentIds() { return opponentIds; }
+
     public double getWinrate() { return winrate; }
 
     public void setWinrate() {
@@ -57,16 +48,16 @@ public class Player {
     }
 
     public double getOpponentsMatchWinrate() { return opponentsMatchWinrate; }
-    
+
     public void setOpponentsMatchWinrate(double opponentsMatchWinrate) {
-    	this.opponentsMatchWinrate = opponentsMatchWinrate;
+        this.opponentsMatchWinrate = opponentsMatchWinrate;
     }
 
-    public void addOpponentId(long opponentId) {
+    public void addOpponentId(String opponentId) {
         opponentIds.add(opponentId);
     }
 
-    public void removeOpponentId(long opponentId) {
+    public void removeOpponentId(String opponentId) {
         opponentIds.remove(opponentId);
     }
 }

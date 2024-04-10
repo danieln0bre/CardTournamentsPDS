@@ -1,23 +1,28 @@
 package br.ufrn.imd.model;
 
 import java.util.Date;
+import java.util.List;
+import java.util.ArrayList;  // Import necessário para usar ArrayList
 
 public class Event {
 
-	private String name;
+    private String name;
     private Date date;
     private String location;
     private int numberOfRounds;
     private long id;
     private int currentRound;
     private boolean finished;
+    private List<Player> players;  // Atributo para armazenar os jogadores participantes do evento
     
+    // Construtor inicializa players como uma lista vazia
     public Event(String name, Date date, String location, int numberOfRounds) {
         this.name = name;
         this.date = date;
         this.location = location;
         this.numberOfRounds = numberOfRounds;
-        this.currentRound = 1;
+        this.players = new ArrayList<Player>();  // Inicializa players como uma lista vazia
+        this.currentRound = 0;
         this.finished = false;
     }
     
@@ -77,5 +82,12 @@ public class Event {
         this.finished = finished;
     }
     
+    public List<Player> getPlayers() {
+        return players;
+    }
+    
+    public void setPlayers(List<Player> players) {
+        this.players = players;
+    }
     
 }

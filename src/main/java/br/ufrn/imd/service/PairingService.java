@@ -2,79 +2,85 @@ package br.ufrn.imd.service;
 
 import br.ufrn.imd.model.Player;
 import br.ufrn.imd.model.Pairing;
-
+import br.ufrn.imd.repository.PlayerRepository;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+@Service
 public class PairingService {
-	public static ArrayList<Pairing> createPairings(ArrayList<Player> players) {
-	    ArrayList<Pairing> pairings = new ArrayList<>();
+    @Autowired
+    private PlayerRepository playerRepository;
 
-	    // Sorting players based on rankPoints, eventPoints, opponentsMatchWinrate
-	    Collections.sort(players, PlayerService.getRankComparator());
+    public List<Pairing> createPairings(ArrayList<Player> players) {
+        List<Pairing> pairings = new ArrayList<>();
+        Collections.sort(players, getRankComparator());
+        Set<Player> pairedPlayers = new HashSet<>();
 
-	    // Creating pairings
-	    for (int i = 0; i < players.size(); i += 2) {
-	        if (i + 1 < players.size()) {
-	            Player player1 = players.get(i);
-	            Player player2 = findMatchingPlayer(player1, players, i + 1);
-	            if (player1 == null || player2 == null) {
-	                continue; // Skip this iteration and move to the next one
-	            }
-	            Pairing pairing = new Pairing(player1, player2);
-	            pairings.add(pairing);
-	        }
-	    }
+        for (Player player1 : players) {
+            if (!pairedPlayers.contains(player1)) {
+                Player player2 = findMatchingPlayer(player1, players, players.indexOf(player1) + 1);
 
-	    return pairings;
-	}
+                if (player2 != null) {
+                    Pairing pairing = new Pairing(player1, player2);
+                    pairings.add(pairing);
+                    pairedPlayers.add(player1);
+                    pairedPlayers.add(player2);
 
+                    // Update opponentIds for both players involved in the pairing
+                    updatePlayerOpponents(player1, player2.getId());
+                    updatePlayerOpponents(player2, player1.getId());
+                }
+            }
+        }
 
-	private static Player findMatchingPlayer(Player player, ArrayList<Player> players, int startIndex) {
-	    int targetEventPoints = player.getEventPoints();
-	    Player bestMatch = null;
-	    double minDifference = Double.MAX_VALUE;
-	    boolean foundEqualEventPoints = false;
+        return pairings;
+    }
 
-	    for (int i = startIndex; i < players.size(); i++) {
-	        Player opponent = players.get(i);
-	        if (opponent.getEventPoints() == targetEventPoints && !opponent.equals(player)) {
-	            // Players with equal event points are found
-	            foundEqualEventPoints = true;
+    private void updatePlayerOpponents(Player player, String opponentId) {
+        player.getOpponentIds().add(opponentId);
+        playerRepository.save(player);  // Save each player after updating their opponent IDs
+    }
 
-	            // Calculate the difference in rankPoints, opponentsMatchWinrate, and opponentsOpponentsMatchWinrate
-	            double rankPointsDiff = Math.abs(opponent.getRankPoints() - player.getRankPoints());
-	            double matchWinrateDiff = Math.abs(opponent.getOpponentsMatchWinrate() - player.getOpponentsMatchWinrate());
+    private Player findMatchingPlayer(Player player, List<Player> players, int startIndex) {
+        if (startIndex >= players.size()) return null;  // Early exit if startIndex is out of bounds
 
-	            // Calculate a score based on the differences
-	            double score = rankPointsDiff + matchWinrateDiff;
+        int targetEventPoints = player.getEventPoints();
+        Player bestMatch = null;
+        double minDifference = Double.MAX_VALUE;
+        boolean foundEqualEventPoints = false;
 
-	            // Update the best match if this opponent has a smaller score
-	            if (score < minDifference) {
-	                minDifference = score;
-	                bestMatch = opponent;
-	            }
-	        }
-	    }
+        for (int i = startIndex; i < players.size(); i++) {
+            Player opponent = players.get(i);
+            if (!opponent.equals(player) && !opponent.getOpponentIds().contains(player.getId())) {
+                double eventPointsDiff = Math.abs(opponent.getEventPoints() - targetEventPoints);
+                double rankPointsDiff = Math.abs(opponent.getRankPoints() - player.getRankPoints());
+                double matchWinrateDiff = Math.abs(opponent.getOpponentsMatchWinrate() - player.getOpponentsMatchWinrate());
+                double score = eventPointsDiff + rankPointsDiff + matchWinrateDiff;  // Consider using a weighted score
 
-	    // If no players with equal event points are found, match to the closest in descending order of event points
-	    if (!foundEqualEventPoints) {
-	        for (int i = startIndex; i < players.size(); i++) {
-	            Player opponent = players.get(i);
-	            if (opponent.getEventPoints() < targetEventPoints && !opponent.equals(player)) {
-	                // Calculate the difference in event points
-	                double eventPointsDiff = targetEventPoints - opponent.getEventPoints();
+                if ((eventPointsDiff == 0 && !foundEqualEventPoints) || (eventPointsDiff == 0 && score < minDifference)) {
+                    foundEqualEventPoints = true;
+                    minDifference = score;
+                    bestMatch = opponent;
+                } else if (!foundEqualEventPoints && score < minDifference) {
+                    minDifference = score;
+                    bestMatch = opponent;
+                }
+            }
+        }
 
-	                // Update the best match if this opponent has a smaller difference in event points
-	                if (eventPointsDiff < minDifference) {
-	                    minDifference = eventPointsDiff;
-	                    bestMatch = opponent;
-	                }
-	            }
-	        }
-	    }
+        return bestMatch;
+    }
 
-	    return bestMatch;
-	}
-
+    private static Comparator<Player> getRankComparator() {
+        return Comparator
+            .comparing(Player::getEventPoints, Comparator.reverseOrder())
+            .thenComparing(Player::getRankPoints);
+    }
 }

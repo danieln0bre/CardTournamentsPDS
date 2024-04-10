@@ -1,13 +1,13 @@
-package br.ufrn.imd.dao;
+package br.ufrn.imd.repository;
 
 import java.util.ArrayList;
 import br.ufrn.imd.model.Player;
 
-public class GeneralRankingDAO {
+public class GeneralRankingRepository {
 	
 	private ArrayList<Player> playersGeneralRanking;
 
-	public GeneralRankingDAO() {
+	public GeneralRankingRepository() {
 		this.playersGeneralRanking = new ArrayList<>();
 	}
 	
