@@ -18,7 +18,7 @@ public class EventService {
         return eventRepository.save(event);
     }
 
-    public Optional<Event> getEventById(String id) {  // Mudança de Long para String
+    public Optional<Event> getEventById(String id) {
         return eventRepository.findById(id);
     }
 
@@ -26,12 +26,11 @@ public class EventService {
         return eventRepository.findAll();
     }
 
-    public void deleteEvent(String id) {  // Mudança de Long para String
+    public void deleteEvent(String id) {
         eventRepository.deleteById(id);
     }
 
-    // Este método updateEvent pode ser removido se você utilizar saveEvent para atualizações também
-    public Event updateEvent(String id, Event eventDetails) {  // Mudança para inclusão do id como parâmetro
+    public Event updateEvent(String id, Event eventDetails) {
         return getEventById(id).map(event -> {
             event.setName(eventDetails.getName());
             event.setDate(eventDetails.getDate());

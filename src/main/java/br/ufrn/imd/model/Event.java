@@ -1,12 +1,12 @@
 package br.ufrn.imd.model;
 
-import java.util.Date;
 import java.util.List;
-
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.util.ArrayList;  // Import necessário para usar ArrayList
+import java.util.ArrayList;
 
+@Document(collection = "event")
 public class Event {
 
     private String name;

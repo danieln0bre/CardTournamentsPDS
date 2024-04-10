@@ -9,7 +9,10 @@ public class Player extends User{
     private int rankPoints;
     private int eventPoints;
     private double winrate;
-    private ArrayList<String> opponentIds; // Store opponent IDs using ArrayList
+    private String deck;
+
+
+	private ArrayList<String> opponentIds; // Store opponent IDs using ArrayList
     private double opponentsMatchWinrate;
 
     public Player(String name, String username, String password) {
@@ -22,6 +25,13 @@ public class Player extends User{
     }
 
     // Other getters and setters
+    public String getDeck() {
+		return deck;
+	}
+
+	public void setDeck(String deck) {
+		this.deck = deck;
+	}
     public int getRankPoints() { return rankPoints; }
     public void setRankPoints(int rankPoints) { this.rankPoints = rankPoints; }
 
