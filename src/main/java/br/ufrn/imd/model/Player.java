@@ -2,6 +2,9 @@ package br.ufrn.imd.model;
 
 import java.util.ArrayList;
 
+import org.springframework.data.mongodb.core.mapping.Document;
+
+@Document(collection = "players2")
 public class Player extends User{
     private int rankPoints;
     private int eventPoints;
@@ -29,12 +32,8 @@ public class Player extends User{
 
     public double getWinrate() { return winrate; }
 
-    public void setWinrate() {
-        if (opponentIds.size() > 0) {
-            this.winrate = (double) eventPoints / opponentIds.size();
-        } else {
-            this.winrate = 0.0;
-        }
+    public void setWinrate(double winrate) {
+    	this.winrate = winrate;
     }
 
     public double getOpponentsMatchWinrate() { return opponentsMatchWinrate; }
