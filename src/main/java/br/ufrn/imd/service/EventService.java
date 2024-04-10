@@ -18,7 +18,7 @@ public class EventService {
         return eventRepository.save(event);
     }
 
-    public Optional<Event> getEventById(Long id) {
+    public Optional<Event> getEventById(String id) {  // Mudança de Long para String
         return eventRepository.findById(id);
     }
 
@@ -26,11 +26,19 @@ public class EventService {
         return eventRepository.findAll();
     }
 
-    public void deleteEvent(Long id) {
+    public void deleteEvent(String id) {  // Mudança de Long para String
         eventRepository.deleteById(id);
     }
 
-    public Event updateEvent(Event event) {
-        return eventRepository.save(event);
+    // Este método updateEvent pode ser removido se você utilizar saveEvent para atualizações também
+    public Event updateEvent(String id, Event eventDetails) {  // Mudança para inclusão do id como parâmetro
+        return getEventById(id).map(event -> {
+            event.setName(eventDetails.getName());
+            event.setDate(eventDetails.getDate());
+            event.setLocation(eventDetails.getLocation());
+            event.setNumberOfRounds(eventDetails.getNumberOfRounds());
+            event.setPlayers(eventDetails.getPlayers());
+            return eventRepository.save(event);
+        }).orElseThrow(() -> new RuntimeException("Event not found!"));
     }
 }

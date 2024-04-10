@@ -3,7 +3,6 @@ package br.ufrn.imd.model;
 import java.util.ArrayList;
 
 public class Player extends User{
-    private String id;  // MongoDB ID
     private int rankPoints;
     private int eventPoints;
     private double winrate;
@@ -17,15 +16,6 @@ public class Player extends User{
         this.eventPoints = 0;
         this.opponentIds = new ArrayList<>();
         this.opponentsMatchWinrate = 0.0;
-    }
-
-    // ID getter and setter
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
     }
 
     // Other getters and setters

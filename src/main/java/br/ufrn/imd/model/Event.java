@@ -2,21 +2,25 @@ package br.ufrn.imd.model;
 
 import java.util.Date;
 import java.util.List;
+
+import org.springframework.data.annotation.Id;
+
 import java.util.ArrayList;  // Import necessário para usar ArrayList
 
 public class Event {
 
     private String name;
-    private Date date;
+    private String date;
     private String location;
     private int numberOfRounds;
-    private long id;
+    @Id
+    private String id;
     private int currentRound;
     private boolean finished;
     private List<Player> players;  // Atributo para armazenar os jogadores participantes do evento
     
     // Construtor inicializa players como uma lista vazia
-    public Event(String name, Date date, String location, int numberOfRounds) {
+    public Event(String name, String date, String location, int numberOfRounds) {
         this.name = name;
         this.date = date;
         this.location = location;
@@ -34,11 +38,11 @@ public class Event {
         this.name = name;
     }
     
-    public Date getDate() {
+    public String getDate() {
         return date;
     }
     
-    public void setDate(Date date) {
+    public void setDate(String date) {
         this.date = date;
     }
     
@@ -58,11 +62,11 @@ public class Event {
         this.numberOfRounds = numberOfRounds;
     }
     
-    public long getId() {
+    public String getId() {
         return id;
     }
     
-    public void setId(long id) {
+    public void setId(String id) {
         this.id = id;
     }
     

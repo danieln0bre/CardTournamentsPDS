@@ -1,12 +1,28 @@
 package br.ufrn.imd.model;
 
+import org.springframework.data.annotation.Id;
+
 public class User {
 
 	private String name;
 	private String username;
 	private String password;
+	@Id
+	private String id;
     
-    public User(String name, String username, String password) {
+    public String getId() {
+		return id;
+	}
+
+	public void setId(String id) {
+		this.id = id;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public User(String name, String username, String password) {
     	this.name = name;
     	this.username = username;
     	this.password = password;

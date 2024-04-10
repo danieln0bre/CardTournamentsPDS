@@ -23,7 +23,7 @@ public class EventPairingController {
     private PairingService pairingService;
 
     @GetMapping("/{eventId}/pair")
-    public List<Pairing> pairEventPlayers(@PathVariable Long eventId) {
+    public List<Pairing> pairEventPlayers(@PathVariable String eventId) {
         Optional<Event> event = eventService.getEventById(eventId);
         if (event.isPresent()) {
             List<Player> eventPlayers = event.get().getPlayers();
