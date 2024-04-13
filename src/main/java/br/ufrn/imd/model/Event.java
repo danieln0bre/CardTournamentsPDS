@@ -18,6 +18,7 @@ public class Event {
     private int currentRound;
     private boolean finished;
     private List<Player> players;  // Atributo para armazenar os jogadores participantes do evento
+    private List<Pairing> pairings;
     
     // Construtor inicializa players como uma lista vazia
     public Event(String name, String date, String location, int numberOfRounds) {
@@ -28,6 +29,7 @@ public class Event {
         this.players = new ArrayList<Player>();  // Inicializa players como uma lista vazia
         this.currentRound = 0;
         this.finished = false;
+        this.setPairings(new ArrayList<Pairing>());
     }
     
     public String getName() {
@@ -93,5 +95,13 @@ public class Event {
     public void setPlayers(List<Player> players) {
         this.players = players;
     }
+
+	public List<Pairing> getPairings() {
+		return pairings;
+	}
+
+	public void setPairings(List<Pairing> pairings) {
+		this.pairings = pairings;
+	}
     
 }
