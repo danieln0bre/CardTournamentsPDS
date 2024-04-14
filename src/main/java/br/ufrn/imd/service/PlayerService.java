@@ -34,4 +34,15 @@ public class PlayerService {
     public Optional<Player> getPlayerById(String id) {
         return playerRepository.findById(id);
     }
+    
+    public Player addEventToPlayer(String playerId, String eventId) {
+        Optional<Player> playerOptional = getPlayerById(playerId);
+        if (playerOptional.isPresent()) {
+            Player player = playerOptional.get();
+            player.addEventId(eventId);
+            return playerRepository.save(player);
+        } else {
+            throw new IllegalArgumentException("Player not found with ID: " + playerId);
+        }
+    }
 }

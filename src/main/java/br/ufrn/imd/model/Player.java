@@ -10,7 +10,7 @@ public class Player extends User{
     private int eventPoints;
     private double winrate;
     private String deck;
-    private ArrayList<String> eventosInscritoId;
+    private ArrayList<String> appliedEventsId;
 
 
 	private ArrayList<String> opponentIds; // Store opponent IDs using ArrayList
@@ -23,7 +23,7 @@ public class Player extends User{
         this.eventPoints = 0;
         this.opponentIds = new ArrayList<>();
         this.opponentsMatchWinrate = 0.0;
-        this.eventosInscritoId = new ArrayList<String>();
+        this.appliedEventsId = new ArrayList<String>();
     }
 
     // Other getters and setters
@@ -31,8 +31,12 @@ public class Player extends User{
 		return deck;
 	}
     
-    public void adicionarEvento(String eventId) {
-    	eventosInscritoId.add(eventId);
+    public void addEventId(String eventId) {
+    	appliedEventsId.add(eventId);
+    }
+    
+    public ArrayList<String> getAppliedEventsId() {
+        return appliedEventsId;
     }
 
 	public void setDeck(String deck) {
