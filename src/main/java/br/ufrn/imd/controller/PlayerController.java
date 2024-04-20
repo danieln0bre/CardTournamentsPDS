@@ -79,9 +79,9 @@ public class PlayerController {
                 return ResponseEntity.badRequest().body("Player is already registered for this event.");
             }
             
-            //Player updatedPlayer = playerService.addEventToPlayer(id, eventId.trim());
+            playerService.addEventToPlayer(id, eventId.trim());
             
-            //Event updatedEvent = eventService.addPlayerToEvent(eventId.trim(), id);  // Use the ID do jogador diretamente
+            eventService.addPlayerToEvent(eventId.trim(), id);  // Use the ID do jogador diretamente
             
             return ResponseEntity.ok("Player and Event updated successfully!");
             
