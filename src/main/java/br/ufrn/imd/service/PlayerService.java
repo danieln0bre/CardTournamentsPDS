@@ -27,6 +27,11 @@ public class PlayerService {
         return playerRepository.save(player);
     }
     
+    public Player updatePlayer(String id, Player playerDetails) {
+        playerDetails.setId(id);  // Ensure the correct player is updated
+        return createPlayer(playerDetails);  // Reuse createPlayer for recalculating win rates
+    }
+    
     public void updatePlayerOpponents(String playerId, String opponentId) {
         Player player = playerRepository.findById(playerId).orElseThrow(
             () -> new IllegalArgumentException("Player not found with ID: " + playerId));
@@ -34,10 +39,7 @@ public class PlayerService {
         playerRepository.save(player);  // Saves the updated player
     }
 
-    public Player updatePlayer(String id, Player playerDetails) {
-        playerDetails.setId(id);  // Ensure the correct player is updated
-        return createPlayer(playerDetails);  // Reuse createPlayer for recalculating win rates
-    }
+    
 
     public Optional<Player> getPlayerById(String id) {
         return playerRepository.findById(id);
