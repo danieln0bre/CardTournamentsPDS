@@ -12,12 +12,4 @@ public interface ManagerRepository extends MongoRepository<Manager, String> {
     
     // Encontrar Managers cujo username comece com um prefixo específico
     List<Manager> findByUsernameStartingWith(String prefix);
-    
-    // Buscar Managers que gerenciam mais de um certo número de eventos
-    @Query("{'eventos.1': {$exists: true}}")
-    List<Manager> findByManagingMoreThanOneEvent();
-    
-    // Buscar Managers por um critério de nome de evento específico
-    @Query("{'eventos.name': ?0}")
-    List<Manager> findByEventName(String eventName);
 }

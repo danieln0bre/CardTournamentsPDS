@@ -23,6 +23,7 @@ public class EventRankingService {
         public int compare(Player p1, Player p2) {
             // First, compare by event points (descending order)
             int eventPointsComparison = Integer.compare(p2.getEventPoints(), p1.getEventPoints());
+            
             if (eventPointsComparison != 0) {
                 return eventPointsComparison;
             }

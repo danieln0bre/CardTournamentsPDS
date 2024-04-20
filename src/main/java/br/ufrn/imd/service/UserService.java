@@ -20,15 +20,28 @@ public class UserService {
     public Player savePlayer(Player player) {
         return playerRepository.save(player);
     }
+    
+    public void removePlayer(Player player) {
+    	playerRepository.delete(player);
+    }
+    
+    public void removeAllPlayers() {
+    	playerRepository.deleteAll();
+    }
 
     public Manager saveManager(Manager manager) {
         return managerRepository.save(manager);
+    }
+    
+    public void removeManager(Manager manager) {
+    	managerRepository.delete(manager);
     }
 
     public User getUserById(String id, String userType) {
         if ("player".equals(userType)) {
             return playerRepository.findById(id).orElse(null);
-        } else if ("manager".equals(userType)) {
+        }
+        if ("manager".equals(userType)) {
             return managerRepository.findById(id).orElse(null);
         }
         return null;  // or throw an exception if preferred

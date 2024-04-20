@@ -8,10 +8,9 @@ public class Pairing {
     public Pairing(String playerOneId, String playerTwoId) {
         this.playerOneId = playerOneId;
         this.playerTwoId = playerTwoId;
-        this.result = -1;  // -1 indicates no result yet
+        this.result = -1;  // -1: ainda não existe um resultado.
     }
 
-    // Getters and Setters
     public String getPlayerOneId() {
         return playerOneId;
     }

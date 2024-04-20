@@ -12,9 +12,11 @@ public class MatchService {
     private PlayerRepository playerRepository;
 
     public void playerWin(String playerId) {
-        Player player = playerRepository.findById(playerId).orElseThrow(
-            () -> new IllegalArgumentException("Player not found with ID: " + playerId));
+        Player player = playerRepository.findById(playerId)
+        								.orElseThrow(() -> new IllegalArgumentException("Player not found with ID: " + playerId));
+        
         player.setEventPoints(player.getEventPoints() + 1);  // Increment event points
+        
         playerRepository.save(player);
     }
 

@@ -15,50 +15,50 @@ public class EventController {
     @Autowired
     private EventService eventService;
 
-    // Create a new event
+    // Criar novo evento.
     @PostMapping("/")
     public Event createEvent(@RequestBody Event event) {
         return eventService.saveEvent(event);
     }
 
-    // Retrieve all events
+    // Retornar todos os eventos.
     @GetMapping("/")
     public List<Event> getAllEvents() {
         return eventService.getAllEvents();
     }
 
-    // Retrieve a single event by ID
+    // Retornar um único evento por ID.
     @GetMapping("/{id}")
     public ResponseEntity<Event> getEventById(@PathVariable String id) {
         return eventService.getEventById(id)
-                .map(event -> ResponseEntity.ok(event))
-                .orElseGet(() -> ResponseEntity.notFound().build());
+                		   .map(event -> ResponseEntity.ok(event))
+                		   .orElseGet(() -> ResponseEntity.notFound().build());
     }
     
     
-    // Update event
+    // Atualizar evento.
     @PutMapping("/{id}")
     public ResponseEntity<Event> updateEvent(@PathVariable String id, @RequestBody Event eventDetails) {
         return eventService.getEventById(id)
-                .map(event -> {
-                    event.setName(eventDetails.getName());
-                    event.setDate(eventDetails.getDate());
-                    event.setLocation(eventDetails.getLocation());
-                    event.setNumberOfRounds(eventDetails.getNumberOfRounds());
-                    event.setPlayerIds(eventDetails.getPlayerIds());  // Update to use setPlayerIds
-                    Event updatedEvent = eventService.saveEvent(event);
-                    return ResponseEntity.ok(updatedEvent);
-                }).orElseGet(() -> ResponseEntity.notFound().build());
+                		   .map(event -> {  event.setName(eventDetails.getName());
+                		   				    event.setDate(eventDetails.getDate());
+        		   				   		    event.setLocation(eventDetails.getLocation());
+        		   				   		    event.setNumberOfRounds(eventDetails.getNumberOfRounds());
+        		   				   		    event.setPlayerIds(eventDetails.getPlayerIds());  // Update to use setPlayerIds
+        		   				   		    Event updatedEvent = eventService.saveEvent(event);
+        		   				   		    return ResponseEntity.ok(updatedEvent);
+        		   				   		 })
+                		   .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-
-    // Delete an event
+    // Deletar um evento.
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteEvent(@PathVariable String id) {
         return eventService.getEventById(id)
-                .map(event -> {
-                    eventService.deleteEvent(id);
-                    return ResponseEntity.ok().<Void>build();
-                }).orElseGet(() -> ResponseEntity.notFound().build());
+                		   .map(event -> {
+                			   				eventService.deleteEvent(id);
+                			   				return ResponseEntity.ok().<Void>build();
+                		   				 })
+                		   .orElseGet(() -> ResponseEntity.notFound().build());
     }
 }

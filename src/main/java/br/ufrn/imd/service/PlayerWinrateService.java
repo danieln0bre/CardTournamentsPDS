@@ -21,7 +21,6 @@ public class PlayerWinrateService {
 
     // Calcular a winrate dos oponentes é importante para o sistema de ranking dos jogadores.
     private Player calculateOpponentsMatchWinrate(Player player) {
-    	
         List<String> opponentIds = player.getOpponentIds();
         
         // Se a lista de oponentes estiver vazia.
@@ -49,7 +48,6 @@ public class PlayerWinrateService {
 
     
     public Player updatePlayerWinrate(Player player) {
-    	
         int totalOpponents = player.getOpponentIds().size();
         
         // Se não tiver oponentes.

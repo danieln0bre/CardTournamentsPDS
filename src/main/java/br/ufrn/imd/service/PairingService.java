@@ -95,10 +95,8 @@ public class PairingService {
         return bestMatch;
     }
 
-
     private static Comparator<Player> getRankComparator() {
-        return Comparator
-            .comparing(Player::getEventPoints, Comparator.reverseOrder())
-            .thenComparing(Player::getRankPoints);
+        return Comparator.comparing(Player::getEventPoints, Comparator.reverseOrder())
+        				 .thenComparing(Player::getRankPoints);
     }
 }

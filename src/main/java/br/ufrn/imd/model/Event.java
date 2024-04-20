@@ -9,16 +9,16 @@ import java.util.ArrayList;
 @Document(collection = "event")
 public class Event {
 
+	@Id
+    private String id; // id utilizado no MongoDB.
     private String name;
     private String date;
     private String location;
     private int numberOfRounds;
-    @Id
-    private String id;
     private int currentRound;
     private boolean finished;
-    private List<String> playerIds;  // Atributo para armazenar os jogadores participantes do evento
-    private List<Pairing> pairings;
+    private List<String> playerIds; // Lista de jogadores participantes do evento.
+    private List<Pairing> pairings; // Lista de pairings dos jogadores do evento.
     
     // Construtor inicializa players como uma lista vazia
     public Event(String name, String date, String location, int numberOfRounds) {
@@ -26,11 +26,21 @@ public class Event {
         this.date = date;
         this.location = location;
         this.numberOfRounds = numberOfRounds;
-        this.playerIds = new ArrayList<String>();  // Inicializa players como uma lista vazia
         this.currentRound = 0;
         this.finished = false;
-        this.setPairings(new ArrayList<Pairing>());
+        this.playerIds = new ArrayList<String>();  // Inicializa players como uma lista vazia
+        this.pairings =  new ArrayList<Pairing>();
     }
+    
+    // Métodos auxiliares.
+    
+    public void addPlayerId(String playerId) {
+        if (!playerIds.contains(playerId)) {
+            playerIds.add(playerId);
+        }
+    }
+    
+    // Gets e sets.
     
     public String getName() {
         return name;
@@ -93,20 +103,13 @@ public class Event {
     }
 
     public void setPlayerIds(List<String> playerIds) {
-        this.playerIds = playerIds;
-    }
-
-    public void addPlayerId(String playerId) {
-        if (!playerIds.contains(playerId)) {
-            playerIds.add(playerId);
-        }
-    }
-
+		this.playerIds = playerIds;
+	}
+    
 	public List<Pairing> getPairings() {
 		return pairings;
 	}
 	
-
 	public void setPairings(List<Pairing> pairings) {
 		this.pairings = pairings;
 	}

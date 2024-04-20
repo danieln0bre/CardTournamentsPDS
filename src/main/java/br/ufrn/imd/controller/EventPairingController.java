@@ -31,22 +31,22 @@ public class EventPairingController {
     @GetMapping("/{eventId}/pair")
     public ResponseEntity<?> pairEventPlayers(@PathVariable String eventId) {
         Optional<Event> eventOpt = eventService.getEventById(eventId);
-        if (eventOpt.isPresent()) {
-            Event event = eventOpt.get();
-            if (event.getCurrentRound() < event.getNumberOfRounds()) {
-                event.setCurrentRound(event.getCurrentRound() + 1);
-                List<Player> players = playerService.getPlayersByIds(event.getPlayerIds()); // Assumes getPlayersByIds takes List<String>
-                List<Pairing> pairings = pairingService.createPairings(players);
-                event.setPairings(pairings);
-                eventService.saveEvent(event); // Save the event with the updated current round
-                return ResponseEntity.ok(pairings);
-            } else {
-                return ResponseEntity.badRequest().body("All rounds completed for this event.");
-            }
-        } else {
-            return ResponseEntity.notFound().build();
+        
+        if(!eventOpt.isPresent()) {
+        	return ResponseEntity.notFound().build();
         }
+        
+        Event event = eventOpt.get();
+
+        if (event.getCurrentRound() >= event.getNumberOfRounds()) {
+        	return ResponseEntity.badRequest().body("All rounds completed for this event.");
+        }
+        
+        event.setCurrentRound(event.getCurrentRound() + 1);
+        List<Player> players = playerService.getPlayersByIds(event.getPlayerIds()); // Assumes getPlayersByIds takes List<String>
+        List<Pairing> pairings = pairingService.createPairings(players);
+        event.setPairings(pairings);
+        eventService.saveEvent(event); // Save the event with the updated current round
+        return ResponseEntity.ok(pairings);
     }
-
-
 }

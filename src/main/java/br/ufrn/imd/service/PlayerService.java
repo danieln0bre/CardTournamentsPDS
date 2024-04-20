@@ -39,8 +39,6 @@ public class PlayerService {
         playerRepository.save(player);  // Saves the updated player
     }
 
-    
-
     public Optional<Player> getPlayerById(String id) {
         return playerRepository.findById(id);
     }
