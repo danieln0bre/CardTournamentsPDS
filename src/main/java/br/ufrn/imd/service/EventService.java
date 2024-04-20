@@ -1,6 +1,7 @@
 package br.ufrn.imd.service;
 
 import br.ufrn.imd.model.Event;
+import br.ufrn.imd.model.Player;
 import br.ufrn.imd.repository.EventRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -36,8 +37,19 @@ public class EventService {
             event.setDate(eventDetails.getDate());
             event.setLocation(eventDetails.getLocation());
             event.setNumberOfRounds(eventDetails.getNumberOfRounds());
-            event.setPlayers(eventDetails.getPlayers());
+            event.setPlayerIds(eventDetails.getPlayerIds());
             return eventRepository.save(event);
         }).orElseThrow(() -> new RuntimeException("Event not found!"));
+    }
+    
+    public Event addPlayerToEvent(String eventId, String playerId) {
+        Optional<Event> eventOptional = getEventById(eventId);
+        if (eventOptional.isPresent()) {
+            Event event = eventOptional.get();
+            event.addPlayerId(playerId);  // Adiciona o ID do jogador ao evento
+            return eventRepository.save(event);
+        } else {
+            throw new IllegalArgumentException("Event not found with ID: " + eventId);
+        }
     }
 }

@@ -31,6 +31,10 @@ public class Player extends User{
 		return deck;
 	}
     
+    public void addEventPoints(int point) {
+    	this.eventPoints += point;
+    }
+    
     public void addEventId(String eventId) {
     	appliedEventsId.add(eventId);
     }

@@ -66,12 +66,19 @@ public class PlayerController {
     }
     
     @PutMapping("/{id}/events/add")
-    public ResponseEntity<Player> addEventToPlayer(@PathVariable String id, @RequestBody String eventId) {
+    public ResponseEntity<?> addEventToPlayer(@PathVariable String id, @RequestBody String eventId) {
         try {
+            Event event = eventService.getEventById(eventId.trim()).orElseThrow(() -> new RuntimeException("Event not found."));
+            if (event.getPlayerIds().contains(id)) {
+                return ResponseEntity.badRequest().body("Player is already registered for this event.");
+            }
+            
             Player updatedPlayer = playerService.addEventToPlayer(id, eventId.trim());
-            return ResponseEntity.ok(updatedPlayer);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.notFound().build();
+            Event updatedEvent = eventService.addPlayerToEvent(eventId.trim(), id);  // Use the ID do jogador diretamente
+            return ResponseEntity.ok("Player and Event updated successfully!");
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body("Failed to update Player or Event: " + e.getMessage());
         }
     }
+
 }

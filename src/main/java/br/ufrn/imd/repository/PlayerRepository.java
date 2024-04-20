@@ -10,4 +10,5 @@ public interface PlayerRepository extends MongoRepository<Player, String> {
     Optional<Player> findById(String id);
     <S extends Player> S save(S entity);
     List<Player> findTop10ByOrderByIdAsc();  // Example method to find the first 10 players
+    List<Player> findAllById(Iterable<String> ids);
 }
