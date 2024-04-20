@@ -4,8 +4,13 @@ import java.util.ArrayList;
 
 import org.springframework.data.mongodb.core.mapping.Document;
 
+//Especifica o collection "players2" que será usado pela classe Player.
 @Document(collection = "players2")
 public class Player extends User{
+	
+	// Note que Player herda de User.
+	// Então, Player utiliza o atributo id de User.
+	
     private int rankPoints;
     private int eventPoints;
     private double winrate;

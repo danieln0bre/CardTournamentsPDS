@@ -27,6 +27,7 @@ public class PlayerController {
     @Autowired
     private PlayerWinrateService winrateService;
 
+    // Atualiza o jogador encontrado pelo ID.
     @PutMapping("/{id}/update")
     public ResponseEntity<Player> updatePlayer(@PathVariable String id, @RequestBody Player playerDetails) {
         Player updatedPlayer = playerService.updatePlayer(id, playerDetails);
@@ -34,6 +35,8 @@ public class PlayerController {
         return ResponseEntity.ok(updatedPlayer);
     }
 
+    
+    // Retorna o jogador encontrado pelo ID.
     @GetMapping("/{id}")
     public ResponseEntity<Player> getPlayerById(@PathVariable String id) {
         return playerService.getPlayerById(id)
@@ -41,6 +44,7 @@ public class PlayerController {
             				.orElse(ResponseEntity.notFound().build());
     }
 
+    // Recalcula e atualiza a winrate do jogador encontrado pelo ID. 
     @PostMapping("/{id}/recalculateWinrates")
     public ResponseEntity<Player> recalculateWinrates(@PathVariable String id) {
         return playerService.getPlayerById(id)
@@ -51,6 +55,7 @@ public class PlayerController {
                 			.orElse(ResponseEntity.notFound().build());
     }
     
+    // Retorna os eventos do jogador encontrado pelo ID.
     @GetMapping("/{id}/events")
     public ResponseEntity<List<Event>> getPlayerEvents(@PathVariable String id) {
     	Optional<Player> playerOptional = playerService.getPlayerById(id);
@@ -69,6 +74,9 @@ public class PlayerController {
         return ResponseEntity.ok(events);
     }
     
+    // Adiciona um evento ao jogador encontrado pelo ID.
+    // Atualiza o jogador.
+    // Atualiza o evento.
     @PutMapping("/{id}/events/add")
     public ResponseEntity<?> addEventToPlayer(@PathVariable String id, @RequestBody String eventId) {
         try {
@@ -81,7 +89,7 @@ public class PlayerController {
             
             playerService.addEventToPlayer(id, eventId.trim());
             
-            eventService.addPlayerToEvent(eventId.trim(), id);  // Use the ID do jogador diretamente
+            eventService.addPlayerToEvent(eventId.trim(), id);
             
             return ResponseEntity.ok("Player and Event updated successfully!");
             

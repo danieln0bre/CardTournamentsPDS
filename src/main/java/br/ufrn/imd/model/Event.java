@@ -6,11 +6,14 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.ArrayList;
 
+// Especifica o collection "event" que será usado pela classe Event.
 @Document(collection = "event")
 public class Event {
 
+	// Chave primária do evento utilizada no MongoDB.
 	@Id
-    private String id; // id utilizado no MongoDB.
+    private String id;
+	
     private String name;
     private String date;
     private String location;
@@ -20,7 +23,6 @@ public class Event {
     private List<String> playerIds; // Lista de jogadores participantes do evento.
     private List<Pairing> pairings; // Lista de pairings dos jogadores do evento.
     
-    // Construtor inicializa players como uma lista vazia
     public Event(String name, String date, String location, int numberOfRounds) {
         this.name = name;
         this.date = date;
@@ -28,7 +30,7 @@ public class Event {
         this.numberOfRounds = numberOfRounds;
         this.currentRound = 0;
         this.finished = false;
-        this.playerIds = new ArrayList<String>();  // Inicializa players como uma lista vazia
+        this.playerIds = new ArrayList<String>();
         this.pairings =  new ArrayList<Pairing>();
     }
     

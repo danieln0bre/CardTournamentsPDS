@@ -15,19 +15,19 @@ public class EventController {
     @Autowired
     private EventService eventService;
 
-    // Criar novo evento.
+    // Cria um novo evento.
     @PostMapping("/")
     public Event createEvent(@RequestBody Event event) {
         return eventService.saveEvent(event);
     }
 
-    // Retornar todos os eventos.
+    // Retorna todos os eventos.
     @GetMapping("/")
     public List<Event> getAllEvents() {
         return eventService.getAllEvents();
     }
 
-    // Retornar um único evento por ID.
+    // Retorna o evento encontrado pelo ID.
     @GetMapping("/{id}")
     public ResponseEntity<Event> getEventById(@PathVariable String id) {
         return eventService.getEventById(id)
@@ -36,7 +36,7 @@ public class EventController {
     }
     
     
-    // Atualizar evento.
+    // Atualiza o evento encontrado pelo ID.
     @PutMapping("/{id}")
     public ResponseEntity<Event> updateEvent(@PathVariable String id, @RequestBody Event eventDetails) {
         return eventService.getEventById(id)
@@ -51,7 +51,7 @@ public class EventController {
                 		   .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    // Deletar um evento.
+    // Deleta o evento encontrado pelo ID.
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteEvent(@PathVariable String id) {
         return eventService.getEventById(id)

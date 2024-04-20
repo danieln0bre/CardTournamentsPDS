@@ -37,6 +37,8 @@ public class UserService {
     	managerRepository.delete(manager);
     }
 
+    // Retorna um usuário identificado pelo ID. 
+    // Se não encontra um usuário, retorna nulo.
     public User getUserById(String id, String userType) {
         if ("player".equals(userType)) {
             return playerRepository.findById(id).orElse(null);
@@ -44,6 +46,6 @@ public class UserService {
         if ("manager".equals(userType)) {
             return managerRepository.findById(id).orElse(null);
         }
-        return null;  // or throw an exception if preferred
+        return null;
     }
 }

@@ -3,8 +3,12 @@ package br.ufrn.imd.model;
 import org.springframework.data.annotation.Id;
 
 public class User {
+	
+	// Chave primária do usuário utilizada no MongoDB.
+	// Será utilizada nas subclasses Player e Manager.
 	@Id
 	private String id;
+	
 	private String name;
 	private String username;
 	private String password;

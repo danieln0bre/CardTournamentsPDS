@@ -28,25 +28,30 @@ public class EventPairingController {
     @Autowired
     private PairingService pairingService;
 
+    // Retorna o pareamento dos jogadores do evento encontrado pelo ID.
     @GetMapping("/{eventId}/pair")
     public ResponseEntity<?> pairEventPlayers(@PathVariable String eventId) {
         Optional<Event> eventOpt = eventService.getEventById(eventId);
         
+        // Se o evento não existe.
         if(!eventOpt.isPresent()) {
         	return ResponseEntity.notFound().build();
         }
         
+        // Se o evento existe.
         Event event = eventOpt.get();
 
+        // Se a rodada atual for maior ou igual que o número de rodadas do evento.
         if (event.getCurrentRound() >= event.getNumberOfRounds()) {
         	return ResponseEntity.badRequest().body("All rounds completed for this event.");
         }
         
+        // Se a rodada atual for menor que o número de rodadas do evento.
         event.setCurrentRound(event.getCurrentRound() + 1);
-        List<Player> players = playerService.getPlayersByIds(event.getPlayerIds()); // Assumes getPlayersByIds takes List<String>
+        List<Player> players = playerService.getPlayersByIds(event.getPlayerIds());
         List<Pairing> pairings = pairingService.createPairings(players);
         event.setPairings(pairings);
-        eventService.saveEvent(event); // Save the event with the updated current round
+        eventService.saveEvent(event); // Salva o evento com a rodada atual atualizada.
         return ResponseEntity.ok(pairings);
     }
 }
