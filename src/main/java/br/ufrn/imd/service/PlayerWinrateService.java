@@ -23,14 +23,14 @@ public class PlayerWinrateService {
     private Player calculateOpponentsMatchWinrate(Player player) {
         List<String> opponentIds = player.getOpponentIds();
         
-        // Se a lista de oponentes estiver vazia.
+        // verifica se a lista de oponentes estiver vazia.
         
         if (opponentIds.isEmpty()) {
             player.setOpponentsMatchWinrate(0.0);
             return player;
         }
 
-        // Se a lista de oponentes não está vazia.
+        // verifica se a lista de oponentes não está vazia.
         
         List<Player> opponents = opponentIds.stream().map(playerRepository::findById)
         											 .filter(Optional::isPresent)
