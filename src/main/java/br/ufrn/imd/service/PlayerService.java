@@ -54,7 +54,7 @@ public class PlayerService {
             Player player = playerOptional.get();
             player.addEventId(eventId);  // Adds the event ID to the player's list
             return playerRepository.save(player);
-            
+
         } else {
             throw new IllegalArgumentException("Player not found with ID: " + playerId);
         }

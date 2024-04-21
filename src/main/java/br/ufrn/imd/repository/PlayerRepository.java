@@ -8,6 +8,8 @@ import java.util.Optional;
 
 public interface PlayerRepository extends MongoRepository<Player, String> {
     Optional<Player> findById(String id);
-    List<Player> findTop10ByOrderByIdAsc();  // Example method to find the first 10 players
+
+    // Example method to find the first 10 players
+    List<Player> findTop10ByOrderByIdAsc();
     List<Player> findAllById(Iterable<String> ids);
 }
