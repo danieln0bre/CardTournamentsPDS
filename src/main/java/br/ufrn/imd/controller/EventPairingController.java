@@ -22,73 +22,61 @@ public class EventPairingController {
 
     @Autowired
     private EventService eventService;
-    
+
     @Autowired
     private PlayerService playerService;
 
     @Autowired
     private PairingService pairingService;
-    
+
     @Autowired
     private MatchService matchService;
 
-    // Retorna o pareamento dos jogadores do evento encontrado pelo ID.
     @GetMapping("/{eventId}/pair")
     public ResponseEntity<?> pairEventPlayers(@PathVariable String eventId) {
         Optional<Event> eventOpt = eventService.getEventById(eventId);
-        
         if (!eventOpt.isPresent()) {
             return ResponseEntity.notFound().build();
         }
 
         Event event = eventOpt.get();
-
-        if (event.getCurrentRound() >= event.getNumberOfRounds()) {
-            return ResponseEntity.badRequest().body("All rounds completed for this event.");
+        if (event.getCurrentRound() != 0) {
+            return ResponseEntity.badRequest().body("Pairing can only be initiated at the start.");
         }
 
-        // Verifica se já existem pareamentos definidos para a rodada atual
-        if (!event.getPairings().isEmpty() && event.getPairings().get(0).getResult() == -1) {
-            return ResponseEntity.badRequest().body("Pairing already initiated for the current round.");
-        }
-
-        event.setCurrentRound(event.getCurrentRound() + 1);
         List<Player> players = playerService.getPlayersByIds(event.getPlayerIds());
         List<Pairing> pairings = pairingService.createPairings(players);
+
         event.setPairings(pairings);
+        event.setCurrentRound(1);  // Start the event at round 1
         eventService.saveEvent(event);
         return ResponseEntity.ok(pairings);
     }
-    
-    @PostMapping("/{eventId}/finalizeRound")
-    public ResponseEntity<?> finalizeRound(@PathVariable String eventId){//, @RequestBody List<Pairing> pairings) {
-        Optional<Event> eventOpt = eventService.getEventById(eventId);
-        
-        List<Pairing> pairings = eventOpt.get().getPairings();
 
+    @PostMapping("/{eventId}/finalizeRound")
+    public ResponseEntity<?> finalizeRound(@PathVariable String eventId) {
+        Optional<Event> eventOpt = eventService.getEventById(eventId);
         if (!eventOpt.isPresent()) {
             return ResponseEntity.notFound().build();
         }
 
         Event event = eventOpt.get();
-
         if (event.getCurrentRound() >= event.getNumberOfRounds()) {
             return ResponseEntity.badRequest().body("All rounds already completed for this event.");
         }
 
-        // Update results and player points
-        pairings.forEach(matchService::updateMatchResult);
+        event.getPairings().forEach(matchService::updateMatchResult);  // Update results for current round
 
-        event.setCurrentRound(event.getCurrentRound() + 1); // increment current round
-
-        // Generate new pairings for the next round
         if (event.getCurrentRound() < event.getNumberOfRounds()) {
             List<Player> players = playerService.getPlayersByIds(event.getPlayerIds());
             List<Pairing> newPairings = pairingService.createPairings(players);
             event.setPairings(newPairings);
+            event.setCurrentRound(event.getCurrentRound() + 1); // Prepare for the next round
+        } else {
+            event.setCurrentRound(event.getCurrentRound() + 1); // Mark as complete
         }
 
-        eventService.saveEvent(event);  // save updated event
-        return ResponseEntity.ok("Round finalized and next round prepared.");
+        eventService.saveEvent(event);
+        return ResponseEntity.ok("Round finalized and next round prepared, if applicable.");
     }
 }

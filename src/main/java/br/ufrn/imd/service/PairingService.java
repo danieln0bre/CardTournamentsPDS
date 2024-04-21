@@ -23,39 +23,25 @@ public class PairingService {
     private PlayerService playerService;
 
     public List<Pairing> createPairings(List<Player> players) {
+        Collections.sort(players, getRankComparator()); // Use the custom comparator for sorting
         List<Pairing> pairings = new ArrayList<>();
-        Collections.sort(players, getRankComparator());  // Sort players based on event points (desc) and rank points
-
-        Set<String> pairedPlayerIds = new HashSet<>();  // Track IDs of players who have been paired
+        Set<String> pairedPlayerIds = new HashSet<>();
 
         for (Player player1 : players) {
-        	
-        	if(player1.getId().equals("Bye")) {
-        		continue;
-        	}
-        	
             if (!pairedPlayerIds.contains(player1.getId())) {
-                // Find the matching player starting from the next index in the sorted list
                 Player player2 = findMatchingPlayer(player1, players, pairedPlayerIds, players.indexOf(player1) + 1);
 
                 if (player2 != null) {
-                    // Create a new pairing
                     Pairing pairing = new Pairing(player1.getId(), player2.getId());
                     pairings.add(pairing);
-                    // Update the set of paired players
                     pairedPlayerIds.add(player1.getId());
                     pairedPlayerIds.add(player2.getId());
-
-                    // Update each player's list of opponents
-                    playerService.updatePlayerOpponents(player1.getId(), player2.getId());
-                    playerService.updatePlayerOpponents(player2.getId(), player1.getId());
                 } else {
-                    // Player gets a bye
+                    // Player 1 gets a bye
                     Pairing byePairing = new Pairing(player1.getId(), "Bye");
                     pairings.add(byePairing);
                     pairedPlayerIds.add(player1.getId());
-                    player1.addEventPoints(1);
-                    playerRepository.save(player1);
+                    updatePlayerForBye(player1.getId());  // Assign points for Bye match
                 }
             }
         }
@@ -68,40 +54,42 @@ public class PairingService {
             return null;  // Early exit if startIndex is out of bounds
         }
 
-        int targetEventPoints = player.getEventPoints();
-        Player bestMatch = null;
         double minDifference = Double.MAX_VALUE;
-        boolean foundEqualEventPoints = false;
+        Player bestMatch = null;
 
         for (int i = startIndex; i < players.size(); i++) {
             Player potentialOpponent = players.get(i);
-            // Check conditions: not the player itself, not previously opposed, not already paired in this round
             if (!potentialOpponent.equals(player) && 
                 !player.getOpponentIds().contains(potentialOpponent.getId()) &&
                 !pairedPlayerIds.contains(potentialOpponent.getId())) {
 
-                double eventPointsDiff = Math.abs(potentialOpponent.getEventPoints() - targetEventPoints);
-                double rankPointsDiff = Math.abs(potentialOpponent.getRankPoints() - player.getRankPoints());
-                double matchWinrateDiff = Math.abs(potentialOpponent.getOpponentsMatchWinrate() - player.getOpponentsMatchWinrate());
-                double score = eventPointsDiff + rankPointsDiff + matchWinrateDiff;  // Calculate combined difference
+                double score = calculateMatchScore(player, potentialOpponent);
 
-                // Choose the best match based on the criteria
-                if ((eventPointsDiff == 0 && !foundEqualEventPoints) || (eventPointsDiff == 0 && score < minDifference)) {
-                    foundEqualEventPoints = true;
-                    minDifference = score;
-                    bestMatch = potentialOpponent;
-                } else if (!foundEqualEventPoints && score < minDifference) {
+                if (score < minDifference) {
                     minDifference = score;
                     bestMatch = potentialOpponent;
                 }
             }
         }
-
         return bestMatch;
+    }
+
+    private double calculateMatchScore(Player player, Player opponent) {
+        double eventPointsDiff = Math.abs(opponent.getEventPoints() - player.getEventPoints());
+        double rankPointsDiff = Math.abs(opponent.getRankPoints() - player.getRankPoints());
+        double matchWinrateDiff = Math.abs(opponent.getOpponentsMatchWinrate() - player.getOpponentsMatchWinrate());
+        return eventPointsDiff + rankPointsDiff + matchWinrateDiff;  // Combined difference as a score
     }
 
     private static Comparator<Player> getRankComparator() {
         return Comparator.comparing(Player::getEventPoints, Comparator.reverseOrder())
-        				 .thenComparing(Player::getRankPoints);
+                         .thenComparing(Player::getRankPoints);
+    }
+
+    private void updatePlayerForBye(String playerId) {
+        playerRepository.findById(playerId).ifPresent(player -> {
+            player.addEventPoints(3);  // Assuming 3 points for a win
+            playerRepository.save(player);
+        });
     }
 }
