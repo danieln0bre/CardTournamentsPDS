@@ -42,7 +42,8 @@ public class EventService {
             return eventRepository.save(event);
         }).orElseThrow(() -> new RuntimeException("Event not found!"));
     }
-    
+
+    // adiciona um player ao evento, com base nos id's passados
     public Event addPlayerToEvent(String eventId, String playerId) {
         Optional<Event> eventOptional = getEventById(eventId);
         if (eventOptional.isPresent()) {
