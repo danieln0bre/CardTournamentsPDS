@@ -29,6 +29,11 @@ public class PairingService {
         Set<String> pairedPlayerIds = new HashSet<>();  // Track IDs of players who have been paired
 
         for (Player player1 : players) {
+        	
+        	if(player1.getId().equals("Bye")) {
+        		continue;
+        	}
+        	
             if (!pairedPlayerIds.contains(player1.getId())) {
                 // Find the matching player starting from the next index in the sorted list
                 Player player2 = findMatchingPlayer(player1, players, pairedPlayerIds, players.indexOf(player1) + 1);

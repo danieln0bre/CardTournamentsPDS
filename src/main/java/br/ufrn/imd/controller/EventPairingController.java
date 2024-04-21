@@ -61,8 +61,10 @@ public class EventPairingController {
     }
     
     @PostMapping("/{eventId}/finalizeRound")
-    public ResponseEntity<?> finalizeRound(@PathVariable String eventId, @RequestBody List<Pairing> pairings) {
+    public ResponseEntity<?> finalizeRound(@PathVariable String eventId){//, @RequestBody List<Pairing> pairings) {
         Optional<Event> eventOpt = eventService.getEventById(eventId);
+        
+        List<Pairing> pairings = eventOpt.get().getPairings();
 
         if (!eventOpt.isPresent()) {
             return ResponseEntity.notFound().build();
