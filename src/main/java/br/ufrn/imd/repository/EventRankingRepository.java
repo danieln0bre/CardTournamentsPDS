@@ -1,10 +1,15 @@
 package br.ufrn.imd.repository;
 
-import java.util.ArrayList;
+//import java.util.ArrayList;
+
+import org.springframework.data.mongodb.repository.MongoRepository;
+
+//import br.ufrn.imd.model.Event;
 import br.ufrn.imd.model.Player;
 
-public class EventRankingRepository {
-	private ArrayList<Player> playersEventRanking;
+
+public interface EventRankingRepository extends MongoRepository<Player, String> {
+	/*private ArrayList<Player> playersEventRanking;
 
 	public EventRankingRepository() {
 		this.playersEventRanking = new ArrayList<>();
@@ -24,5 +29,5 @@ public class EventRankingRepository {
 	
 	public void receberDadosDoMongoDB() {
 		
-	}
+	}*/
 }

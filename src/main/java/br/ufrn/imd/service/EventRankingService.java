@@ -7,13 +7,13 @@ import java.util.Collections;
 import java.util.Comparator;
 
 public class EventRankingService {
+	
     public static ArrayList<Player> sortByEventPoints(ArrayList<Player> players) {
-        // Create a copy of the original list to avoid modifying the input list
-        ArrayList<Player> sortedPlayers = new ArrayList<>(players);
-
-        // Sort the players by event points and opponent match win rate
+    	// Criar outro ArrayList para evitar modificar "players".
+        ArrayList<Player> sortedPlayers = new ArrayList<>();
+        sortedPlayers.addAll(players);
+        // Ordenar os jogadores com base nos event points e winrate dos oponentes.
         Collections.sort(sortedPlayers, new EventPointsAndOpponentMatchWinrateComparator());
-        
         return sortedPlayers;
     }
 

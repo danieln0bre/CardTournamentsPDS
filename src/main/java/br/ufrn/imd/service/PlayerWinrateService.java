@@ -19,7 +19,7 @@ public class PlayerWinrateService {
         this.playerRepository = playerRepository;
     }
 
-    // Calcular a winrate dos oponentes é importante para o sistema de ranking dos jogadores.
+    // Calcula a winrate dos oponentes, que é utilizada no sistema de ranking dos jogadores.
     private Player calculateOpponentsMatchWinrate(Player player) {
         List<String> opponentIds = player.getOpponentIds();
         
