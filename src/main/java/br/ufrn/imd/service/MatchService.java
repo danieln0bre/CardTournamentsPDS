@@ -12,6 +12,7 @@ public class MatchService {
     @Autowired
     private PlayerRepository playerRepository;
 
+    // atualiza o resultado da partida
     public void updateMatchResult(Pairing pairing) {
         Player playerOne = playerRepository.findById(pairing.getPlayerOneId())
                                 .orElseThrow(() -> new IllegalArgumentException("Player not found with ID: " + pairing.getPlayerOneId()));
