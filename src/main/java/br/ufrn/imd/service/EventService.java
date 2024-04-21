@@ -31,6 +31,7 @@ public class EventService {
         eventRepository.deleteById(id);
     }
 
+    // atualiza um evento com o ID fornecido, com base nos detalhes do evento fornecido
     public Event updateEvent(String id, Event eventDetails) {
         return getEventById(id).map(event -> {
             event.setName(eventDetails.getName());
