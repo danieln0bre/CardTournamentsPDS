@@ -50,13 +50,13 @@ public class PlayerWinrateService {
     public Player updatePlayerWinrate(Player player) {
         int totalOpponents = player.getOpponentIds().size();
         
-        // Se não tiver oponentes.
+        // verifica se não tiver oponentes.
         if(totalOpponents <= 0) {
         	player.setWinrate(0.0);
         	return playerRepository.save(player);
         }
         
-        // Se tiver oponentes.
+        // verifica se tiver oponentes.
         double winrate = (double) player.getEventPoints() / totalOpponents;
         player.setWinrate(winrate);
         return playerRepository.save(player);
