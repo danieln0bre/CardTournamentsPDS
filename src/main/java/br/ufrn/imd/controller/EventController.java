@@ -1,7 +1,11 @@
 package br.ufrn.imd.controller;
 
 import br.ufrn.imd.model.Event;
+import br.ufrn.imd.model.Player;
+import br.ufrn.imd.service.EventRankingService;
 import br.ufrn.imd.service.EventService;
+import br.ufrn.imd.service.PlayerService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -11,6 +15,9 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/events")
 public class EventController {
+	
+	@Autowired
+	private PlayerService playerService;
 
     @Autowired
     private EventService eventService;
@@ -60,5 +67,17 @@ public class EventController {
                 			   				return ResponseEntity.ok().<Void>build();
                 		   				 })
                 		   .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+    
+    // Ranking do evento.
+    @GetMapping("/{id}/rankings")
+    public ResponseEntity<List<Player>> getEventRankings(@PathVariable String id) {
+        return eventService.getEventById(id)
+                .map(event -> {
+                    List<Player> players = playerService.getPlayersByIds(event.getPlayerIds());
+                    List<Player> sortedPlayers = EventRankingService.sortByEventPoints(players);
+                    return ResponseEntity.ok(sortedPlayers);
+                })
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 }

@@ -5,12 +5,13 @@ import br.ufrn.imd.model.Player;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
 
 public class EventRankingService {
 	
-    public static ArrayList<Player> sortByEventPoints(ArrayList<Player> players) {
+    public static List<Player> sortByEventPoints(List<Player> players) {
     	// Criar outro ArrayList para evitar modificar "players".
-        ArrayList<Player> sortedPlayers = new ArrayList<>();
+        List<Player> sortedPlayers = new ArrayList<>();
         sortedPlayers.addAll(players);
         // Ordenar os jogadores com base nos event points e winrate dos oponentes.
         Collections.sort(sortedPlayers, new EventPointsAndOpponentMatchWinrateComparator());

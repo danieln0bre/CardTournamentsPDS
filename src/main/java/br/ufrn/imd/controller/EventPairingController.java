@@ -4,6 +4,7 @@ import br.ufrn.imd.model.Event;
 import br.ufrn.imd.model.Pairing;
 import br.ufrn.imd.model.Player;
 import br.ufrn.imd.service.EventService;
+import br.ufrn.imd.service.MatchService;
 import br.ufrn.imd.service.PairingService;
 import br.ufrn.imd.service.PlayerService;
 
@@ -27,31 +28,65 @@ public class EventPairingController {
 
     @Autowired
     private PairingService pairingService;
+    
+    @Autowired
+    private MatchService matchService;
 
     // Retorna o pareamento dos jogadores do evento encontrado pelo ID.
     @GetMapping("/{eventId}/pair")
     public ResponseEntity<?> pairEventPlayers(@PathVariable String eventId) {
         Optional<Event> eventOpt = eventService.getEventById(eventId);
         
-        // Se o evento não existe.
-        if(!eventOpt.isPresent()) {
-        	return ResponseEntity.notFound().build();
+        if (!eventOpt.isPresent()) {
+            return ResponseEntity.notFound().build();
         }
-        
-        // Se o evento existe.
+
         Event event = eventOpt.get();
 
-        // Se a rodada atual for maior ou igual que o número de rodadas do evento.
         if (event.getCurrentRound() >= event.getNumberOfRounds()) {
-        	return ResponseEntity.badRequest().body("All rounds completed for this event.");
+            return ResponseEntity.badRequest().body("All rounds completed for this event.");
         }
-        
-        // Se a rodada atual for menor que o número de rodadas do evento.
+
+        // Verifica se já existem pareamentos definidos para a rodada atual
+        if (!event.getPairings().isEmpty() && event.getPairings().get(0).getResult() == -1) {
+            return ResponseEntity.badRequest().body("Pairing already initiated for the current round.");
+        }
+
         event.setCurrentRound(event.getCurrentRound() + 1);
         List<Player> players = playerService.getPlayersByIds(event.getPlayerIds());
         List<Pairing> pairings = pairingService.createPairings(players);
         event.setPairings(pairings);
-        eventService.saveEvent(event); // Salva o evento com a rodada atual atualizada.
+        eventService.saveEvent(event);
         return ResponseEntity.ok(pairings);
+    }
+    
+    @PostMapping("/{eventId}/finalizeRound")
+    public ResponseEntity<?> finalizeRound(@PathVariable String eventId, @RequestBody List<Pairing> pairings) {
+        Optional<Event> eventOpt = eventService.getEventById(eventId);
+
+        if (!eventOpt.isPresent()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Event event = eventOpt.get();
+
+        if (event.getCurrentRound() >= event.getNumberOfRounds()) {
+            return ResponseEntity.badRequest().body("All rounds already completed for this event.");
+        }
+
+        // Update results and player points
+        pairings.forEach(matchService::updateMatchResult);
+
+        event.setCurrentRound(event.getCurrentRound() + 1); // increment current round
+
+        // Generate new pairings for the next round
+        if (event.getCurrentRound() < event.getNumberOfRounds()) {
+            List<Player> players = playerService.getPlayersByIds(event.getPlayerIds());
+            List<Pairing> newPairings = pairingService.createPairings(players);
+            event.setPairings(newPairings);
+        }
+
+        eventService.saveEvent(event);  // save updated event
+        return ResponseEntity.ok("Round finalized and next round prepared.");
     }
 }

@@ -3,6 +3,7 @@ package br.ufrn.imd.controller;
 import br.ufrn.imd.model.Event;
 import br.ufrn.imd.model.Player;
 import br.ufrn.imd.service.EventService;
+import br.ufrn.imd.service.GeneralRankingService;
 import br.ufrn.imd.service.PlayerService;
 import br.ufrn.imd.service.PlayerWinrateService;
 
@@ -17,6 +18,9 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/players")
 public class PlayerController {
+	
+	@Autowired
+	private GeneralRankingService generalRankingService;
 
     @Autowired
     private PlayerService playerService;
@@ -97,6 +101,15 @@ public class PlayerController {
         	
             return ResponseEntity.badRequest().body("Failed to update Player or Event: " + e.getMessage());
         }
+    }
+    
+    @GetMapping("/rankings")
+    public ResponseEntity<List<Player>> getGeneralRankings() {
+        List<Player> rankedPlayers = generalRankingService.getRankedPlayersByRankPoints();
+        if (rankedPlayers.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(rankedPlayers);
     }
 
 }
