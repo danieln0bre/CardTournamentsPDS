@@ -19,18 +19,19 @@ public class PlayerWinrateService {
         this.playerRepository = playerRepository;
     }
 
-    // Calcula a winrate dos oponentes, que é utilizada no sistema de ranking dos jogadores.
+    // Calcula a winrate dos oponentes.
+    // Utilizada no sistema de ranking dos jogadores.
     private Player calculateOpponentsMatchWinrate(Player player) {
         List<String> opponentIds = player.getOpponentIds();
         
-        // verifica se a lista de oponentes estiver vazia.
+        // Se a lista de oponentes é vazia.
         
         if (opponentIds.isEmpty()) {
             player.setOpponentsMatchWinrate(0.0);
             return player;
         }
 
-        // verifica se a lista de oponentes não está vazia.
+        // Se a lista de oponentes não é vazia.
         
         List<Player> opponents = opponentIds.stream().map(playerRepository::findById)
         											 .filter(Optional::isPresent)
@@ -50,13 +51,13 @@ public class PlayerWinrateService {
     public Player updatePlayerWinrate(Player player) {
         int totalOpponents = player.getOpponentIds().size();
         
-        // verifica se não tiver oponentes.
+        // Se não existir oponentes.
         if(totalOpponents <= 0) {
         	player.setWinrate(0.0);
         	return playerRepository.save(player);
         }
         
-        // verifica se tiver oponentes.
+        // Se existir oponentes.
         double winrate = (double) player.getEventPoints() / totalOpponents;
         player.setWinrate(winrate);
         return playerRepository.save(player);

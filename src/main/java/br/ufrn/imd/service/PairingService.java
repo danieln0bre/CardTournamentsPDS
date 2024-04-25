@@ -37,11 +37,11 @@ public class PairingService {
                     pairedPlayerIds.add(player1.getId());
                     pairedPlayerIds.add(player2.getId());
                 } else {
-                    // Player 1 gets a bye
+                	// Jogador 1 é pareado com "Bye"
                     Pairing byePairing = new Pairing(player1.getId(), "Bye");
                     pairings.add(byePairing);
                     pairedPlayerIds.add(player1.getId());
-                    updatePlayerForBye(player1.getId());  // Assign points for Bye match
+                    updatePlayerForBye(player1.getId());  // Atualiza os pontos caso seja <jogador> vs "Bye".
                 }
             }
         }
@@ -50,9 +50,14 @@ public class PairingService {
     }
 
     private Player findMatchingPlayer(Player player, List<Player> players, Set<String> pairedPlayerIds, int startIndex) {
-        if (startIndex >= players.size()) {
-            return null;  // Early exit if startIndex is out of bounds
+        
+    	// Se startIndex for maior ou igual que o tamanho da lista de jogadores.
+    	
+    	if (startIndex >= players.size()) {
+            return null;
         }
+    	
+    	// Se startIndex for menor que o tamanho da lista de jogadores.
 
         double minDifference = Double.MAX_VALUE;
         Player bestMatch = null;
@@ -78,7 +83,7 @@ public class PairingService {
         double eventPointsDiff = Math.abs(opponent.getEventPoints() - player.getEventPoints());
         double rankPointsDiff = Math.abs(opponent.getRankPoints() - player.getRankPoints());
         double matchWinrateDiff = Math.abs(opponent.getOpponentsMatchWinrate() - player.getOpponentsMatchWinrate());
-        return eventPointsDiff + rankPointsDiff + matchWinrateDiff;  // Combined difference as a score
+        return eventPointsDiff + rankPointsDiff + matchWinrateDiff;  // O score é a soma das diferenças.
     }
 
     private static Comparator<Player> getRankComparator() {
@@ -88,7 +93,7 @@ public class PairingService {
 
     private void updatePlayerForBye(String playerId) {
         playerRepository.findById(playerId).ifPresent(player -> {
-            player.addEventPoints(3);  // Assuming 3 points for a win
+            player.addEventPoints(1);  // Adiciona 1 ponto para a vitória.
             playerRepository.save(player);
         });
     }

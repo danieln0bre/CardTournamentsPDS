@@ -22,21 +22,24 @@ public class PlayerService {
     }
 
     public Player createPlayer(Player player) {
-        // Calculate win rates before saving the player
+    	// Calcula a winrate do jogador e dos oponentes do jogador antes de salvar.
         player = winrateService.calculateWinRates(player);
         return playerRepository.save(player);
     }
     
     public Player updatePlayer(String id, Player playerDetails) {
-        playerDetails.setId(id);  // Ensure the correct player is updated
-        return createPlayer(playerDetails);  // Reuse createPlayer for recalculating win rates
+        playerDetails.setId(id); // Garante que o jogador correto está sendo atualizado.
+        return createPlayer(playerDetails);  // Reutiliza createPlayer para recalcular as winrates.
     }
     
     public void updatePlayerOpponents(String playerId, String opponentId) {
-        Player player = playerRepository.findById(playerId).orElseThrow(
-            () -> new IllegalArgumentException("Player not found with ID: " + playerId));
-        player.addOpponentId(opponentId);  // Adds the opponent ID to the player
-        playerRepository.save(player);  // Saves the updated player
+        Player player = playerRepository.findById(playerId)
+        		.orElseThrow(
+        				() -> new IllegalArgumentException("Player not found with ID: " + playerId)
+        		);
+        
+        player.addOpponentId(opponentId);  // Adiciona o ID do oponente para o jogador.
+        playerRepository.save(player);  // Salva o jogador atualizado.
     }
 
     public Optional<Player> getPlayerById(String id) {
@@ -52,7 +55,7 @@ public class PlayerService {
         Optional<Player> playerOptional = getPlayerById(playerId);
         if (playerOptional.isPresent()) {
             Player player = playerOptional.get();
-            player.addEventId(eventId);  // Adds the event ID to the player's list
+            player.addEventId(eventId);  // Adiciona o ID do evento para a lista do jogador.
             return playerRepository.save(player);
 
         } else {
