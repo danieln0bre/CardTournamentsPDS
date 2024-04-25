@@ -38,17 +38,17 @@ public class EventPairingController {
         if (!eventOpt.isPresent()) {
             return ResponseEntity.notFound().build();
         }
-
+        
         Event event = eventOpt.get();
         if (event.getCurrentRound() != 0) {
             return ResponseEntity.badRequest().body("Pairing can only be initiated at the start.");
         }
-
+        
         List<Player> players = playerService.getPlayersByIds(event.getPlayerIds());
         List<Pairing> pairings = pairingService.createPairings(players);
-
+        
         event.setPairings(pairings);
-        event.setCurrentRound(1);  // Start the event at round 1
+        event.setCurrentRound(1);  // O evento começa no round 1.
         eventService.saveEvent(event);
         return ResponseEntity.ok(pairings);
     }
@@ -61,20 +61,21 @@ public class EventPairingController {
         }
 
         Event event = eventOpt.get();
+        
+        // Se o round atual do evento for maior ou igual ao número de rounds do evento.
+
         if (event.getCurrentRound() >= event.getNumberOfRounds()) {
             return ResponseEntity.badRequest().body("All rounds already completed for this event.");
         }
 
-        event.getPairings().forEach(matchService::updateMatchResult);  // Update results for current round
+        // Se o round atual do evento for menor que o número de rounds do evento.
+        
+        event.getPairings().forEach(matchService::updateMatchResult);  // Atualiza resultados para o round atual.
 
-        if (event.getCurrentRound() < event.getNumberOfRounds()) {
-            List<Player> players = playerService.getPlayersByIds(event.getPlayerIds());
-            List<Pairing> newPairings = pairingService.createPairings(players);
-            event.setPairings(newPairings);
-            event.setCurrentRound(event.getCurrentRound() + 1); // Prepare for the next round
-        } else {
-            event.setCurrentRound(event.getCurrentRound() + 1); // Mark as complete
-        }
+        List<Player> players = playerService.getPlayersByIds(event.getPlayerIds());
+        List<Pairing> newPairings = pairingService.createPairings(players);
+        event.setPairings(newPairings);
+        event.setCurrentRound(event.getCurrentRound() + 1); // Prepara para o próximo round.
 
         eventService.saveEvent(event);
         return ResponseEntity.ok("Round finalized and next round prepared, if applicable.");

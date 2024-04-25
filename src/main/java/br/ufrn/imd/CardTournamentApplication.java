@@ -5,10 +5,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
 public class CardTournamentApplication {
-
-  public static void main(String[] args) {
-    SpringApplication.run(CardTournamentApplication.class, args);
-  }
-
+	public static void main(String[] args) {
+		SpringApplication.run(CardTournamentApplication.class, args);
+	}
 }
-

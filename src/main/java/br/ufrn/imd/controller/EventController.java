@@ -47,14 +47,15 @@ public class EventController {
     @PutMapping("/{id}")
     public ResponseEntity<Event> updateEvent(@PathVariable String id, @RequestBody Event eventDetails) {
         return eventService.getEventById(id)
-                		   .map(event -> {  event.setName(eventDetails.getName());
-                		   				    event.setDate(eventDetails.getDate());
-        		   				   		    event.setLocation(eventDetails.getLocation());
-        		   				   		    event.setNumberOfRounds(eventDetails.getNumberOfRounds());
-        		   				   		    event.setPlayerIds(eventDetails.getPlayerIds());  // Update to use setPlayerIds
-        		   				   		    Event updatedEvent = eventService.saveEvent(event);
-        		   				   		    return ResponseEntity.ok(updatedEvent);
-        		   				   		 })
+                		   .map(event -> { 
+                			   event.setName(eventDetails.getName());
+	   				    	   event.setDate(eventDetails.getDate());
+   				   		       event.setLocation(eventDetails.getLocation());
+   				   		       event.setNumberOfRounds(eventDetails.getNumberOfRounds());
+   				   		       event.setPlayerIds(eventDetails.getPlayerIds());  // Update to use setPlayerIds
+   				   		       Event updatedEvent = eventService.saveEvent(event);
+   				   		       return ResponseEntity.ok(updatedEvent);
+   				   		   })
                 		   .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
@@ -62,10 +63,10 @@ public class EventController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteEvent(@PathVariable String id) {
         return eventService.getEventById(id)
-                		   .map(event -> {
-                			   				eventService.deleteEvent(id);
-                			   				return ResponseEntity.ok().<Void>build();
-                		   				 })
+                		   .map(event -> { 
+                			   eventService.deleteEvent(id);
+                			   return ResponseEntity.ok().<Void>build();
+                		   })
                 		   .orElseGet(() -> ResponseEntity.notFound().build());
     }
     
@@ -73,11 +74,11 @@ public class EventController {
     @GetMapping("/{id}/rankings")
     public ResponseEntity<List<Player>> getEventRankings(@PathVariable String id) {
         return eventService.getEventById(id)
-                .map(event -> {
-                    List<Player> players = playerService.getPlayersByIds(event.getPlayerIds());
-                    List<Player> sortedPlayers = EventRankingService.sortByEventPoints(players);
-                    return ResponseEntity.ok(sortedPlayers);
-                })
-                .orElseGet(() -> ResponseEntity.notFound().build());
+			               .map(event -> {
+			            	   List<Player> players = playerService.getPlayersByIds(event.getPlayerIds());
+			                   List<Player> sortedPlayers = EventRankingService.sortByEventPoints(players);
+			                   return ResponseEntity.ok(sortedPlayers);
+			               })
+			               .orElseGet(() -> ResponseEntity.notFound().build());
     }
 }
