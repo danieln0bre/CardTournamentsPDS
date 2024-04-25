@@ -8,8 +8,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Document(collection = "players2")
 public class Player extends User{
 	
-	// Note que Player herda de User.
-	// Então, Player utiliza o atributo id de User.
+	// Usa a chave primária id da superclasse User.
 	
     private int rankPoints;
     private int eventPoints;

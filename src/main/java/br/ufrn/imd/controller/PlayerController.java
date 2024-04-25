@@ -53,9 +53,9 @@ public class PlayerController {
     public ResponseEntity<Player> recalculateWinrates(@PathVariable String id) {
         return playerService.getPlayerById(id)
                 			.map(player -> {
-												Player updatedPlayer = winrateService.calculateWinRates(player);
-												return ResponseEntity.ok(updatedPlayer);
-										   })
+                				Player updatedPlayer = winrateService.calculateWinRates(player);
+								return ResponseEntity.ok(updatedPlayer);
+							})
                 			.orElse(ResponseEntity.notFound().build());
     }
     

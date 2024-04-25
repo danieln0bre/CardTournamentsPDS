@@ -11,6 +11,8 @@ public class Pairing {
         this.result = -1;  // -1: ainda não existe um resultado.
     }
 
+    // Gets e sets.
+    
     public String getPlayerOneId() {
         return playerOneId;
     }

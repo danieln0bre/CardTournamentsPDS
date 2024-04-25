@@ -19,6 +19,8 @@ public class User {
     	this.password = password;
     }
 	
+	// Gets e sets.
+	
 	public String getId() {
 		return id;
 	}

@@ -35,7 +35,6 @@ public class UserController {
         
         // Se não existir o usuário.
         if(user == null) {
-        	
         	return ResponseEntity.notFound().build();
         }
         
