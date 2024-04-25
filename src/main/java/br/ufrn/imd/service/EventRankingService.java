@@ -13,23 +13,28 @@ public class EventRankingService {
     	// Criar outro ArrayList para evitar modificar "players".
         List<Player> sortedPlayers = new ArrayList<>();
         sortedPlayers.addAll(players);
-        // Ordenar os jogadores com base nos event points e winrate dos oponentes.
+        // Ordena os jogadores com base nos event points e winrate dos oponentes.
         Collections.sort(sortedPlayers, new EventPointsAndOpponentMatchWinrateComparator());
         return sortedPlayers;
     }
 
-    // Comparator for sorting players based on event points and opponent match win rate
+    // Comparador para rankear os jogadores baseado nos pontos de evento e taxa de vitória do oponente.
     static class EventPointsAndOpponentMatchWinrateComparator implements Comparator<Player> {
         @Override
         public int compare(Player p1, Player p2) {
-            // First, compare by event points (descending order)
+
+        	// Compara por pontos de evento (em ordem decrescente)
             int eventPointsComparison = Integer.compare(p2.getEventPoints(), p1.getEventPoints());
+            
+            // Se os pontos de evento forem diferentes.
             
             if (eventPointsComparison != 0) {
                 return eventPointsComparison;
             }
             
-            // If event points are equal, compare by opponent match win rate (descending order)
+            // Se os pontos de evento forem iguais.
+            
+            // Compara utilizando a taxa de vitória do oponente (em ordem decrescente).
             return Double.compare(p2.getOpponentsMatchWinrate(), p1.getOpponentsMatchWinrate());
         }
     }

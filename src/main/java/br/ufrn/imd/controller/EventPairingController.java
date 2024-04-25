@@ -32,6 +32,7 @@ public class EventPairingController {
     @Autowired
     private MatchService matchService;
 
+    // Realiza o pareamento e retorna.
     @GetMapping("/{eventId}/pair")
     public ResponseEntity<?> pairEventPlayers(@PathVariable String eventId) {
         Optional<Event> eventOpt = eventService.getEventById(eventId);
@@ -53,6 +54,7 @@ public class EventPairingController {
         return ResponseEntity.ok(pairings);
     }
 
+    // Finaliza a rodada atual.
     @PostMapping("/{eventId}/finalizeRound")
     public ResponseEntity<?> finalizeRound(@PathVariable String eventId) {
         Optional<Event> eventOpt = eventService.getEventById(eventId);

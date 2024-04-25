@@ -31,10 +31,10 @@ public class EventService {
         eventRepository.deleteById(id);
     }
 
-    // atualiza um evento com o ID fornecido, com base nos detalhes do evento passado no parâmetro
+    // Atualiza um evento com o ID fornecido com base nos detalhes do evento passado como parâmetro.
     public Event updateEvent(String id, Event eventDetails) {
         return getEventById(id).map(event -> {
-            event.setName(eventDetails.getName());
+        	event.setName(eventDetails.getName());
             event.setDate(eventDetails.getDate());
             event.setLocation(eventDetails.getLocation());
             event.setNumberOfRounds(eventDetails.getNumberOfRounds());
@@ -43,7 +43,7 @@ public class EventService {
         }).orElseThrow(() -> new RuntimeException("Event not found!"));
     }
 
-    // adiciona um player ao evento, com base nos id's passados
+    // Adiciona um player ao evento com base nos id's passados como parâmetro.
     public Event addPlayerToEvent(String eventId, String playerId) {
         Optional<Event> eventOptional = getEventById(eventId);
         if (eventOptional.isPresent()) {

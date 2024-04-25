@@ -103,6 +103,7 @@ public class PlayerController {
         }
     }
     
+    // Faz o rankeamento dos jogadores e retorna.
     @GetMapping("/rankings")
     public ResponseEntity<List<Player>> getGeneralRankings() {
         List<Player> rankedPlayers = generalRankingService.getRankedPlayersByRankPoints();

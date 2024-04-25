@@ -7,9 +7,9 @@ import java.util.List;
 
 public interface ManagerRepository extends MongoRepository<Manager, String> {
     
-    // Encontrar Managers por nome
+    // Encontra Managers por nome.
     List<Manager> findByName(String name);
     
-    // Encontrar Managers cujo username comece com um prefixo específico
+    // Encontra Managers cujo username comece com um prefixo específico.
     List<Manager> findByUsernameStartingWith(String prefix);
 }

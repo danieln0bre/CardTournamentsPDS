@@ -21,6 +21,8 @@ public class GeneralRankingService {
         return players;
     }
 
+    // Utilizado para gerar a tabela de ranking geral.
+    // Compara os rank points dos jogadores. 
     static class RankPointsComparator implements Comparator<Player> {
         @Override
         public int compare(Player p1, Player p2) {
