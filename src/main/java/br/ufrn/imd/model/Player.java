@@ -18,8 +18,8 @@ public class Player extends User{
 	private ArrayList<String> opponentIds;
     private double opponentsMatchWinrate;
 
-    public Player(String name, String username, String password) {
-        super(name, username, password);
+    public Player(String name, String username,String email, String password) {
+        super(name, username, email, password);
         this.rankPoints = 0;
         this.winrate = 0;
         this.eventPoints = 0;

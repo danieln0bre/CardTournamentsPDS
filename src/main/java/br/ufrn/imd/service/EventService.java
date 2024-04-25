@@ -1,11 +1,9 @@
 package br.ufrn.imd.service;
 
 import br.ufrn.imd.model.Event;
-import br.ufrn.imd.model.Player;
 import br.ufrn.imd.repository.EventRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
 import java.util.Optional;
 
@@ -16,6 +14,13 @@ public class EventService {
     private EventRepository eventRepository;
 
     public Event saveEvent(Event event) {
+        if (event.getName() == null || event.getName().trim().isEmpty()) {
+            throw new IllegalArgumentException("Event name cannot be empty.");
+        }
+        if (event.getLocation() == null || event.getLocation().trim().isEmpty()) {
+            throw new IllegalArgumentException("Event location cannot be empty.");
+        }
+        // Não é necessária validação de formato para a data, conforme especificação
         return eventRepository.save(event);
     }
 
@@ -31,10 +36,9 @@ public class EventService {
         eventRepository.deleteById(id);
     }
 
-    // Atualiza um evento com o ID fornecido com base nos detalhes do evento passado como parâmetro.
     public Event updateEvent(String id, Event eventDetails) {
         return getEventById(id).map(event -> {
-        	event.setName(eventDetails.getName());
+            event.setName(eventDetails.getName());
             event.setDate(eventDetails.getDate());
             event.setLocation(eventDetails.getLocation());
             event.setNumberOfRounds(eventDetails.getNumberOfRounds());
@@ -43,15 +47,15 @@ public class EventService {
         }).orElseThrow(() -> new RuntimeException("Event not found!"));
     }
 
-    // Adiciona um player ao evento com base nos id's passados como parâmetro.
     public Event addPlayerToEvent(String eventId, String playerId) {
-        Optional<Event> eventOptional = getEventById(eventId);
-        if (eventOptional.isPresent()) {
-            Event event = eventOptional.get();
-            event.addPlayerId(playerId);  // Adiciona o ID do jogador ao evento
-            return eventRepository.save(event);
-        } else {
-            throw new IllegalArgumentException("Event not found with ID: " + eventId);
+        Event event = getEventById(eventId).orElseThrow(() ->
+            new IllegalArgumentException("Event not found with ID: " + eventId));
+        
+        if (event.getPlayerIds().contains(playerId)) {
+            throw new IllegalArgumentException("Player already added to the event.");
         }
+
+        event.addPlayerId(playerId);
+        return eventRepository.save(event);
     }
 }

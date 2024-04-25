@@ -12,8 +12,8 @@ public class Manager extends User {
 	
 	ArrayList<Event> eventos;
 	
-	public Manager(String name, String username, String password) {
-        super(name, username, password);
+	public Manager(String name, String username, String email, String password) {
+        super(name, username, email, password);
         this.eventos = new ArrayList<Event>();
     }
 

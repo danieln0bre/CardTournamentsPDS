@@ -1,8 +1,8 @@
 package br.ufrn.imd.service;
 
 import br.ufrn.imd.model.Player;
-import br.ufrn.imd.repository.PlayerRepository;
 import br.ufrn.imd.model.Pairing;
+import br.ufrn.imd.repository.PlayerRepository;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -16,13 +16,14 @@ import org.springframework.stereotype.Service;
 @Service
 public class PairingService {
     
-	@Autowired
-	private PlayerRepository playerRepository;
-	
     @Autowired
-    private PlayerService playerService;
+    private PlayerRepository playerRepository;
 
     public List<Pairing> createPairings(List<Player> players) {
+        if (players == null || players.isEmpty()) {
+            throw new IllegalArgumentException("List of players cannot be null or empty.");
+        }
+
         Collections.sort(players, getRankComparator()); // Use the custom comparator for sorting
         List<Pairing> pairings = new ArrayList<>();
         Set<String> pairedPlayerIds = new HashSet<>();
@@ -37,7 +38,7 @@ public class PairingService {
                     pairedPlayerIds.add(player1.getId());
                     pairedPlayerIds.add(player2.getId());
                 } else {
-                	// Jogador 1 é pareado com "Bye"
+                    // Jogador 1 é pareado com "Bye"
                     Pairing byePairing = new Pairing(player1.getId(), "Bye");
                     pairings.add(byePairing);
                     pairedPlayerIds.add(player1.getId());
@@ -50,14 +51,9 @@ public class PairingService {
     }
 
     private Player findMatchingPlayer(Player player, List<Player> players, Set<String> pairedPlayerIds, int startIndex) {
-        
-    	// Se startIndex for maior ou igual que o tamanho da lista de jogadores.
-    	
-    	if (startIndex >= players.size()) {
+        if (startIndex >= players.size()) {
             return null;
         }
-    	
-    	// Se startIndex for menor que o tamanho da lista de jogadores.
 
         double minDifference = Double.MAX_VALUE;
         Player bestMatch = null;

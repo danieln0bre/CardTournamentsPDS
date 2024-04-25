@@ -2,7 +2,7 @@ package br.ufrn.imd.service;
 
 import br.ufrn.imd.model.Player;
 import br.ufrn.imd.repository.PlayerRepository;
-
+import br.ufrn.imd.util.PlayerValidationUtil;
 import java.util.List;
 import java.util.Optional;
 
@@ -22,44 +22,49 @@ public class PlayerService {
     }
 
     public Player createPlayer(Player player) {
-    	// Calcula a winrate do jogador e dos oponentes do jogador antes de salvar.
+        PlayerValidationUtil.validatePlayer(player);
         player = winrateService.calculateWinRates(player);
         return playerRepository.save(player);
     }
-    
+
     public Player updatePlayer(String id, Player playerDetails) {
-        playerDetails.setId(id); // Garante que o jogador correto está sendo atualizado.
-        return createPlayer(playerDetails);  // Reutiliza createPlayer para recalcular as winrates.
+        PlayerValidationUtil.validatePlayer(playerDetails);
+        playerDetails.setId(id);
+        return createPlayer(playerDetails);
     }
-    
+
     public void updatePlayerOpponents(String playerId, String opponentId) {
-        Player player = playerRepository.findById(playerId)
-        		.orElseThrow(
-        				() -> new IllegalArgumentException("Player not found with ID: " + playerId)
-        		);
+        if (opponentId == null || opponentId.isEmpty()) {
+            throw new IllegalArgumentException("Opponent ID cannot be null or empty.");
+        }
         
-        player.addOpponentId(opponentId);  // Adiciona o ID do oponente para o jogador.
-        playerRepository.save(player);  // Salva o jogador atualizado.
+        Player player = playerRepository.findById(playerId)
+                .orElseThrow(() -> new IllegalArgumentException("Player not found with ID: " + playerId));
+        
+        player.addOpponentId(opponentId);
+        playerRepository.save(player);
     }
 
     public Optional<Player> getPlayerById(String id) {
         return playerRepository.findById(id);
     }
-    
+
     public List<Player> getPlayersByIds(List<String> playerIds) {
+        if (playerIds == null || playerIds.isEmpty()) {
+            throw new IllegalArgumentException("Player IDs list cannot be null or empty.");
+        }
         return playerRepository.findAllById(playerIds);
     }
 
     public Player addEventToPlayer(String playerId, String eventId) {
-
-        Optional<Player> playerOptional = getPlayerById(playerId);
-        if (playerOptional.isPresent()) {
-            Player player = playerOptional.get();
-            player.addEventId(eventId);  // Adiciona o ID do evento para a lista do jogador.
-            return playerRepository.save(player);
-
-        } else {
-            throw new IllegalArgumentException("Player not found with ID: " + playerId);
+        if (eventId == null || eventId.isEmpty()) {
+            throw new IllegalArgumentException("Event ID cannot be null or empty.");
         }
+        
+        Player player = getPlayerById(playerId).orElseThrow(() -> 
+            new IllegalArgumentException("Player not found with ID: " + playerId));
+        
+        player.addEventId(eventId);
+        return playerRepository.save(player);
     }
 }
