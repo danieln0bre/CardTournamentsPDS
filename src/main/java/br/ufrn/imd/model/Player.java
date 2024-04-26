@@ -74,6 +74,15 @@ public class Player extends User{
     public String getDeck() {
 		return deck;
 	}
+    
+    public boolean hasDeck() {
+        if(deck!=null) {
+        	return true;
+        }else {
+        	return false;
+        }
+    }
+
 
 	public void setDeck(String deck) {
 		this.deck = deck;

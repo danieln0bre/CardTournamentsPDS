@@ -19,6 +19,7 @@ public class Event {
     private String location;
     private int numberOfRounds;
     private int currentRound;
+    private boolean hasStarted;
     private boolean finished;
     private List<String> playerIds; // Lista de jogadores participantes do evento.
     private List<Pairing> pairings; // Lista de pairings dos jogadores do evento.
@@ -114,6 +115,14 @@ public class Event {
 	
 	public void setPairings(List<Pairing> pairings) {
 		this.pairings = pairings;
+	}
+
+	public boolean getHasStarted() {
+		return hasStarted;
+	}
+
+	public void setHasStarted(boolean hasStarted) {
+		this.hasStarted = hasStarted;
 	}
     
 }

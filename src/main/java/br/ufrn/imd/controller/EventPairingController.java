@@ -31,27 +31,60 @@ public class EventPairingController {
 
     @Autowired
     private MatchService matchService;
-
-    // Realiza o pareamento e retorna.
-    @GetMapping("/{eventId}/pair")
-    public ResponseEntity<?> pairEventPlayers(@PathVariable String eventId) {
+    
+    // Método para iniciar o evento.
+    @PostMapping("/{eventId}/start")
+    public ResponseEntity<?> startEvent(@PathVariable String eventId) {
         Optional<Event> eventOpt = eventService.getEventById(eventId);
         if (!eventOpt.isPresent()) {
             return ResponseEntity.notFound().build();
         }
-        
+
         Event event = eventOpt.get();
-        if (event.getCurrentRound() != 0) {
-            return ResponseEntity.badRequest().body("Pairing can only be initiated at the start.");
+        if (event.getHasStarted()) {
+            return ResponseEntity.badRequest().body("Event has already started.");
         }
-        
+
+        if (!playerService.allPlayersHaveDecks(event.getPlayerIds())) {
+            return ResponseEntity.badRequest().body("Not all players have registered decks.");
+        }
+
+        event.setHasStarted(true);
+        eventService.saveEvent(event);
+        return ResponseEntity.ok("Event started successfully.");
+    }
+
+    // Metodo para gerar os pairings
+    @PostMapping("/{eventId}/generatePairings")
+    public ResponseEntity<?> generatePairings(@PathVariable String eventId) {
+        Optional<Event> eventOpt = eventService.getEventById(eventId);
+        if (!eventOpt.isPresent()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Event event = eventOpt.get();
+        if (!event.getHasStarted()) {
+            return ResponseEntity.badRequest().body("Event has not started yet.");
+        }
+
         List<Player> players = playerService.getPlayersByIds(event.getPlayerIds());
         List<Pairing> pairings = pairingService.createPairings(players);
-        
+
         event.setPairings(pairings);
-        event.setCurrentRound(1);  // O evento começa no round 1.
         eventService.saveEvent(event);
-        return ResponseEntity.ok(pairings);
+        return ResponseEntity.ok("Pairings generated successfully.");
+    }
+    
+    // Método para retornar os pairings atuais de um evento.
+    @GetMapping("/{eventId}/pairings")
+    public ResponseEntity<?> getEventPairings(@PathVariable String eventId) {
+        Optional<Event> eventOpt = eventService.getEventById(eventId);
+        if (!eventOpt.isPresent()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Event event = eventOpt.get();
+        return ResponseEntity.ok(event.getPairings());
     }
 
     // Finaliza a rodada atual.

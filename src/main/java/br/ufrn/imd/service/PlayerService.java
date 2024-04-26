@@ -67,4 +67,10 @@ public class PlayerService {
         player.addEventId(eventId);
         return playerRepository.save(player);
     }
+    
+    // Verifica se todos os jogadores to evento tem decks registrados
+    public boolean allPlayersHaveDecks(List<String> playerIds) {
+        List<Player> players = getPlayersByIds(playerIds);
+        return players.stream().allMatch(Player::hasDeck);
+    }
 }

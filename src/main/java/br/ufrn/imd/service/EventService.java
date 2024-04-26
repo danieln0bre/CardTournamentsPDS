@@ -20,7 +20,7 @@ public class EventService {
         if (event.getLocation() == null || event.getLocation().trim().isEmpty()) {
             throw new IllegalArgumentException("Event location cannot be empty.");
         }
-        // Não é necessária validação de formato para a data, conforme especificação
+        // Não é necessária validação de formato para a data
         return eventRepository.save(event);
     }
 
