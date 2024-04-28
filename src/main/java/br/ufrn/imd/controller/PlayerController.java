@@ -1,7 +1,9 @@
 package br.ufrn.imd.controller;
 
+import br.ufrn.imd.model.Deck;
 import br.ufrn.imd.model.Event;
 import br.ufrn.imd.model.Player;
+import br.ufrn.imd.service.DeckService;
 import br.ufrn.imd.service.EventService;
 import br.ufrn.imd.service.GeneralRankingService;
 import br.ufrn.imd.service.PlayerService;
@@ -11,7 +13,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import br.ufrn.imd.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -30,14 +34,37 @@ public class PlayerController {
 
     @Autowired
     private PlayerWinrateService winrateService;
+    
+    @Autowired
+    private DeckService deckService;
 
     // Atualiza o jogador encontrado pelo ID.
     @PutMapping("/{id}/update")
-    public ResponseEntity<Player> updatePlayer(@PathVariable String id, @RequestBody Player playerDetails) {
-        Player updatedPlayer = playerService.updatePlayer(id, playerDetails);
+    public ResponseEntity<Player> updatePlayerInfo(@PathVariable String id, @RequestBody User userDetails) {
+        Optional<Player> playerOptional = playerService.getPlayerById(id);
+
+        if (!playerOptional.isPresent()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Player player = playerOptional.get();
+        
+        // Update only if the fields are present in the request body
+        if (userDetails.getEmail() != null) {
+            player.setEmail(userDetails.getEmail());
+        }
+        if (userDetails.getUsername() != null) {
+            player.setUsername(userDetails.getUsername());
+        }
+        if (userDetails.getPassword() != null) {
+            player.setPassword(userDetails.getPassword());
+        }
+
+        Player updatedPlayer = playerService.updatePlayer(id, player);
         
         return ResponseEntity.ok(updatedPlayer);
     }
+
 
     
     // Retorna o jogador encontrado pelo ID.
@@ -112,5 +139,31 @@ public class PlayerController {
         }
         return ResponseEntity.ok(rankedPlayers);
     }
+    
+
+    @PutMapping("/{id}/updateDeck")
+    public ResponseEntity<?> updatePlayerDeck(@PathVariable String id, @RequestBody String deckId) {
+        try {
+            Optional<Player> playerOptional = playerService.getPlayerById(id);
+
+            if (!playerOptional.isPresent()) {
+                return ResponseEntity.notFound().build();
+            }
+
+            Deck deck = deckService.findDeckById(deckId).orElseThrow(() -> new IllegalArgumentException("Deck ID not found in the winning decks collection."));
+            
+            Player player = playerOptional.get();
+            player.setDeck(deck);
+            playerService.updatePlayer(id, player);
+
+            return ResponseEntity.ok(player.getDeckId());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An unexpected error occurred: " + e.getMessage());
+        }
+    }
+
+
 
 }

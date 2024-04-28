@@ -20,6 +20,7 @@ public class User {
     	this.name = name;
     	this.username = username;
     	this.password = password;
+    	this.email = email;
     }
 	
 	// Gets e sets.

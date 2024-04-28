@@ -73,4 +73,8 @@ public class PlayerService {
         List<Player> players = getPlayersByIds(playerIds);
         return players.stream().allMatch(Player::hasDeck);
     }
+    
+    public void registerPlayerDeckName(String id, String deckName) {
+    	
+    }
 }

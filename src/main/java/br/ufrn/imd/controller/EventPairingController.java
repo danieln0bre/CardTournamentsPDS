@@ -54,7 +54,7 @@ public class EventPairingController {
         return ResponseEntity.ok("Event started successfully.");
     }
 
-    // Metodo para gerar os pairings
+    // Metodo para gerar os pairings	
     @PostMapping("/{eventId}/generatePairings")
     public ResponseEntity<?> generatePairings(@PathVariable String eventId) {
         Optional<Event> eventOpt = eventService.getEventById(eventId);

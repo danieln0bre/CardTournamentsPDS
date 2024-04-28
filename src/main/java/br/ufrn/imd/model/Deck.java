@@ -6,7 +6,7 @@ import org.springframework.data.mongodb.core.mapping.Field;
 
 import java.util.Map;
 
-@Document(collection = "decks")
+@Document(collection = "winning_decks2")
 public class Deck {
     @Id
     private String id;
@@ -20,6 +20,7 @@ public class Deck {
     // Construtores, getters e setters
 
     public Deck() {
+    	deckName = null;
     }
 
     public String getId() {
@@ -46,5 +47,4 @@ public class Deck {
         this.positionFrequencies = positionFrequencies;
     }
 
-    // toString, equals, hashCode
 }

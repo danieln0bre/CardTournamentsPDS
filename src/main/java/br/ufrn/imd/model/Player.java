@@ -2,6 +2,7 @@ package br.ufrn.imd.model;
 
 import java.util.ArrayList;
 
+import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 //Especifica o collection "players2" que será usado pela classe Player.
@@ -13,7 +14,8 @@ public class Player extends User{
     private int rankPoints;
     private int eventPoints;
     private double winrate;
-    private String deck;
+    @DBRef
+    private Deck deck;
     private ArrayList<String> appliedEventsId;
 	private ArrayList<String> opponentIds;
     private double opponentsMatchWinrate;
@@ -23,7 +25,7 @@ public class Player extends User{
         this.rankPoints = 0;
         this.winrate = 0;
         this.eventPoints = 0;
-        this.deck = null;
+        this.deck = new Deck();
         this.appliedEventsId = new ArrayList<String>();
         this.opponentIds = new ArrayList<>();
         this.opponentsMatchWinrate = 0.0;
@@ -71,22 +73,21 @@ public class Player extends User{
     	this.winrate = winrate;
     }
     
-    public String getDeck() {
-		return deck;
-	}
+    public String getDeckId() {
+        return (this.deck != null) ? this.deck.getId() : null;
+    }
+
+    public void setDeck(Deck deck) {
+        this.deck = deck;
+    }
     
     public boolean hasDeck() {
-        if(deck!=null) {
+        if(deck.getDeckName()!=null) {
         	return true;
         }else {
         	return false;
         }
     }
-
-
-	public void setDeck(String deck) {
-		this.deck = deck;
-	}
     
 	public ArrayList<String> getAppliedEventsId() {
         return appliedEventsId;
