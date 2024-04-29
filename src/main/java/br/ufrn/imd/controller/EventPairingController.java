@@ -1,6 +1,5 @@
 package br.ufrn.imd.controller;
 
-import br.ufrn.imd.model.Event;
 import br.ufrn.imd.model.Pairing;
 import br.ufrn.imd.model.Player;
 import br.ufrn.imd.service.EventService;
