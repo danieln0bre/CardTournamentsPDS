@@ -5,7 +5,6 @@ import br.ufrn.imd.model.Player;
 import br.ufrn.imd.service.EventRankingService;
 import br.ufrn.imd.service.EventService;
 import br.ufrn.imd.service.PlayerService;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,73 +14,66 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/events")
 public class EventController {
-	
-	@Autowired
-	private PlayerService playerService;
+
+    private final PlayerService playerService;
+    private final EventService eventService;
 
     @Autowired
-    private EventService eventService;
+    public EventController(PlayerService playerService, EventService eventService) {
+        this.playerService = playerService;
+        this.eventService = eventService;
+    }
 
-    // Cria um novo evento.
     @PostMapping("/")
     public Event createEvent(@RequestBody Event event) {
         return eventService.saveEvent(event);
     }
 
-    // Retorna todos os eventos.
     @GetMapping("/")
     public List<Event> getAllEvents() {
         return eventService.getAllEvents();
     }
 
-    // Retorna o evento encontrado pelo ID.
     @GetMapping("/{id}")
     public ResponseEntity<Event> getEventById(@PathVariable String id) {
         return eventService.getEventById(id)
-                		   .map(event -> ResponseEntity.ok(event))
+                		   .map(ResponseEntity::ok)
                 		   .orElseGet(() -> ResponseEntity.notFound().build());
     }
     
-    
-    // Atualiza o evento encontrado pelo ID.
     @PutMapping("/{id}")
     public ResponseEntity<Event> updateEvent(@PathVariable String id, @RequestBody Event eventDetails) {
         return eventService.getEventById(id)
-                		   .map(event -> { 
-                			   event.setName(eventDetails.getName());
-	   				    	   event.setDate(eventDetails.getDate());
-   				   		       event.setLocation(eventDetails.getLocation());
-   				   		       event.setNumberOfRounds(eventDetails.getNumberOfRounds());
-   				   		       event.setPlayerIds(eventDetails.getPlayerIds());  // Update to use setPlayerIds
-   				   		       Event updatedEvent = eventService.saveEvent(event);
-   				   		       return ResponseEntity.ok(updatedEvent);
-   				   		   })
+                		   .map(existingEvent -> updateAndSaveEvent(existingEvent, eventDetails))
                 		   .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    // Deleta o evento encontrado pelo ID.
+    private ResponseEntity<Event> updateAndSaveEvent(Event existingEvent, Event eventDetails) {
+        existingEvent.updateDetailsFrom(eventDetails);
+        Event updatedEvent = eventService.saveEvent(existingEvent);
+        return ResponseEntity.ok(updatedEvent);
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteEvent(@PathVariable String id) {
         return eventService.getEventById(id)
-                		   .map(event -> { 
+                		   .map(event -> {
                 			   eventService.deleteEvent(id);
                 			   return ResponseEntity.ok().<Void>build();
                 		   })
                 		   .orElseGet(() -> ResponseEntity.notFound().build());
     }
-    
-    // Ranking do evento.
+
     @GetMapping("/{id}/rankings")
     public ResponseEntity<List<Player>> getEventRankings(@PathVariable String id) {
         return eventService.getEventById(id)
 			               .map(event -> {
 			            	   List<Player> players = playerService.getPlayersByIds(event.getPlayerIds());
-			                   List<Player> sortedPlayers = EventRankingService.sortByEventPoints(players);
-			                   return ResponseEntity.ok(sortedPlayers);
+			                   return ResponseEntity.ok(EventRankingService.sortByEventPoints(players));
 			               })
 			               .orElseGet(() -> ResponseEntity.notFound().build());
     }
-    
+
     @PutMapping("/{eventId}/finalize")
     public ResponseEntity<?> finalizeEvent(@PathVariable String eventId) {
         try {

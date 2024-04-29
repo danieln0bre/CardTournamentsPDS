@@ -12,8 +12,12 @@ import java.util.Optional;
 @Service
 public class ManagerService {
 
+    private final ManagerRepository managerRepository;
+
     @Autowired
-    private ManagerRepository managerRepository;
+    public ManagerService(ManagerRepository managerRepository) {
+        this.managerRepository = managerRepository;
+    }
 
     public Manager saveManager(Manager manager) {
         validateManager(manager);
@@ -21,16 +25,12 @@ public class ManagerService {
     }
 
     public Optional<Manager> getManagerById(String id) {
-        if (!StringUtils.hasText(id)) {
-            throw new IllegalArgumentException("Manager ID cannot be null or empty.");
-        }
+        validateId(id);
         return managerRepository.findById(id);
     }
 
     public void deleteManager(String id) {
-        if (!StringUtils.hasText(id)) {
-            throw new IllegalArgumentException("Manager ID cannot be null or empty for deletion.");
-        }
+        validateId(id);
         managerRepository.deleteById(id);
     }
 
@@ -45,8 +45,18 @@ public class ManagerService {
         if (!StringUtils.hasText(manager.getName())) {
             throw new IllegalArgumentException("Manager name cannot be empty.");
         }
-        if (manager.getEmail() != null && !manager.getEmail().matches("[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,6}")) {
+        if (manager.getEmail() != null && !isValidEmail(manager.getEmail())) {
             throw new IllegalArgumentException("Invalid email format.");
         }
+    }
+
+    private void validateId(String id) {
+        if (!StringUtils.hasText(id)) {
+            throw new IllegalArgumentException("Manager ID cannot be null or empty.");
+        }
+    }
+
+    private boolean isValidEmail(String email) {
+        return email.matches("[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,6}");
     }
 }

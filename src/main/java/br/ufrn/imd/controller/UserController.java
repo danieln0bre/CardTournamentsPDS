@@ -2,10 +2,9 @@ package br.ufrn.imd.controller;
 
 import br.ufrn.imd.model.Manager;
 import br.ufrn.imd.model.Player;
-import br.ufrn.imd.service.UserService;
 import br.ufrn.imd.model.User;
+import br.ufrn.imd.service.UserService;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,32 +12,31 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/users")
 public class UserController {
 
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
 
-    // Cria/registra um novo jogador.
+    public UserController(UserService userService) {
+        this.userService = userService;
+    }
+
+    // Registers a new player.
     @PostMapping("/register/player")
     public ResponseEntity<Player> registerPlayer(@RequestBody Player player) {
-        return ResponseEntity.ok(userService.savePlayer(player));
+        Player savedPlayer = userService.savePlayer(player);
+        return ResponseEntity.ok(savedPlayer);
     }
 
-    // Cria/registra um novo manager.
+    // Registers a new manager.
     @PostMapping("/register/manager")
     public ResponseEntity<Manager> registerManager(@RequestBody Manager manager) {
-        return ResponseEntity.ok(userService.saveManager(manager));
+        Manager savedManager = userService.saveManager(manager);
+        return ResponseEntity.ok(savedManager);
     }
 
-    // Retorna o usuário encontrado pelo ID.
+    // Retrieves a user by ID and type.
     @GetMapping("/{id}")
     public ResponseEntity<User> getUserById(@PathVariable String id, @RequestParam String userType) {
-        User user = userService.getUserById(id, userType);
-        
-        // Se não existir o usuário.
-        if(user == null) {
-        	return ResponseEntity.notFound().build();
-        }
-        
-        // Se existir o usuário.
-        return ResponseEntity.ok(user);
+        return userService.getUserById(id, userType)
+                          .map(ResponseEntity::ok)
+                          .orElse(ResponseEntity.notFound().build());
     }
 }

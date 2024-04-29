@@ -1,19 +1,20 @@
 package br.ufrn.imd.model;
 
-import java.util.List;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
-// Especifica o collection "event" que será usado pela classe Event.
+/**
+ * Represents an event stored in MongoDB. Each event includes details such as
+ * name, date, location, number of rounds, and lists of player IDs and pairings.
+ */
 @Document(collection = "event")
 public class Event {
-
-	// Chave primária do evento utilizada no MongoDB.
-	@Id
+    @Id
     private String id;
-	
     private String name;
     private String date;
     private String location;
@@ -21,9 +22,17 @@ public class Event {
     private int currentRound;
     private boolean hasStarted;
     private boolean finished;
-    private List<String> playerIds; // Lista de jogadores participantes do evento.
-    private List<Pairing> pairings; // Lista de pairings dos jogadores do evento.
-    
+    private List<String> playerIds;
+    private List<Pairing> pairings;
+
+    /**
+     * Constructor for creating a new Event with initial details.
+     *
+     * @param name            the name of the event
+     * @param date            the date of the event
+     * @param location        the location of the event
+     * @param numberOfRounds  the total number of rounds in the event
+     */
     public Event(String name, String date, String location, int numberOfRounds) {
         this.name = name;
         this.date = date;
@@ -31,98 +40,118 @@ public class Event {
         this.numberOfRounds = numberOfRounds;
         this.currentRound = 0;
         this.finished = false;
-        this.playerIds = new ArrayList<String>();
-        this.pairings =  new ArrayList<Pairing>();
+        this.hasStarted = false;
+        this.playerIds = new ArrayList<>();
+        this.pairings = new ArrayList<>();
     }
-    
-    // Métodos auxiliares.
-    
+
+    /**
+     * Updates event details from another event object.
+     * This method copies all properties from the source event into this event.
+     *
+     * @param source the source event to copy properties from
+     */
+    public void updateDetailsFrom(Event source) {
+        this.name = source.name;
+        this.date = source.date;
+        this.location = source.location;
+        this.numberOfRounds = source.numberOfRounds;
+        this.currentRound = source.currentRound;
+        this.finished = source.finished;
+        this.hasStarted = source.hasStarted;
+        setPlayerIds(new ArrayList<>(source.playerIds));
+        setPairings(new ArrayList<>(source.pairings));
+    }
+
+    /**
+     * Adds a player ID to the event if it is not already included.
+     *
+     * @param playerId the ID of the player to add
+     */
     public void addPlayerId(String playerId) {
         if (!playerIds.contains(playerId)) {
             playerIds.add(playerId);
         }
     }
-    
-    // Gets e sets.
-    
+
+    // Standard getters and setters
     public String getName() {
         return name;
     }
-    
+
     public void setName(String name) {
         this.name = name;
     }
-    
+
     public String getDate() {
         return date;
     }
-    
+
     public void setDate(String date) {
         this.date = date;
     }
-    
+
     public String getLocation() {
         return location;
     }
-    
+
     public void setLocation(String location) {
         this.location = location;
     }
-    
+
     public int getNumberOfRounds() {
         return numberOfRounds;
     }
-    
+
     public void setNumberOfRounds(int numberOfRounds) {
         this.numberOfRounds = numberOfRounds;
     }
-    
+
     public String getId() {
         return id;
     }
-    
+
     public void setId(String id) {
         this.id = id;
     }
-    
+
     public int getCurrentRound() {
         return currentRound;
     }
-    
+
     public void setCurrentRound(int currentRound) {
         this.currentRound = currentRound;
     }
-    
+
     public boolean isFinished() {
         return finished;
     }
-    
+
     public void setFinished(boolean finished) {
         this.finished = finished;
     }
-    
+
+    public boolean getHasStarted() {
+        return hasStarted;
+    }
+
+    public void setHasStarted(boolean hasStarted) {
+        this.hasStarted = hasStarted;
+    }
+
     public List<String> getPlayerIds() {
-        return playerIds;
+        return Collections.unmodifiableList(playerIds);
     }
 
     public void setPlayerIds(List<String> playerIds) {
-		this.playerIds = playerIds;
-	}
+        this.playerIds = new ArrayList<>(playerIds);
+    }
     
-	public List<Pairing> getPairings() {
-		return pairings;
-	}
-	
-	public void setPairings(List<Pairing> pairings) {
-		this.pairings = pairings;
-	}
-
-	public boolean getHasStarted() {
-		return hasStarted;
-	}
-
-	public void setHasStarted(boolean hasStarted) {
-		this.hasStarted = hasStarted;
-	}
+    public List<Pairing> getPairings() {
+        return Collections.unmodifiableList(pairings);
+    }
     
+    public void setPairings(List<Pairing> pairings) {
+        this.pairings = new ArrayList<>(pairings);
+    }
 }

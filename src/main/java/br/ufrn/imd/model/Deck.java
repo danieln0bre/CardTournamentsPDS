@@ -5,7 +5,11 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
 import java.util.Map;
+import java.util.HashMap;
 
+/**
+ * Represents a deck with a name and a map of position frequencies used within a MongoDB collection.
+ */
 @Document(collection = "winning_decks2")
 public class Deck {
     @Id
@@ -17,10 +21,23 @@ public class Deck {
     @Field("position_frequencies")
     private Map<Integer, Integer> positionFrequencies;
 
-    // Construtores, getters e setters
-
+    /**
+     * Constructs a new, empty Deck with no name or position frequencies.
+     */
     public Deck() {
-    	deckName = null;
+        this.deckName = "";
+        this.positionFrequencies = new HashMap<>();
+    }
+
+    /**
+     * Constructs a new Deck with specified name and position frequencies.
+     *
+     * @param deckName the name of the deck
+     * @param positionFrequencies a map of position frequencies for the deck
+     */
+    public Deck(String deckName, Map<Integer, Integer> positionFrequencies) {
+        this.deckName = deckName;
+        this.positionFrequencies = new HashMap<>(positionFrequencies);
     }
 
     public String getId() {
@@ -40,11 +57,10 @@ public class Deck {
     }
 
     public Map<Integer, Integer> getPositionFrequencies() {
-        return positionFrequencies;
+        return new HashMap<>(positionFrequencies);
     }
 
     public void setPositionFrequencies(Map<Integer, Integer> positionFrequencies) {
-        this.positionFrequencies = positionFrequencies;
+        this.positionFrequencies = new HashMap<>(positionFrequencies);
     }
-
 }

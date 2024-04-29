@@ -9,40 +9,53 @@ import org.springframework.stereotype.Service;
 @Service
 public class MatchService {
 
-    @Autowired
-    private PlayerRepository playerRepository;
+    private final PlayerRepository playerRepository;
 
-    // Atualiza o resultado da partida.
+    @Autowired
+    public MatchService(PlayerRepository playerRepository) {
+        this.playerRepository = playerRepository;
+    }
+
+    /**
+     * Updates the match result based on the provided pairing.
+     * @param pairing The pairing information including player IDs and match result.
+     */
     public void updateMatchResult(Pairing pairing) {
-        // Verifica se o pareamento é válido
+        validatePairing(pairing);
+        handleByeMatch(pairing);
+        updatePlayersResults(pairing);
+    }
+
+    private void validatePairing(Pairing pairing) {
         if (pairing == null) {
             throw new IllegalArgumentException("Pairing cannot be null.");
         }
-
-        // Verifica se o pareamento inclui "Bye"
-        if ("Bye".equals(pairing.getPlayerTwoId())) {
-            updatePlayerForBye(pairing.getPlayerOneId());
-            return;  // Encerra a atualização se o jogador dois é "Bye".
-        } else if ("Bye".equals(pairing.getPlayerOneId())) {
-            updatePlayerForBye(pairing.getPlayerTwoId());
-            return;  // Encerra a atualização se o jogador um é "Bye".
-        }
-
-        Player playerOne = playerRepository.findById(pairing.getPlayerOneId())
-                                            .orElseThrow(() -> new IllegalArgumentException("Player not found with ID: " 
-                                                                                              + pairing.getPlayerOneId()));
-        Player playerTwo = playerRepository.findById(pairing.getPlayerTwoId())
-                                            .orElseThrow(() -> new IllegalArgumentException("Player not found with ID: " 
-                                                                                              + pairing.getPlayerTwoId()));
-        
-        // Verifica se o resultado é válido
         if (pairing.getResult() < 0 || pairing.getResult() > 1) {
             throw new IllegalArgumentException("Invalid match result. Must be 0 or 1.");
         }
+    }
 
-        if (pairing.getResult() == 0) {  // Jogador um vence.
+    private void handleByeMatch(Pairing pairing) {
+        if ("Bye".equals(pairing.getPlayerTwoId())) {
+            updatePlayerForBye(pairing.getPlayerOneId());
+            return;
+        } else if ("Bye".equals(pairing.getPlayerOneId())) {
+            updatePlayerForBye(pairing.getPlayerTwoId());
+            return;
+        }
+    }
+
+    private void updatePlayersResults(Pairing pairing) {
+        if ("Bye".equals(pairing.getPlayerOneId()) || "Bye".equals(pairing.getPlayerTwoId())) {
+            return;  // Stop further processing if it's a bye.
+        }
+
+        Player playerOne = fetchPlayer(pairing.getPlayerOneId());
+        Player playerTwo = fetchPlayer(pairing.getPlayerTwoId());
+
+        if (pairing.getResult() == 0) {
             playerOne.setEventPoints(playerOne.getEventPoints() + 1);
-        } else if (pairing.getResult() == 1) {  // Jogador dois vence.
+        } else if (pairing.getResult() == 1) {
             playerTwo.setEventPoints(playerTwo.getEventPoints() + 1);
         }
 
@@ -50,11 +63,14 @@ public class MatchService {
         playerRepository.save(playerTwo);
     }
 
+    private Player fetchPlayer(String playerId) {
+        return playerRepository.findById(playerId)
+                               .orElseThrow(() -> new IllegalArgumentException("Player not found with ID: " + playerId));
+    }
+
     private void updatePlayerForBye(String playerId) {
-        Player player = playerRepository.findById(playerId)
-                                        .orElseThrow(() -> new IllegalArgumentException("Player not found with ID: " 
-                                                                                          + playerId));
-        player.setEventPoints(player.getEventPoints() + 1); // Soma os pontos do jogador.
+        Player player = fetchPlayer(playerId);
+        player.setEventPoints(player.getEventPoints() + 1); // Automatically win for a bye.
         playerRepository.save(player);
     }
 }

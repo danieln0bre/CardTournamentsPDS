@@ -10,61 +10,59 @@ import br.ufrn.imd.util.PlayerValidationUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 public class UserService {
 
-    @Autowired
-    private PlayerRepository playerRepository;
+    private final PlayerRepository playerRepository;
+    private final ManagerRepository managerRepository;
 
     @Autowired
-    private ManagerRepository managerRepository;
+    public UserService(PlayerRepository playerRepository, ManagerRepository managerRepository) {
+        this.playerRepository = playerRepository;
+        this.managerRepository = managerRepository;
+    }
 
     public Player savePlayer(Player player) {
         PlayerValidationUtil.validatePlayer(player);
         return playerRepository.save(player);
-    }
-    
-    public void removePlayer(Player player) {
-        if (player == null || player.getId() == null) {
-            throw new IllegalArgumentException("Player or player ID cannot be null for deletion.");
-        }
-        playerRepository.delete(player);
-    }
-    
-    public void removeAllPlayers() {
-        playerRepository.deleteAll();
     }
 
     public Manager saveManager(Manager manager) {
         if (manager == null) {
             throw new IllegalArgumentException("Manager cannot be null.");
         }
-        // Assuming similar validation needs for Manager, though not implemented here
         return managerRepository.save(manager);
     }
-    
-    public void removeManager(Manager manager) {
-        if (manager == null || manager.getId() == null) {
-            throw new IllegalArgumentException("Manager or manager ID cannot be null for deletion.");
-        }
-        managerRepository.delete(manager);
+
+    // Retrieves a user by ID based on user type and returns an Optional<User>
+    public Optional<User> getUserById(String id, String userType) {
+        validateUserType(userType);
+        validateUserId(id);
+        return findUserByIdAndType(id, userType);
     }
 
-    // Retrieves a user by ID based on user type.
-    public User getUserById(String id, String userType) {
+    private void validateUserType(String userType) {
+        if (!"player".equals(userType) && !"manager".equals(userType)) {
+            throw new IllegalArgumentException("Invalid user type. Valid options are 'player' or 'manager'.");
+        }
+    }
+
+    private void validateUserId(String id) {
         if (id == null || id.isEmpty()) {
             throw new IllegalArgumentException("User ID cannot be null or empty.");
         }
-        if (!"player".equals(userType) && !"manager".equals(userType)) {
-            throw new IllegalArgumentException("Invalid or null user type. Valid options are 'player' or 'manager'.");
-        }
+    }
 
+    private Optional<User> findUserByIdAndType(String id, String userType) {
         if ("player".equals(userType)) {
-            return playerRepository.findById(id).orElse(null);
+            return playerRepository.findById(id)
+                .map(player -> (User)player);
+        } else if ("manager".equals(userType)) {
+            return managerRepository.findById(id)
+                .map(manager -> (User)manager);
         }
-        if ("manager".equals(userType)) {
-            return managerRepository.findById(id).orElse(null);
-        }
-        return null;
+        return Optional.empty();
     }
 }

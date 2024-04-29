@@ -1,48 +1,49 @@
 package br.ufrn.imd.model;
 
-import java.util.ArrayList;
-
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-//Especifica o collection "players2" que será usado pela classe Player.
+import java.util.List;
+import java.util.ArrayList;
+
+/**
+ * Represents a player with rankings, events, and performance statistics.
+ */
 @Document(collection = "players2")
-public class Player extends User{
-	
-	// Usa a chave primária id da superclasse User.
-	
+public class Player extends User {
+
     private int rankPoints;
     private int eventPoints;
     private double winrate;
     @DBRef
     private Deck deck;
-    private ArrayList<String> appliedEventsId;
-	private ArrayList<String> opponentIds;
-	private ArrayList<Event> historicoEventos;
+    private List<String> appliedEventsId;
+    private List<String> opponentIds;
+    private List<Event> historicoEventos;
     private double opponentsMatchWinrate;
 
-    public Player(String name, String username,String email, String password) {
+    public Player(String name, String username, String email, String password) {
         super(name, username, email, password);
         this.rankPoints = 0;
-        this.winrate = 0;
         this.eventPoints = 0;
+        this.winrate = 0.0;
         this.deck = new Deck();
-        this.appliedEventsId = new ArrayList<String>();
+        this.appliedEventsId = new ArrayList<>();
         this.opponentIds = new ArrayList<>();
-        this.setHistoricoEventos(new ArrayList<Event>());
+        this.historicoEventos = new ArrayList<>();
         this.opponentsMatchWinrate = 0.0;
     }
 
-    // Métodos auxiliares.
-    
-    public void addEventPoints(int point) {
-    	this.eventPoints += point;
+    // Auxiliary methods to manipulate player data.
+
+    public void addEventPoints(int points) {
+        this.eventPoints += points;
     }
-    
+
     public void addEventId(String eventId) {
-    	appliedEventsId.add(eventId);
+        appliedEventsId.add(eventId);
     }
-    
+
     public void addOpponentId(String opponentId) {
         opponentIds.add(opponentId);
     }
@@ -50,83 +51,80 @@ public class Player extends User{
     public void removeOpponentId(String opponentId) {
         opponentIds.remove(opponentId);
     }
-    
-    // Gets e sets.
-    
+
+    // Getters and setters.
+
     public int getRankPoints() {
-    	return rankPoints;
+        return rankPoints;
     }
+
     public void setRankPoints(int rankPoints) {
-    	this.rankPoints = rankPoints;
+        this.rankPoints = rankPoints;
     }
-    
+
     public int getEventPoints() {
-    	return eventPoints;
+        return eventPoints;
     }
+
     public void setEventPoints(int eventPoints) {
-    	this.eventPoints = eventPoints;
+        this.eventPoints = eventPoints;
     }
-    
+
     public double getWinrate() {
-    	return winrate;
+        return winrate;
     }
 
     public void setWinrate(double winrate) {
-    	this.winrate = winrate;
+        this.winrate = winrate;
+    }
+
+    public Deck getDeck() {
+        return deck;
     }
     
     public String getDeckId() {
-        return (this.deck != null) ? this.deck.getId() : null;
+    	return deck.getId();
     }
 
     public void setDeck(Deck deck) {
         this.deck = deck;
     }
-    
+
     public boolean hasDeck() {
-        if(deck.getDeckName()!=null) {
-        	return true;
-        }else {
-        	return false;
-        }
-    }
-    
-    public Deck getDeck() {
-        return this.deck;
+        return deck != null && deck.getDeckName() != null;
     }
 
-    public void clearOpponents() {
-        this.opponentIds.clear();
+    public List<String> getAppliedEventsId() {
+        return new ArrayList<>(appliedEventsId);
     }
 
-    public void clearAppliedEvents() {
-        this.appliedEventsId.clear();
+    public List<String> getOpponentIds() {
+        return new ArrayList<>(opponentIds);
     }
-	public ArrayList<String> getAppliedEventsId() {
-        return appliedEventsId;
+
+    public List<Event> getHistoricoEventos() {
+        return new ArrayList<>(historicoEventos);
     }
-    
-    public ArrayList<String> getOpponentIds() {
-    	return opponentIds;
+
+    public void addHistoricoEvento(Event event) {
+        historicoEventos.add(event);
     }
 
     public double getOpponentsMatchWinrate() {
-    	return opponentsMatchWinrate;
+        return opponentsMatchWinrate;
     }
 
     public void setOpponentsMatchWinrate(double opponentsMatchWinrate) {
         this.opponentsMatchWinrate = opponentsMatchWinrate;
     }
 
-	public ArrayList<Event> getHistoricoEventos() {
-		return historicoEventos;
-	}
+    // Clear methods for lists
 
-	public void setHistoricoEventos(ArrayList<Event> historicoEventos) {
-		this.historicoEventos = historicoEventos;
-	}
-	
-	public void addEventoHistorico(Event event) {
-		historicoEventos.add(event);
-	}
+    public void clearOpponents() {
+        opponentIds.clear();
+    }
+
+    public void clearAppliedEvents() {
+        appliedEventsId.clear();
+    }
 }

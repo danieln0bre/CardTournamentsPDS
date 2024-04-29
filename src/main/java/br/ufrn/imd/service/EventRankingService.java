@@ -6,32 +6,39 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+/**
+ * Provides functionality to rank players based on event points and opponents' win rates.
+ */
 public class EventRankingService {
-	
+    
+    /**
+     * Sorts a list of players based on their event points and opponents' match win rates.
+     * 
+     * @param players the list of players to sort
+     * @return a sorted list of players based on defined criteria
+     * @throws IllegalArgumentException if the input list is null
+     */
     public static List<Player> sortByEventPoints(List<Player> players) {
         if (players == null) {
             throw new IllegalArgumentException("List of players cannot be null.");
         }
 
-        // Criar outro ArrayList para evitar modificar a lista original "players".
         List<Player> sortedPlayers = new ArrayList<>(players);
-        // Ordena os jogadores com base nos event points e winrate dos oponentes.
         Collections.sort(sortedPlayers, new EventPointsAndOpponentMatchWinrateComparator());
         return sortedPlayers;
     }
 
-    // Comparador para rankear os jogadores baseado nos pontos de evento e taxa de vitória do oponente.
-    static class EventPointsAndOpponentMatchWinrateComparator implements Comparator<Player> {
+    /**
+     * Comparator for ranking players based on event points in descending order,
+     * and if ties occur, by opponents' match win rates in descending order.
+     */
+    private static class EventPointsAndOpponentMatchWinrateComparator implements Comparator<Player> {
         @Override
         public int compare(Player p1, Player p2) {
-            // Compara por pontos de evento (em ordem decrescente)
             int eventPointsComparison = Integer.compare(p2.getEventPoints(), p1.getEventPoints());
-            
             if (eventPointsComparison != 0) {
                 return eventPointsComparison;
             }
-            
-            // Se os pontos de evento forem iguais, compara utilizando a taxa de vitória do oponente (em ordem decrescente).
             return Double.compare(p2.getOpponentsMatchWinrate(), p1.getOpponentsMatchWinrate());
         }
     }

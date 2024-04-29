@@ -3,6 +3,7 @@ package br.ufrn.imd.service;
 import br.ufrn.imd.model.Player;
 import br.ufrn.imd.repository.PlayerRepository;
 import br.ufrn.imd.util.PlayerValidationUtil;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -34,11 +35,8 @@ public class PlayerService {
     }
 
     public void updatePlayerOpponents(String playerId, String opponentId) {
-        if (opponentId == null || opponentId.isEmpty()) {
-            throw new IllegalArgumentException("Opponent ID cannot be null or empty.");
-        }
-        
-        Player player = playerRepository.findById(playerId)
+        validateId(opponentId, "Opponent ID");
+        Player player = getPlayerById(playerId)
                 .orElseThrow(() -> new IllegalArgumentException("Player not found with ID: " + playerId));
         
         player.addOpponentId(opponentId);
@@ -50,17 +48,12 @@ public class PlayerService {
     }
 
     public List<Player> getPlayersByIds(List<String> playerIds) {
-        if (playerIds == null || playerIds.isEmpty()) {
-            throw new IllegalArgumentException("Player IDs list cannot be null or empty.");
-        }
+        validatePlayerIds(playerIds);
         return playerRepository.findAllById(playerIds);
     }
 
     public Player addEventToPlayer(String playerId, String eventId) {
-        if (eventId == null || eventId.isEmpty()) {
-            throw new IllegalArgumentException("Event ID cannot be null or empty.");
-        }
-        
+        validateId(eventId, "Event ID");
         Player player = getPlayerById(playerId).orElseThrow(() -> 
             new IllegalArgumentException("Player not found with ID: " + playerId));
         
@@ -68,16 +61,32 @@ public class PlayerService {
         return playerRepository.save(player);
     }
     
-    // Verifica se todos os jogadores to evento tem decks registrados
     public boolean allPlayersHaveDecks(List<String> playerIds) {
+        validatePlayerIds(playerIds);
         List<Player> players = getPlayersByIds(playerIds);
         return players.stream().allMatch(Player::hasDeck);
     }
     
     public List<Player> saveAll(List<Player> players) {
+        validatePlayerIdsList(players);
+        return playerRepository.saveAll(players);
+    }
+
+    private void validateId(String id, String description) {
+        if (id == null || id.trim().isEmpty()) {
+            throw new IllegalArgumentException(description + " cannot be null or empty.");
+        }
+    }
+
+    private void validatePlayerIds(List<String> playerIds) {
+        if (playerIds == null || playerIds.isEmpty()) {
+            throw new IllegalArgumentException("Player IDs list cannot be null or empty.");
+        }
+    }
+
+    private void validatePlayerIdsList(List<Player> players) {
         if (players == null || players.isEmpty()) {
             throw new IllegalArgumentException("The list of players cannot be empty.");
         }
-        return playerRepository.saveAll(players);  // Utiliza o método saveAll do repositório
     }
 }

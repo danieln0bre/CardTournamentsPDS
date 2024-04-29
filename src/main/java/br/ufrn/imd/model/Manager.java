@@ -1,29 +1,45 @@
 package br.ufrn.imd.model;
 
-import java.util.ArrayList;
-
 import org.springframework.data.mongodb.core.mapping.Document;
 
-//Especifica o collection "managers" que será usado pela classe Manager.
+import java.util.List;
+import java.util.ArrayList;
+
+/**
+ * Represents a manager, storing manager-specific data in the "managers" MongoDB collection.
+ * Inherits common user properties from the User class.
+ */
 @Document(collection = "managers")
 public class Manager extends User {
-	
-	// Usa a chave primária id da superclasse User.
-	
-	ArrayList<Event> eventos;
-	
-	public Manager(String name, String username, String email, String password) {
+    
+    // List of events managed by this manager
+    private List<Event> events;
+
+    /**
+     * Constructs a new Manager with specified user details and initializes an empty list of events.
+     * @param name the manager's name
+     * @param username the manager's username
+     * @param email the manager's email
+     * @param password the manager's password
+     */
+    public Manager(String name, String username, String email, String password) {
         super(name, username, email, password);
-        this.eventos = new ArrayList<Event>();
+        this.events = new ArrayList<>();
     }
 
-	// Gets e sets.
-	
-	public ArrayList<Event> getEventos() {
-		return eventos;
-	}
+    /**
+     * Gets the list of events associated with the manager.
+     * @return a list of events
+     */
+    public List<Event> getEvents() {
+        return events;
+    }
 
-	public void setEventos(ArrayList<Event> eventos) {
-		this.eventos = eventos;
-	}
+    /**
+     * Sets the list of events managed by the manager.
+     * @param events a list of events to set
+     */
+    public void setEvents(List<Event> events) {
+        this.events = new ArrayList<>(events);
+    }
 }
