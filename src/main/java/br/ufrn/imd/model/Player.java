@@ -18,6 +18,7 @@ public class Player extends User{
     private Deck deck;
     private ArrayList<String> appliedEventsId;
 	private ArrayList<String> opponentIds;
+	private ArrayList<Event> historicoEventos;
     private double opponentsMatchWinrate;
 
     public Player(String name, String username,String email, String password) {
@@ -28,6 +29,7 @@ public class Player extends User{
         this.deck = new Deck();
         this.appliedEventsId = new ArrayList<String>();
         this.opponentIds = new ArrayList<>();
+        this.setHistoricoEventos(new ArrayList<Event>());
         this.opponentsMatchWinrate = 0.0;
     }
 
@@ -89,6 +91,17 @@ public class Player extends User{
         }
     }
     
+    public Deck getDeck() {
+        return this.deck;
+    }
+
+    public void clearOpponents() {
+        this.opponentIds.clear();
+    }
+
+    public void clearAppliedEvents() {
+        this.appliedEventsId.clear();
+    }
 	public ArrayList<String> getAppliedEventsId() {
         return appliedEventsId;
     }
@@ -104,4 +117,16 @@ public class Player extends User{
     public void setOpponentsMatchWinrate(double opponentsMatchWinrate) {
         this.opponentsMatchWinrate = opponentsMatchWinrate;
     }
+
+	public ArrayList<Event> getHistoricoEventos() {
+		return historicoEventos;
+	}
+
+	public void setHistoricoEventos(ArrayList<Event> historicoEventos) {
+		this.historicoEventos = historicoEventos;
+	}
+	
+	public void addEventoHistorico(Event event) {
+		historicoEventos.add(event);
+	}
 }

@@ -74,7 +74,10 @@ public class PlayerService {
         return players.stream().allMatch(Player::hasDeck);
     }
     
-    public void registerPlayerDeckName(String id, String deckName) {
-    	
+    public List<Player> saveAll(List<Player> players) {
+        if (players == null || players.isEmpty()) {
+            throw new IllegalArgumentException("The list of players cannot be empty.");
+        }
+        return playerRepository.saveAll(players);  // Utiliza o método saveAll do repositório
     }
 }

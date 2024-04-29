@@ -81,4 +81,16 @@ public class EventController {
 			               })
 			               .orElseGet(() -> ResponseEntity.notFound().build());
     }
+    
+    @PutMapping("/{eventId}/finalize")
+    public ResponseEntity<?> finalizeEvent(@PathVariable String eventId) {
+        try {
+            Event event = eventService.finalizeEvent(eventId);
+            return ResponseEntity.ok("Event finalized successfully with ID: " + event.getId());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body("Error: " + e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("Internal Server Error: Unable to finalize event.");
+        }
+    }
 }
