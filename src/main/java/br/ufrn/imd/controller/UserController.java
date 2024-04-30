@@ -18,9 +18,10 @@ public class UserController {
         this.userService = userService;
     }
 
-    // Registers a new player.
+ // Registers a new player.
     @PostMapping("/register/player")
     public ResponseEntity<Player> registerPlayer(@RequestBody Player player) {
+        player.setRole("ROLE_PLAYER");  // Define o papel como PLAYER antes de salvar
         Player savedPlayer = userService.savePlayer(player);
         return ResponseEntity.ok(savedPlayer);
     }
@@ -28,9 +29,11 @@ public class UserController {
     // Registers a new manager.
     @PostMapping("/register/manager")
     public ResponseEntity<Manager> registerManager(@RequestBody Manager manager) {
+        manager.setRole("ROLE_MANAGER");  // Define o papel como MANAGER antes de salvar
         Manager savedManager = userService.saveManager(manager);
         return ResponseEntity.ok(savedManager);
     }
+
 
     // Retrieves a user by ID and type.
     @GetMapping("/{id}")
