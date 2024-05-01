@@ -1,6 +1,7 @@
 package br.ufrn.imd.model;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Field;
 
 /**
  * Represents a user in the system, serving as a base class for more specific types of users
@@ -15,7 +16,8 @@ public class User {
     private String username;
     private String email;
     private String password;
-    private String role;
+    @Field("role")
+    private Role role;
 
     /**
      * Constructs a new User with provided credentials.
@@ -25,14 +27,26 @@ public class User {
      * @param email    the user's email address
      * @param password the user's password
      */
-    public User(String name, String username, String email, String password) {
+    public User(String name, String username, String email, String password, Role role) {
         this.name = name;
         this.username = username;
         this.email = email;
         this.password = password;
+        this.role = role;  // Set the role here
     }
 
     // Accessor methods
+    public enum Role {
+        ROLE_PLAYER, ROLE_MANAGER
+    }
+    
+    public Role getRole() {
+        return role;
+    }
+
+    public void setRole(Role role) {
+        this.role = role;
+    }
 
     public String getId() {
         return id;
@@ -73,12 +87,4 @@ public class User {
     public void setPassword(String password) {
         this.password = password;
     }
-
-	public String getRole() {
-		return role;
-	}
-
-	public void setRole(String role) {
-		this.role = role;
-	}
 }

@@ -23,7 +23,7 @@ public class Manager extends User {
      * @param password the manager's password
      */
     public Manager(String name, String username, String email, String password) {
-        super(name, username, email, password);
+        super(name, username, email, password, Role.ROLE_MANAGER);
         this.events = new ArrayList<>();
     }
 

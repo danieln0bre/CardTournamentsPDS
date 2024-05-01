@@ -23,7 +23,7 @@ public class Player extends User {
     private double opponentsMatchWinrate;
 
     public Player(String name, String username, String email, String password) {
-        super(name, username, email, password);
+        super(name, username, email, password, Role.ROLE_PLAYER);
         this.rankPoints = 0;
         this.eventPoints = 0;
         this.winrate = 0.0;
