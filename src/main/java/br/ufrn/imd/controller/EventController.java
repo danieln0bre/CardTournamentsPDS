@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/events")
@@ -73,6 +74,19 @@ public class EventController {
 			               })
 			               .orElseGet(() -> ResponseEntity.notFound().build());
     }
+    
+    @GetMapping("/{id}/deck-matchups")
+    public ResponseEntity<?> getDeckMatchups(@PathVariable String id) {
+        try {
+            Map<String, Map<String, Double>> matchups = eventService.getDeckMatchupStatistics(id);
+            return ResponseEntity.ok(matchups);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body("Error: " + e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("Internal Server Error: Could not retrieve matchups.");
+        }
+    }
+
 
     @PutMapping("/{eventId}/finalize")
     public ResponseEntity<?> finalizeEvent(@PathVariable String eventId) {

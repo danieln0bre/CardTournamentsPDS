@@ -42,6 +42,14 @@ public class EventService {
             throw new IllegalArgumentException("Event location cannot be empty.");
         }
     }
+    
+    public Map<String, Map<String, Double>> getDeckMatchupStatistics(String eventId) {
+        Event event = eventRepository.findById(eventId)
+                                     .orElseThrow(() -> new IllegalArgumentException("Event not found with ID: " + eventId));
+        return matchService.getDeckMatchupStatistics(eventId);
+    }
+
+
 
     public Optional<Event> getEventById(String id) {
         return eventRepository.findById(id);
@@ -93,6 +101,7 @@ public class EventService {
             throw new IllegalStateException("No players found for the event.");
         }
 
+        // Use sortByEventPoints from EventRankingService to determine the player positions
         List<Player> sortedPlayers = EventRankingService.sortByEventPoints(players);
         Map<String, Integer> playerPositions = new HashMap<>();
         for (int i = 0; i < sortedPlayers.size(); i++) {
@@ -112,7 +121,9 @@ public class EventService {
             if (player.getDeck() != null) {
                 Integer currentPosition = playerPositions.get(player.getId());
                 if (currentPosition != null) {
+                    // Update the deck's position frequencies based on the current position
                     player.getDeck().getPositionFrequencies().merge(currentPosition, 1, Integer::sum);
+                    // Save changes to deck if necessary, depending on your persistence logic
                 }
             }
         });
@@ -121,6 +132,7 @@ public class EventService {
 
         return event;
     }
+
 
     public Event finalizeRound(String eventId) {
         Event event = getEventById(eventId).orElseThrow(() ->
