@@ -37,18 +37,7 @@ public class ManagerService {
     public List<Manager> getAllManagers() {
         return managerRepository.findAll();
     }
-
-    private void validateManager(Manager manager) {
-        if (manager == null) {
-            throw new IllegalArgumentException("Manager cannot be null.");
-        }
-        if (!StringUtils.hasText(manager.getName())) {
-            throw new IllegalArgumentException("Manager name cannot be empty.");
-        }
-        if (manager.getEmail() != null && !isValidEmail(manager.getEmail())) {
-            throw new IllegalArgumentException("Invalid email format.");
-        }
-    }
+    
 
     private void validateId(String id) {
         if (!StringUtils.hasText(id)) {
