@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+// RestController for managing Event-related pairings and operations.
 @RestController
 @RequestMapping("/api/events")
 public class EventPairingController {
@@ -20,6 +21,7 @@ public class EventPairingController {
     private final PlayerService playerService;
     private final PairingService pairingService;
 
+    // Autowired constructor for dependency injection.
     @Autowired
     public EventPairingController(EventService eventService, PlayerService playerService, PairingService pairingService) {
         this.eventService = eventService;
@@ -27,6 +29,7 @@ public class EventPairingController {
         this.pairingService = pairingService;
     }
 
+    // Starts an event if it has not already started and all players have registered decks.
     @PostMapping("/{eventId}/start")
     public ResponseEntity<String> startEvent(@PathVariable String eventId) {
         return eventService.getEventById(eventId)
@@ -46,6 +49,7 @@ public class EventPairingController {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
+    // Generates pairings for an event if it has already started.
     @PostMapping("/{eventId}/generatePairings")
     public ResponseEntity<String> generatePairings(@PathVariable String eventId) {
         return eventService.getEventById(eventId)
@@ -63,6 +67,7 @@ public class EventPairingController {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
+    // Retrieves the pairings for a given event.
     @GetMapping("/{eventId}/pairings")
     public ResponseEntity<List<Pairing>> getEventPairings(@PathVariable String eventId) {
         return eventService.getEventById(eventId)
@@ -70,6 +75,7 @@ public class EventPairingController {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
+    // Finalizes the current round of an event and prepares the next round.
     @PostMapping("/{eventId}/finalizeRound")
     public ResponseEntity<String> finalizeRound(@PathVariable String eventId) {
         try {
