@@ -24,14 +24,12 @@ public class UserController {
         this.authenticationManager = authenticationManager;
     }
 
-
     // Registers a new player.
     @PostMapping("/register/player")
     public ResponseEntity<Player> registerPlayer(@RequestBody Player player) {
         Player savedPlayer = userService.savePlayer(player);
         return ResponseEntity.ok(savedPlayer);
     }
-
 
     // Registers a new manager.
     @PostMapping("/register/manager")
@@ -40,7 +38,6 @@ public class UserController {
         return ResponseEntity.ok(savedManager);
     }
 
-
     // Retrieves a user by ID and type.
     @GetMapping("/{id}")
     public ResponseEntity<User> getUserById(@PathVariable String id, @RequestParam String userType) {
@@ -48,7 +45,6 @@ public class UserController {
                           .map(ResponseEntity::ok)
                           .orElse(ResponseEntity.notFound().build());
     }
-
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestParam String username, @RequestParam String password) {
@@ -83,5 +79,4 @@ public class UserController {
             return ResponseEntity.status(401).body("Invalid credentials");
         }
     }
-
 }
