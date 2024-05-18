@@ -44,24 +44,40 @@ public class UserController {
                           .map(ResponseEntity::ok)
                           .orElse(ResponseEntity.notFound().build());
     }
-
-    // Login method
+    
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestParam String username, @RequestParam String password) {
+        System.out.println("Login attempt with username: " + username);
+
         Optional<User> userOpt = userService.getUserByUsername(username);
-        
-        if (userOpt.isPresent() && userService.checkPassword(userOpt.get(), password)) {
+
+        if (userOpt.isPresent()) {
             User user = userOpt.get();
-            switch (user.getRole()) {
-                case ROLE_PLAYER:
-                    return ResponseEntity.ok("Logged in as Player");
-                case ROLE_MANAGER:
-                    return ResponseEntity.ok("Logged in as Manager");
-                default:
-                    return ResponseEntity.status(403).body("Unknown role");
+            System.out.println("User found with username: " + username);
+
+            if (user.getPassword().equals(password)) {
+                System.out.println("Password check passed for username: " + username);
+
+                switch (user.getRole()) {
+                    case ROLE_PLAYER:
+                        System.out.println("User logged in as Player");
+                        return ResponseEntity.ok("Logged in as Player");
+                    case ROLE_MANAGER:
+                        System.out.println("User logged in as Manager");
+                        return ResponseEntity.ok("Logged in as Manager");
+                    default:
+                        System.out.println("Unknown role for user: " + username);
+                        return ResponseEntity.status(403).body("Unknown role");
+                }
+            } else {
+                System.out.println("Password check failed for username: " + username);
+                return ResponseEntity.status(401).body("Invalid credentials");
             }
         } else {
+            System.out.println("User not found with username: " + username);
             return ResponseEntity.status(401).body("Invalid credentials");
         }
     }
+
+
 }

@@ -4,7 +4,7 @@ import { loginUser } from '../../services/api';
 
 function Login() {
     const [formData, setFormData] = useState({
-        email: '',
+        username: '',
         password: ''
     });
 
@@ -33,11 +33,11 @@ function Login() {
             <h1>Login</h1>
             <form onSubmit={handleSubmit}>
                 <input
-                    type="email"
-                    name="email"
-                    value={formData.email}
+                    type="text"
+                    name="username"
+                    value={formData.username}
                     onChange={handleChange}
-                    placeholder="Email"
+                    placeholder="Username"
                     required
                 />
                 <input
