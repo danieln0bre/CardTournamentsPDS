@@ -1,0 +1,23 @@
+/* src/components/Rankings/Rankings.css */
+.rankings-container {
+    padding: 20px;
+    background-color: #f9f9f9;
+}
+
+.rankings-container h1 {
+    margin-bottom: 20px;
+}
+
+.rankings-container ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.rankings-container li {
+    padding: 10px;
+    border-bottom: 1px solid #ccc;
+}
+
+.rankings-container li:hover {
+    background-color: #e9e9e9;
+}

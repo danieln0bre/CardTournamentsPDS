@@ -1,19 +1,23 @@
 package br.ufrn.imd.config;
 
-import br.ufrn.imd.repository.MongoPersistentTokenRepository;
-import br.ufrn.imd.repository.PersistentLoginRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
-import br.ufrn.imd.model.User;
-import br.ufrn.imd.repository.UserRepository;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.session.web.http.SessionRepositoryFilter;
+import org.springframework.session.web.http.CookieHttpSessionIdResolver;
+import org.springframework.session.web.http.HttpSessionIdResolver;
+
+import br.ufrn.imd.service.UserService;
 
 import java.util.ArrayList;
 
@@ -21,38 +25,32 @@ import java.util.ArrayList;
 @EnableWebSecurity
 public class SecurityConfig {
 
-    private final UserRepository userRepository;
-    private final PersistentLoginRepository persistentLoginRepository;
+    private final UserService userService;
 
-    public SecurityConfig(UserRepository userRepository, PersistentLoginRepository persistentLoginRepository) {
-        this.userRepository = userRepository;
-        this.persistentLoginRepository = persistentLoginRepository;
+    public SecurityConfig(UserService userService) {
+        this.userService = userService;
     }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http, AuthenticationConfiguration authenticationConfiguration) throws Exception {
+        AuthenticationManager authenticationManager = authenticationManager(authenticationConfiguration);
+        CustomAuthenticationFilter customAuthenticationFilter = new CustomAuthenticationFilter(authenticationManager);
+
         http
-            .csrf().disable() // Desabilitar CSRF para facilitar o teste com Postman, mas isso deve ser habilitado em produção
+            .csrf().disable()  // Disable CSRF for simplicity; enable it in production
             .authorizeHttpRequests(authz -> authz
-                .requestMatchers("/public/**", "/api/users/register/**", "/api/users/login").permitAll()
+                .requestMatchers("/api/users/login", "/login", "/public/**").permitAll() // Allow access to login endpoints
                 .anyRequest().authenticated()
             )
+            .addFilterBefore(customAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
             .logout(logout -> logout.permitAll())
-            .rememberMe(rememberMe -> rememberMe
-                .tokenValiditySeconds(86400) // 1 dia
-                .key("mySecretKey") // Chave secreta para hashing
-                .userDetailsService(userDetailsService()) // Serviço para carregar os detalhes do usuário
-                .tokenRepository(persistentTokenRepository()) // Repositório de tokens persistente
+            .sessionManagement(session -> session
+                .sessionCreationPolicy(SessionCreationPolicy.ALWAYS)
             );
 
         return http.build();
     }
 
-    @Bean
-    public PersistentTokenRepository persistentTokenRepository() {
-        return new MongoPersistentTokenRepository(persistentLoginRepository);
-    }
-    
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
         return authenticationConfiguration.getAuthenticationManager();
@@ -61,11 +59,23 @@ public class SecurityConfig {
     @Bean
     public UserDetailsService userDetailsService() {
         return username -> {
-            System.out.println("Fetching user by username: " + username);
-            User user = userRepository.findByUsername(username)
+            System.out.println("Fetching user details for username: " + username);
+            return userService.getUserByUsername(username)
+                .map(user -> {
+                    System.out.println("User found: " + user.getUsername());
+                    return new User(user.getUsername(), user.getPassword(), new ArrayList<>());
+                })
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
-            System.out.println("User found: " + user.getUsername());
-            return new org.springframework.security.core.userdetails.User(user.getUsername(), user.getPassword(), new ArrayList<>());
         };
+    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new PlainTextPasswordEncoder();
+    }
+
+    @Bean
+    public HttpSessionIdResolver httpSessionIdResolver() {
+        return new CookieHttpSessionIdResolver();
     }
 }

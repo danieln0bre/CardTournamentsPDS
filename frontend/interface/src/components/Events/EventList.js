@@ -1,6 +1,7 @@
 // src/components/Events/EventsList.js
 import React, { useEffect, useState } from 'react';
 import { fetchEvents } from '../../services/api';
+import './EventList.css';
 
 function EventsList() {
     const [events, setEvents] = useState([]);
@@ -10,7 +11,7 @@ function EventsList() {
     }, []);
 
     return (
-        <div>
+        <div className="events-container">
             <h1>Eventos Disponíveis</h1>
             <ul>
                 {events.map(event => (

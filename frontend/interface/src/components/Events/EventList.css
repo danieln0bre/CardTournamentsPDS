@@ -1,0 +1,23 @@
+/* src/components/Events/EventsList.css */
+.events-container {
+    padding: 20px;
+    background-color: #f9f9f9;
+}
+
+.events-container h1 {
+    margin-bottom: 20px;
+}
+
+.events-container ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.events-container li {
+    padding: 10px;
+    border-bottom: 1px solid #ccc;
+}
+
+.events-container li:hover {
+    background-color: #e9e9e9;
+}

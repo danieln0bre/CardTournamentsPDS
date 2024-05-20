@@ -25,35 +25,32 @@ public class UserService {
     public Optional<User> getUserByUsername(String username) {
         Optional<Player> player = playerRepository.findByUsername(username);
         if (player.isPresent()) {
+            System.out.println("Found player: " + player.get().getUsername());
             return Optional.of(player.get());
         }
 
         Optional<Manager> manager = managerRepository.findByUsername(username);
         if (manager.isPresent()) {
+            System.out.println("Found manager: " + manager.get().getUsername());
             return Optional.of(manager.get());
         }
 
+        System.out.println("User not found with username: " + username);
         return Optional.empty();
     }
 
     public boolean checkPassword(User user, String rawPassword) {
-        // Compare the raw password directly with the stored password
         return rawPassword.equals(user.getPassword());
     }
 
-    // Save Player
     public Player savePlayer(Player player) {
-        // Directly save the raw password
         return playerRepository.save(player);
     }
 
-    // Save Manager
     public Manager saveManager(Manager manager) {
-        // Directly save the raw password
         return managerRepository.save(manager);
     }
 
-    // Get user by ID and type
     public Optional<User> getUserById(String id, String userType) {
         if ("player".equalsIgnoreCase(userType)) {
             return playerRepository.findById(id).map(player -> (User) player);

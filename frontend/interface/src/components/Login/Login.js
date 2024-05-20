@@ -1,55 +1,48 @@
-// src/components/Login/Login.js
 import React, { useState } from 'react';
 import { loginUser } from '../../services/api';
+import { useNavigate } from 'react-router-dom';
+import './Login.css';
 
 function Login() {
-    const [formData, setFormData] = useState({
-        username: '',
-        password: ''
-    });
+    const [username, setUsername] = useState('');
+    const [password, setPassword] = useState('');
+    const [error, setError] = useState(null);
+    const navigate = useNavigate();
 
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setFormData(prevState => ({
-            ...prevState,
-            [name]: value
-        }));
-    };
-
-    const handleSubmit = (e) => {
+    const handleLogin = async (e) => {
         e.preventDefault();
-        loginUser(formData).then(response => {
+        try {
+            const credentials = { username, password };
+            const response = await loginUser(credentials);
             console.log('Login successful', response);
-            // Aqui você pode redirecionar o usuário para a página principal ou de perfil
-            // ou lidar com o armazenamento de tokens de autenticação, se aplicável.
-        }).catch(error => {
-            console.error('Login failed', error);
-            // Lidar com erros de login, como mostrar mensagens ao usuário
-        });
+            navigate('/home');  // Redirect to home after successful login
+        } catch (error) {
+            setError('Login failed. Please check your username and password.');
+            console.error('Login error', error);
+        }
     };
 
     return (
-        <div>
+        <div className="login-container">
             <h1>Login</h1>
-            <form onSubmit={handleSubmit}>
+            <form onSubmit={handleLogin}>
                 <input
                     type="text"
-                    name="username"
-                    value={formData.username}
-                    onChange={handleChange}
                     placeholder="Username"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
                     required
                 />
                 <input
                     type="password"
-                    name="password"
-                    value={formData.password}
-                    onChange={handleChange}
-                    placeholder="Senha"
+                    placeholder="Password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
                     required
                 />
-                <button type="submit">Entrar</button>
+                <button type="submit">Login</button>
             </form>
+            {error && <div className="error">{error}</div>}
         </div>
     );
 }
