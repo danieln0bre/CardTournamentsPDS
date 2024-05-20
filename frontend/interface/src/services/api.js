@@ -32,7 +32,8 @@ export const registerUser = (userDetails) => {
 export const loginUser = (credentials) => {
     const params = new URLSearchParams(credentials).toString();
     return axios.post(`${baseUrl}/users/login?${params}`, {}, {
-        headers: { 'Content-Type': 'application/json' }
+        headers: { 'Content-Type': 'application/json' },
+        withCredentials: true
     }).then(checkResponseStatus);
 };
 
