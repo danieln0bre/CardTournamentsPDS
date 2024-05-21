@@ -1,4 +1,4 @@
-// src/components/MyEvents/MyEvents.js
+// src/pages/MyEvents/MyEvents.js
 import React, { useEffect, useState } from 'react';
 import { fetchPlayerEvents } from '../../services/api';
 import { useUser } from '../../contexts/UserContext';
@@ -12,6 +12,8 @@ function MyEvents() {
 
     useEffect(() => {
         if (user && user.id) {
+            setLoading(true);
+            setError(null);
             fetchPlayerEvents(user.id)
                 .then(data => {
                     setEvents(data);
@@ -21,6 +23,8 @@ function MyEvents() {
                     setError(err);
                     setLoading(false);
                 });
+        } else {
+            setLoading(false);
         }
     }, [user]);
 

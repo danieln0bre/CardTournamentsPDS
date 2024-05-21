@@ -48,8 +48,11 @@ export const loginUser = (credentials) => {
     return axiosInstance.post('/users/login', credentials)
         .then(response => {
             if (response.status === 200) {
-                console.log('Login response data:', response.data); // Log the response data
-                return response.data; // Login successful, return user data
+                console.log('Login response data:', response.data);
+                const userData = response.data;
+                // Save user data to context and local storage
+                localStorage.setItem('user', JSON.stringify(userData));
+                return userData;
             } else {
                 throw new Error('Login failed');
             }
@@ -57,6 +60,7 @@ export const loginUser = (credentials) => {
             throw error;
         });
 };
+
 
 
 
