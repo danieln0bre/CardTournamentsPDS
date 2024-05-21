@@ -38,6 +38,20 @@ public class UserService {
         System.out.println("User not found with username: " + username);
         return Optional.empty();
     }
+    
+    public Optional<String> getUserIdByUsername(String username) {
+        Optional<Player> player = playerRepository.findByUsername(username);
+        if (player.isPresent()) {
+            return Optional.of(player.get().getId());
+        }
+
+        Optional<Manager> manager = managerRepository.findByUsername(username);
+        if (manager.isPresent()) {
+            return Optional.of(manager.get().getId());
+        }
+
+        return Optional.empty();
+    }
 
     public boolean checkPassword(User user, String rawPassword) {
         return rawPassword.equals(user.getPassword());

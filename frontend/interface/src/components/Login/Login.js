@@ -1,6 +1,8 @@
+// src/components/Login/Login.js
 import React, { useState } from 'react';
 import { loginUser } from '../../services/api';
 import { useNavigate } from 'react-router-dom';
+import { useUser } from '../../contexts/UserContext';
 import './Login.css';
 
 function Login() {
@@ -8,6 +10,7 @@ function Login() {
     const [password, setPassword] = useState('');
     const [error, setError] = useState(null);
     const navigate = useNavigate();
+    const { setUser } = useUser();
 
     const handleLogin = async (e) => {
         e.preventDefault();
@@ -15,7 +18,8 @@ function Login() {
             const credentials = { username, password };
             const response = await loginUser(credentials);
             console.log('Login successful', response);
-            navigate('/home');  // Redirect to home after successful login
+            setUser(response);  // Store user data in context
+            navigate('/events');  // Redirect to events
         } catch (error) {
             setError('Login failed. Please check your username and password.');
             console.error('Login error', error);

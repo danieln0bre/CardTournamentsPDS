@@ -33,16 +33,23 @@ export const fetchPlayerById = (playerId) => {
         .then(checkResponseStatus);
 };
 
+export const fetchPlayerEvents = (playerId) => {
+    return axiosInstance.get(`/players/${playerId}/events`)
+        .then(checkResponseStatus);
+};
+
 export const registerUser = (userDetails) => {
     return axiosInstance.post('/users/register/player', userDetails)
         .then(checkResponseStatus);
 };
 
+// src/services/api.js
 export const loginUser = (credentials) => {
     return axiosInstance.post('/users/login', credentials)
         .then(response => {
             if (response.status === 200) {
-                return response.data; // Login successful
+                console.log('Login response data:', response.data); // Log the response data
+                return response.data; // Login successful, return user data
             } else {
                 throw new Error('Login failed');
             }
@@ -50,6 +57,8 @@ export const loginUser = (credentials) => {
             throw error;
         });
 };
+
+
 
 export const fetchGeneralRankings = async () => {
     return axiosInstance.get('/players/rankings')

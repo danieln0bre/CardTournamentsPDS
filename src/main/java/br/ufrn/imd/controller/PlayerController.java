@@ -60,7 +60,7 @@ public class PlayerController {
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
-
+    
     // Recalculates a player's win rates.
     @PostMapping("/{id}/recalculateWinrates")
     public ResponseEntity<Player> recalculateWinrates(@PathVariable String id) {

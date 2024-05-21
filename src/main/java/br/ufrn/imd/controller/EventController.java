@@ -25,7 +25,7 @@ public class EventController {
         this.eventService = eventService;
     }
 
-    @PostMapping("/")
+    @PostMapping("/createEvent")
     public Event createEvent(@RequestBody Event event) {
         return eventService.saveEvent(event);
     }
@@ -35,14 +35,14 @@ public class EventController {
         return eventService.getAllEvents();
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/{id}/get")
     public ResponseEntity<Event> getEventById(@PathVariable String id) {
         return eventService.getEventById(id)
                 		   .map(ResponseEntity::ok)
                 		   .orElseGet(() -> ResponseEntity.notFound().build());
     }
     
-    @PutMapping("/{id}")
+    @PutMapping("/{id}/update")
     public ResponseEntity<Event> updateEvent(@PathVariable String id, @RequestBody Event eventDetails) {
         return eventService.getEventById(id)
                 		   .map(existingEvent -> updateAndSaveEvent(existingEvent, eventDetails))
@@ -55,7 +55,7 @@ public class EventController {
         return ResponseEntity.ok(updatedEvent);
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/{id}/delete")
     public ResponseEntity<Void> deleteEvent(@PathVariable String id) {
         return eventService.getEventById(id)
                 		   .map(event -> {

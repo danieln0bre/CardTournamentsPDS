@@ -6,6 +6,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -19,6 +20,7 @@ import org.springframework.session.web.http.HttpSessionIdResolver;
 import br.ufrn.imd.service.UserService;
 
 import java.util.ArrayList;
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -33,12 +35,15 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http, AuthenticationConfiguration authenticationConfiguration) throws Exception {
         AuthenticationManager authenticationManager = authenticationManager(authenticationConfiguration);
-        CustomAuthenticationFilter customAuthenticationFilter = new CustomAuthenticationFilter(authenticationManager);
+        CustomAuthenticationFilter customAuthenticationFilter = new CustomAuthenticationFilter(authenticationManager, userService);
 
         http
             .csrf().disable()  // Disable CSRF for simplicity; enable it in production
             .authorizeHttpRequests(authz -> authz
                 .requestMatchers("/api/users/login", "/login","/api/users/register" , "/public/**").permitAll() // Allow access to login endpoints
+                .requestMatchers("/api/events/createEvent", "/api/events/{id}/update", "/api/events/{id}/delete",
+                		"/api/events/{eventId}/finalize", "api/events/{eventId}/start", "/api/events/{eventId}/generatePairings",
+                		"/api/events/{eventId}/finalizeRound").hasRole("MANAGER")
                 .anyRequest().authenticated() // All other requests need to be authenticated
             )
             .sessionManagement(session -> session
@@ -62,7 +67,13 @@ public class SecurityConfig {
             return userService.getUserByUsername(username)
                 .map(user -> {
                     System.out.println("User found: " + user.getUsername());
-                    return new User(user.getUsername(), user.getPassword(), new ArrayList<>());
+                    List<SimpleGrantedAuthority> authorities = new ArrayList<>();
+                    if (user.getRole().equals("ROLE_PLAYER")) {
+                        authorities.add(new SimpleGrantedAuthority("ROLE_PLAYER"));
+                    } else if (user.getRole().equals("ROLE_MANAGER")) {
+                        authorities.add(new SimpleGrantedAuthority("ROLE_MANAGER"));
+                    }
+                    return new User(user.getUsername(), user.getPassword(), authorities);
                 })
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
         };
