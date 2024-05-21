@@ -13,7 +13,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.session.web.http.SessionRepositoryFilter;
 import org.springframework.session.web.http.CookieHttpSessionIdResolver;
 import org.springframework.session.web.http.HttpSessionIdResolver;
 
@@ -39,14 +38,14 @@ public class SecurityConfig {
         http
             .csrf().disable()  // Disable CSRF for simplicity; enable it in production
             .authorizeHttpRequests(authz -> authz
-                .requestMatchers("/api/users/login", "/login", "/public/**").permitAll() // Allow access to login endpoints
-                .anyRequest().authenticated()
+                .requestMatchers("/api/users/login", "/login","/api/users/register" , "/public/**").permitAll() // Allow access to login endpoints
+                .anyRequest().authenticated() // All other requests need to be authenticated
+            )
+            .sessionManagement(session -> session
+                .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
             )
             .addFilterBefore(customAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-            .logout(logout -> logout.permitAll())
-            .sessionManagement(session -> session
-                .sessionCreationPolicy(SessionCreationPolicy.ALWAYS)
-            );
+            .logout(logout -> logout.permitAll());
 
         return http.build();
     }
@@ -79,3 +78,4 @@ public class SecurityConfig {
         return new CookieHttpSessionIdResolver();
     }
 }
+

@@ -5,11 +5,15 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
+
 import java.io.IOException;
 import java.util.Map;
 
@@ -25,14 +29,13 @@ public class CustomAuthenticationFilter extends UsernamePasswordAuthenticationFi
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
         try {
-            // Parse JSON payload
             ObjectMapper objectMapper = new ObjectMapper();
             Map<String, String> credentials = objectMapper.readValue(request.getInputStream(), Map.class);
 
             String username = credentials.get("username");
             String password = credentials.get("password");
 
-            System.out.println("Attempting authentication for user: " + username + " with password: " + password);
+            System.out.println("Attempting authentication for user: " + username);
             UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(username, password);
             return authenticationManager.authenticate(authenticationToken);
         } catch (IOException e) {
@@ -46,6 +49,13 @@ public class CustomAuthenticationFilter extends UsernamePasswordAuthenticationFi
         response.setContentType("application/json");
         response.getWriter().write("{\"message\":\"Login successful\"}");
         response.setStatus(HttpServletResponse.SC_OK);
+        
+        // Set authentication in the SecurityContextHolder
+        SecurityContextHolder.getContext().setAuthentication(authResult);
+        
+        // Ensure the session is created and set
+        HttpSession session = request.getSession(true);
+        session.setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY, SecurityContextHolder.getContext());
     }
 
     @Override
