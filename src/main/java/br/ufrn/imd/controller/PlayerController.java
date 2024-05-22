@@ -119,13 +119,27 @@ public class PlayerController {
         return rankedPlayers.isEmpty() ? ResponseEntity.notFound().build() : ResponseEntity.ok(rankedPlayers);
     }
 
-    // Updates a player's deck.
     @PutMapping("/{id}/updateDeck")
     public ResponseEntity<?> updatePlayerDeck(@PathVariable String id, @RequestBody String deckId) {
         return playerService.getPlayerById(id)
-                .map(player -> updateDeckForPlayer(player, deckId))
+                .map(player -> {
+                    Deck deck = deckService.getDeckById(deckId);
+                    if (deck == null) {
+                        return ResponseEntity.badRequest().body("Deck not found");
+                    }
+                    player.setDeck(deck);
+                    playerService.savePlayer(player);
+                    return ResponseEntity.ok("Deck updated successfully");
+                })
                 .orElse(ResponseEntity.notFound().build());
     }
+    
+    @GetMapping("/winning-decks")
+    public ResponseEntity<List<Deck>> getWinningDecks() {
+        List<Deck> decks = deckService.getAllWinningDecks();
+        return ResponseEntity.ok(decks);
+    }
+
 
     // Helper method to update a player's deck.
     private ResponseEntity<?> updateDeckForPlayer(Player player, String deckId) {

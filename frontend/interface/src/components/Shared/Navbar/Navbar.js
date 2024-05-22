@@ -5,7 +5,6 @@ import './Navbar.css';
 
 function Navbar() {
   const location = useLocation();
-  const userIsRegisteredForEvent = true; // This should be dynamic based on authentication and specific logic
 
   return (
     <nav>
@@ -16,13 +15,7 @@ function Navbar() {
           <Link to="/profile" className={location.pathname === '/profile' ? 'active' : ''}>Perfil do Usuário</Link>
           <Link to="/events" className={location.pathname === '/events' ? 'active' : ''}>Ver Eventos</Link>
           <Link to="/my-events" className={location.pathname === '/my-events' ? 'active' : ''}>Meus Eventos</Link>
-          {userIsRegisteredForEvent && (
-            <>
-              <Link to="/event-details" className={location.pathname === '/event-details' ? 'active' : ''}>Ver Evento Específico</Link>
-              <Link to="/event-rankings" className={location.pathname === '/event-rankings' ? 'active' : ''}>Ranking do Evento</Link>
-              <Link to="/event-pairings" className={location.pathname === '/event-pairings' ? 'active' : ''}>Pairings do Evento</Link>
-            </>
-          )}
+          <Link to="/select-deck" className={location.pathname === '/select-deck' ? 'active' : ''}>Selecionar Deck</Link>
         </div>
       </div>
     </nav>

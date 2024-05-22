@@ -10,6 +10,8 @@ import MyEvents from './components/MyEvents/MyEvents';
 import EventDetail from './components/EventDetails/EventDetail';
 import EventRanking from './components/EventRanking/EventRanking';
 import EventPairing from './components/EventPairing/EventPairing';
+import SelectDeck from './components/SelectDeck/SelectDeck';
+import EventStatistics from './components/EventStatistics/EventStatistics';
 
 function App() {
   return (
@@ -19,12 +21,14 @@ function App() {
         <Route path="/signup" element={<SignUp />} />
         <Route path="/login" element={<Login />} />
         <Route path="/rankings" element={<Rankings />} />
+        <Route path="/select-deck" element={<SelectDeck />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/events" element={<EventsList />} />
         <Route path="/my-events" element={<MyEvents />} />
         <Route path="/events/:eventName" element={<EventDetail />} />
         <Route path="/events/:eventId/ranking" element={<EventRanking />} />
         <Route path="/events/:eventId/pairing" element={<EventPairing />} />
+        <Route path="/events/:eventId/statistics" element={<EventStatistics />} />
       </Routes>
     </BrowserRouter>
   );

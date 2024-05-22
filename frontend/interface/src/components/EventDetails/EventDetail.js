@@ -72,6 +72,7 @@ function EventDetail() {
                     <div>
                         <button onClick={() => navigate(`/events/${event.id}/ranking`)}>Ranking</button>
                         <button onClick={() => navigate(`/events/${event.id}/pairing`)}>Pareamento</button>
+                        <button onClick={() => navigate(`/events/${event.id}/statistics`)}>Statistics</button>
                     </div>
                 ) : (
                     <button onClick={handleRegistration}>Se Inscrever</button>

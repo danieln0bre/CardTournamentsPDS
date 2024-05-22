@@ -48,6 +48,21 @@ export const registerUser = (userDetails) => {
         .then(checkResponseStatus);
 };
 
+export const fetchWinningDeckNames = () => {
+    return axiosInstance.get('/players/winning-decks').then(response => response.data);
+};
+
+export const updatePlayerDeck = (playerId, deckId) => {
+    return axiosInstance.put(`/players/${playerId}/updateDeck`, deckId, {
+        headers: {
+            'Content-Type': 'text/plain'
+        }
+    }).then(response => response.data);
+};
+
+export const fetchDeckMatchups = (eventId) => {
+    return axiosInstance.get(`/events/${eventId}/deck-matchups`).then(response => response.data);
+};
 
 export const fetchEventRankings = (eventId) => {
     return axiosInstance.get(`/events/${eventId}/rankings`).then(response => response.data);

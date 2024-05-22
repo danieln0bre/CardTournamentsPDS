@@ -16,13 +16,13 @@ function EventRanking() {
                 setLoading(false);
             })
             .catch(err => {
-                setError(err);
+                setError(err.message);
                 setLoading(false);
             });
     }, [eventId]);
 
     if (loading) return <p>Loading rankings...</p>;
-    if (error) return <p>Error loading rankings: {error.message}</p>;
+    if (error) return <p>Error loading rankings: {error}</p>;
 
     return (
         <div className="event-ranking-container">
@@ -30,7 +30,7 @@ function EventRanking() {
             <ul className="ranking-list">
                 {rankings.map((player, index) => (
                     <li key={player.id} className="ranking-item">
-                        #{index + 1} {player.name} - Points: {player.rankPoints}
+                        #{index + 1} {player.name} - Points: {player.eventPoints}
                     </li>
                 ))}
             </ul>

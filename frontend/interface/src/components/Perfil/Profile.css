@@ -1,13 +1,25 @@
-/* src/components/Profile/Profile.css */
 .profile-container {
     padding: 20px;
     background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    max-width: 800px;
+    margin: 0 auto;
+    text-align: left;
 }
 
 .profile-container h1 {
     margin-bottom: 20px;
+    font-size: 2em;
+    color: #343a40;
 }
 
 .profile-container p {
     font-size: 16px;
+    color: #495057;
+    margin: 10px 0;
+}
+
+.profile-container p strong {
+    color: #343a40;
 }

@@ -3,6 +3,7 @@ package br.ufrn.imd.service;
 import br.ufrn.imd.model.Deck;
 import br.ufrn.imd.repository.DeckRepository;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,5 +45,13 @@ public class DeckService {
      */
     public Optional<Deck> findDeckById(String id) {
         return deckRepository.findById(id);
+    }
+
+    public List<Deck> getAllWinningDecks() {
+        return deckRepository.findAll();
+    }
+    
+    public Deck getDeckById(String deckId) {
+        return deckRepository.findById(deckId).orElse(null);
     }
 }

@@ -105,4 +105,8 @@ public class PlayerService {
             throw new IllegalArgumentException("The list of players cannot be empty.");
         }
     }
+    
+    public Player savePlayer(Player player) {
+        return playerRepository.save(player);
+    }
 }
