@@ -48,8 +48,10 @@ public class EventService {
                                      .orElseThrow(() -> new IllegalArgumentException("Event not found with ID: " + eventId));
         return matchService.getDeckMatchupStatistics(eventId);
     }
-
-
+    
+    public Optional<Event> getEventByName(String name) {
+        return eventRepository.findByName(name);
+    }
 
     public Optional<Event> getEventById(String id) {
         return eventRepository.findById(id);

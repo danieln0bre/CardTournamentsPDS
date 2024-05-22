@@ -24,12 +24,17 @@ export const fetchEvents = () => {
 };
 
 export const fetchEventById = (eventId) => {
-    return axiosInstance.get(`/events/${eventId}`)
+    return axiosInstance.get(`/events/${eventId}/get`)
         .then(checkResponseStatus);
 };
 
 export const fetchPlayerById = (playerId) => {
     return axiosInstance.get(`/players/${playerId}`)
+        .then(checkResponseStatus);
+};
+
+export const fetchEventByName = (eventName) => {
+    return axiosInstance.get(`/events/name/${encodeURIComponent(eventName)}`)
         .then(checkResponseStatus);
 };
 

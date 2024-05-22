@@ -34,6 +34,14 @@ public class EventController {
     public List<Event> getAllEvents() {
         return eventService.getAllEvents();
     }
+    
+    @GetMapping("/name/{name}")
+    public ResponseEntity<Event> getEventByName(@PathVariable String name) {
+        return eventService.getEventByName(name.replace("-", " "))
+               .map(ResponseEntity::ok)
+               .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
 
     @GetMapping("/{id}/get")
     public ResponseEntity<Event> getEventById(@PathVariable String id) {
