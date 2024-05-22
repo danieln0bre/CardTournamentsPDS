@@ -48,6 +48,14 @@ export const registerUser = (userDetails) => {
         .then(checkResponseStatus);
 };
 
+
+export const fetchEventRankings = (eventId) => {
+    return axiosInstance.get(`/events/${eventId}/rankings`).then(response => response.data);
+};
+
+export const fetchEventPairings = (eventId) => {
+    return axiosInstance.get(`/events/${eventId}/pairings`).then(response => response.data);
+};
 // src/services/api.js
 export const loginUser = (credentials) => {
     return axiosInstance.post('/users/login', credentials)
@@ -66,8 +74,25 @@ export const loginUser = (credentials) => {
         });
 };
 
+// src/services/api.js
+export const fetchLoggedInPlayerEvents = () => {
+    const user = JSON.parse(localStorage.getItem('user'));
+    const playerId = user && user.id;
+    if (playerId) {
+        return axiosInstance.get(`/players/${playerId}/events`)
+            .then(checkResponseStatus);
+    } else {
+        return Promise.reject(new Error('No logged in user found'));
+    }
+};
 
-
+export const addEventToPlayer = (playerId, eventId) => {
+    return axiosInstance.put(`/players/${playerId}/events/add`, eventId, {
+        headers: {
+            'Content-Type': 'text/plain'
+        }
+    }).then(response => response.data);
+};
 
 export const fetchGeneralRankings = async () => {
     return axiosInstance.get('/players/rankings')

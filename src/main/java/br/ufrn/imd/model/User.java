@@ -7,7 +7,7 @@ import org.springframework.data.mongodb.core.mapping.Field;
  * Represents a user in the system, serving as a base class for more specific types of users
  * like Player and Manager. It handles common user attributes.
  */
-public class User {
+public abstract class User {
 
     @Id
     private String id;  // MongoDB primary key for User objects

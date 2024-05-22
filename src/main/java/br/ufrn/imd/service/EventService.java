@@ -80,15 +80,24 @@ public class EventService {
     }
 
     public Event addPlayerToEvent(String eventId, String playerId) {
+        System.out.println("Fetching event by ID: " + eventId);
         Event event = getEventById(eventId).orElseThrow(() ->
             new IllegalArgumentException("Event not found with ID: " + eventId));
         
+        System.out.println("Event found: " + event);
+        System.out.println("Event ID: " + event.getId());
         if (event.getPlayerIds().contains(playerId)) {
             throw new IllegalArgumentException("Player already added to the event.");
         }
 
+        System.out.println("Adding player ID: " + playerId + " to event: " + event);
         event.addPlayerId(playerId);
-        return eventRepository.save(event);
+        System.out.println("Event's player IDs before save: " + event.getPlayerIds());
+
+        Event savedEvent = eventRepository.save(event);
+        System.out.println("Event saved: " + savedEvent);
+        System.out.println("Event's player IDs after save: " + savedEvent.getPlayerIds());
+        return savedEvent;
     }
 
     public Event finalizeEvent(String eventId) {

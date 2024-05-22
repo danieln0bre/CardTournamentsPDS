@@ -1,3 +1,5 @@
-export function generateUrlFriendlyName(name) {
-    return name.toLowerCase().replace(/\s+/g, '-');
-}
+// src/utils/utils.js
+export const generateUrlFriendlyName = (name) => {
+    return encodeURIComponent(name.trim().replace(/\s+/g, '-'));
+};
+

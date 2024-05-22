@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { fetchEventByName, fetchPlayerById } from '../../services/api';
+import { fetchEventByName, fetchPlayerById, addEventToPlayer } from '../../services/api';
 import { useUser } from '../../contexts/UserContext';
 import './EventDetail.css';
 
@@ -12,6 +12,7 @@ function EventDetail() {
     const [players, setPlayers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [registrationError, setRegistrationError] = useState(null);
 
     useEffect(() => {
         fetchEventByName(eventName)
@@ -28,6 +29,23 @@ function EventDetail() {
                 setLoading(false);
             });
     }, [eventName]);
+
+    const handleRegistration = () => {
+        if (user && event) {
+            addEventToPlayer(user.id, event.id)
+                .then(() => {
+                    setEvent(prevEvent => ({
+                        ...prevEvent,
+                        playerIds: [...prevEvent.playerIds, user.id]
+                    }));
+                    setPlayers(prevPlayers => [...prevPlayers, user]);
+                    setRegistrationError(null);
+                })
+                .catch(err => {
+                    setRegistrationError(err.message);
+                });
+        }
+    };
 
     if (loading) return <p>Loading event...</p>;
     if (error) return <p>Error loading event: {error.message}</p>;
@@ -52,12 +70,13 @@ function EventDetail() {
             <div className="button-group">
                 {event.playerIds.includes(user.id) ? (
                     <div>
-                        <button onClick={() => navigate(`/events/${eventName}/ranking`)}>Ranking</button>
-                        <button onClick={() => navigate(`/events/${eventName}/pairing`)}>Pareamento</button>
+                        <button onClick={() => navigate(`/events/${event.id}/ranking`)}>Ranking</button>
+                        <button onClick={() => navigate(`/events/${event.id}/pairing`)}>Pareamento</button>
                     </div>
                 ) : (
-                    <button onClick={() => {/* Handle event registration here */}}>Se Inscrever</button>
+                    <button onClick={handleRegistration}>Se Inscrever</button>
                 )}
+                {registrationError && <p className="error-message">{registrationError}</p>}
             </div>
         </div>
     );

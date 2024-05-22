@@ -85,23 +85,30 @@ public class PlayerController {
                 .collect(Collectors.toList());
     }
 
-    // Adds an event to a player's profile.
     @PutMapping("/{id}/events/add")
     public ResponseEntity<String> addEventToPlayer(@PathVariable String id, @RequestBody String eventId) {
+        System.out.println("Request received to add event with ID: " + eventId + " to player with ID: " + id);
         return eventService.getEventById(eventId.trim())
                 .map(event -> {
+                    System.out.println("Event found: " + event);
                     checkAndAddEventToPlayer(id, event);
                     return ResponseEntity.ok("Player and Event updated successfully!");
                 })
-                .orElseGet(() -> ResponseEntity.badRequest().body("Event not found."));
+                .orElseGet(() -> {
+                    System.out.println("Event not found for ID: " + eventId);
+                    return ResponseEntity.badRequest().body("Event not found.");
+                });
     }
 
     // Helper method to check if an event can be added to a player and update both player and event.
     private void checkAndAddEventToPlayer(String playerId, Event event) {
+        System.out.println("Checking if player with ID: " + playerId + " is already registered for event: " + event);
         if (event.getPlayerIds().contains(playerId)) {
             throw new IllegalArgumentException("Player is already registered for this event.");
         }
+        System.out.println("Adding event to player...");
         playerService.addEventToPlayer(playerId, event.getId());
+        System.out.println("Adding player to event...");
         eventService.addPlayerToEvent(event.getId(), playerId);
     }
 

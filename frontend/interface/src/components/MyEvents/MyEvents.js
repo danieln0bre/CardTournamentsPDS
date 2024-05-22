@@ -1,7 +1,8 @@
-// src/pages/MyEvents/MyEvents.js
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { fetchPlayerEvents } from '../../services/api';
 import { useUser } from '../../contexts/UserContext';
+import { generateUrlFriendlyName } from '../utils/utils';
 import './MyEvents.css';
 
 function MyEvents() {
@@ -9,6 +10,7 @@ function MyEvents() {
     const [events, setEvents] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const navigate = useNavigate();
 
     useEffect(() => {
         if (user && user.id) {
@@ -16,7 +18,9 @@ function MyEvents() {
             setError(null);
             fetchPlayerEvents(user.id)
                 .then(data => {
-                    setEvents(data);
+                    // Sort events so finished events appear at the bottom
+                    const sortedEvents = data.sort((a, b) => a.finished - b.finished);
+                    setEvents(sortedEvents);
                     setLoading(false);
                 })
                 .catch(err => {
@@ -28,6 +32,11 @@ function MyEvents() {
         }
     }, [user]);
 
+    const handleEventClick = (event) => {
+        const eventUrlName = generateUrlFriendlyName(event.name);
+        navigate(`/events/${eventUrlName}`);
+    };
+
     if (loading) return <p>Loading events...</p>;
     if (error) return <p>Error loading events: {error.message}</p>;
 
@@ -36,9 +45,12 @@ function MyEvents() {
             <h1>Meus Eventos</h1>
             <ul className="event-list">
                 {events.map((event) => (
-                    <li key={event.id} className="event-item">
+                    <li key={event.id} className={`event-item ${event.finished ? 'finished' : ''}`} onClick={() => handleEventClick(event)}>
                         <div className="event-header">
-                            <div className="event-name">{event.name}</div>
+                            <div className="event-name">
+                                {event.name}
+                                {event.finished && <span className="tag">Finalizado</span>}
+                            </div>
                             <div className="event-date">{event.date || 'Data não definida'}</div>
                         </div>
                         <div className="event-details">

@@ -21,3 +21,15 @@
 .events-container li:hover {
     background-color: #e9e9e9;
 }
+.tag {
+    background-color: #4caf50; /* Green background */
+    color: white; /* White text */
+    padding: 0.2em 0.4em; /* Some padding */
+    margin-left: 0.5em; /* Space from the event name */
+    border-radius: 0.2em; /* Rounded corners */
+    font-size: 0.8em; /* Smaller text size */
+}
+
+.event-item:hover {
+    background-color: #e9ecef;
+}

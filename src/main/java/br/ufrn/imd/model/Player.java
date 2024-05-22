@@ -1,6 +1,5 @@
 package br.ufrn.imd.model;
 
-import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.List;
@@ -15,7 +14,6 @@ public class Player extends User {
     private int rankPoints;
     private int eventPoints;
     private double winrate;
-    @DBRef
     private Deck deck;
     private List<String> appliedEventsId;
     private List<String> opponentIds;

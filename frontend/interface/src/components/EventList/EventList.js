@@ -1,19 +1,21 @@
 import React, { useEffect, useState } from 'react';
-import { fetchEvents } from '../../services/api';
+import { fetchEvents, fetchLoggedInPlayerEvents } from '../../services/api';
 import { useNavigate } from 'react-router-dom';
 import './EventList.css';
 import { generateUrlFriendlyName } from '../utils/utils';
 
 function EventList() {
     const [events, setEvents] = useState([]);
+    const [playerEvents, setPlayerEvents] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const navigate = useNavigate();
 
     useEffect(() => {
-        fetchEvents()
-            .then(data => {
-                setEvents(data);
+        Promise.all([fetchEvents(), fetchLoggedInPlayerEvents()])
+            .then(([allEvents, playerEvents]) => {
+                setEvents(allEvents);
+                setPlayerEvents(playerEvents.map(event => event.id));
                 setLoading(false);
             })
             .catch(err => {
@@ -37,7 +39,10 @@ function EventList() {
                 {events.map((event) => (
                     <li key={event.id} className="event-item" onClick={() => handleEventClick(event)}>
                         <div className="event-header">
-                            <div className="event-name">{event.name}</div>
+                            <div className="event-name">
+                                {event.name}
+                                {playerEvents.includes(event.id) && <span className="tag">Inscrito</span>}
+                            </div>
                             <div className="event-date">{event.date || 'Data não definida'}</div>
                         </div>
                         <div className="event-details">
