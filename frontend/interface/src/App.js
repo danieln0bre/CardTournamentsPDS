@@ -12,6 +12,7 @@ import EventRanking from './components/EventRanking/EventRanking';
 import EventPairing from './components/EventPairing/EventPairing';
 import SelectDeck from './components/SelectDeck/SelectDeck';
 import EventStatistics from './components/EventStatistics/EventStatistics';
+import CreateEvent from './components/CreateEvent/CreateEvent';
 
 function App() {
   return (
@@ -29,6 +30,7 @@ function App() {
         <Route path="/events/:eventId/ranking" element={<EventRanking />} />
         <Route path="/events/:eventId/pairing" element={<EventPairing />} />
         <Route path="/events/:eventId/statistics" element={<EventStatistics />} />
+        <Route path="/create-event" element={<CreateEvent />} />
       </Routes>
     </BrowserRouter>
   );

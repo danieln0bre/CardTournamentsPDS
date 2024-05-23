@@ -1,26 +1,25 @@
 package br.ufrn.imd.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import br.ufrn.imd.service.UserService;
-
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
-
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class CustomAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
@@ -28,7 +27,7 @@ public class CustomAuthenticationFilter extends UsernamePasswordAuthenticationFi
     private final UserService userService;
 
     public CustomAuthenticationFilter(AuthenticationManager authenticationManager, UserService userService) {
-    	this.userService = userService;
+        this.userService = userService;
         this.authenticationManager = authenticationManager;
         setFilterProcessesUrl("/api/users/login");
     }
@@ -53,13 +52,20 @@ public class CustomAuthenticationFilter extends UsernamePasswordAuthenticationFi
     @Override
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authResult) throws IOException {
         System.out.println("Authentication successful for user: " + authResult.getName());
-        
+
         UserDetails userDetails = (UserDetails) authResult.getPrincipal();
         String userId = userService.getUserIdByUsername(userDetails.getUsername()).orElse(null);
-        
+
+        String role = userDetails.getAuthorities().stream()
+            .map(GrantedAuthority::getAuthority)
+            .findFirst()
+            .orElse(null);
+
+        System.out.println("User ID: " + userId + ", Role: " + role);
+
         Map<String, Object> userData = new HashMap<>();
         userData.put("username", userDetails.getUsername());
-        userData.put("roles", userDetails.getAuthorities());
+        userData.put("role", role);
         userData.put("id", userId);
 
         response.setContentType("application/json");
@@ -73,8 +79,6 @@ public class CustomAuthenticationFilter extends UsernamePasswordAuthenticationFi
         HttpSession session = request.getSession(true);
         session.setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY, SecurityContextHolder.getContext());
     }
-
-
 
     @Override
     protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) throws IOException {

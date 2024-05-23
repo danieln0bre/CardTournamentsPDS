@@ -35,11 +35,9 @@ function Profile() {
                     <p><strong>Username:</strong> {playerData.username}</p>
                     <p><strong>Email:</strong> {playerData.email}</p>
                     <p><strong>Rank Points:</strong> {playerData.rankPoints}</p>
-                    <p><strong>Event Points:</strong> {playerData.eventPoints}</p>
                     <p><strong>Winrate:</strong> {playerData.winrate}%</p>
                     <p><strong>Deck:</strong> {playerData.deck ? playerData.deck.deckName : 'No deck'}</p>
                     <p><strong>Applied Events:</strong> {playerData.appliedEventsId.length}</p>
-                    <p><strong>Historical Events:</strong> {playerData.historicoEventos.map(event => event.name).join(', ')}</p>
                 </>
             )}
         </div>
