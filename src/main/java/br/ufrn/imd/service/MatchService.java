@@ -46,26 +46,35 @@ public class MatchService {
     }
 
     public Map<String, Map<String, Double>> getDeckMatchupStatistics(String eventId) {
+        // Obtém os matchups de decks para o evento especificado. 
+        // Se não houver matchups para o evento, retorna um novo HashMap vazio.
         Map<String, Map<String, Integer[]>> deckMatchups = eventDeckMatchups.getOrDefault(eventId, new HashMap<>());
 
+        // Cria um mapa para armazenar as porcentagens de vitória de cada deck contra os decks oponentes.
         Map<String, Map<String, Double>> winPercentageMap = new HashMap<>();
 
+        // Itera sobre os matchups de cada deck.
         for (Map.Entry<String, Map<String, Integer[]>> entry : deckMatchups.entrySet()) {
-            String deckId = entry.getKey();
-            Map<String, Double> opponentWinPercentages = new HashMap<>();
+            String deckId = entry.getKey(); // Obtém o ID do deck.
+            Map<String, Double> opponentWinPercentages = new HashMap<>(); // Mapa para armazenar as porcentagens de vitória contra cada deck oponente.
 
+            // Itera sobre os resultados dos matchups contra os decks oponentes.
             for (Map.Entry<String, Integer[]> opponentEntry : entry.getValue().entrySet()) {
-                String opponentDeckId = opponentEntry.getKey();
-                Integer[] results = opponentEntry.getValue();
-                if (results[1] != 0) {  // Prevent division by zero
-                    double winPercentage = (double) results[0] / results[1] * 100;
-                    opponentWinPercentages.put(opponentDeckId, winPercentage);
+                String opponentDeckId = opponentEntry.getKey(); // Obtém o ID do deck oponente.
+                Integer[] results = opponentEntry.getValue(); // Obtém os resultados (vitórias, jogos).
+
+                // Verifica se houve jogos contra o deck oponente para evitar divisão por zero.
+                if (results[1] != 0) {
+                    double winPercentage = (double) results[0] / results[1] * 100; // Calcula a porcentagem de vitórias.
+                    opponentWinPercentages.put(opponentDeckId, winPercentage); // Adiciona a porcentagem de vitórias ao mapa.
                 }
             }
 
+            // Adiciona o mapa de porcentagens de vitória contra os oponentes para o deck atual.
             winPercentageMap.put(deckId, opponentWinPercentages);
         }
 
+        // Retorna o mapa com as porcentagens de vitória de cada deck contra os decks oponentes.
         return winPercentageMap;
     }
 
