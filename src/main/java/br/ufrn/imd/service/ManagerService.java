@@ -1,6 +1,7 @@
 package br.ufrn.imd.service;
 
 import br.ufrn.imd.model.Manager;
+import br.ufrn.imd.model.Event;
 import br.ufrn.imd.repository.ManagerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -36,6 +37,13 @@ public class ManagerService {
 
     public List<Manager> getAllManagers() {
         return managerRepository.findAll();
+    }
+
+    public List<Event> getManagerEvents(String managerId) {
+        validateId(managerId);
+        Manager manager = managerRepository.findById(managerId)
+            .orElseThrow(() -> new IllegalArgumentException("Manager not found with ID: " + managerId));
+        return manager.getEvents();
     }
 
     private void validateManager(Manager manager) {

@@ -1,4 +1,4 @@
-.create-event-container {
+.update-event-container {
     padding: 20px;
     background-color: #f9f9f9;
     border-radius: 8px;
@@ -7,7 +7,7 @@
     box-shadow: 0 0 10px rgba(0,0,0,0.1);
 }
 
-.create-event-container h1 {
+.update-event-container h1 {
     margin-bottom: 20px;
     text-align: center;
 }

@@ -19,6 +19,14 @@ public class PlayerWinrateService {
         this.playerRepository = playerRepository;
     }
 
+    // Calculates and updates the winrate based on event points.
+    private Player calculateWinrate(Player player) {
+        int totalMatches = player.getEventPoints();
+        double winrate = totalMatches > 0 ? (double) totalMatches / player.getOpponentIds().size() * 100 : 0.0;
+        player.setWinrate(winrate);
+        return playerRepository.save(player);
+    }
+
     // Calculates and updates the winrate based on opponents' winrates.
     private Player calculateOpponentsMatchWinrate(Player player) {
         List<String> opponentIds = player.getOpponentIds();
@@ -34,16 +42,11 @@ public class PlayerWinrateService {
     }
 
     private List<Player> fetchPlayers(List<String> ids) {
-        List<Player> players = ids.stream()
-                                  .map(playerRepository::findById)
-                                  .filter(Optional::isPresent)
-                                  .map(Optional::get)
-                                  .collect(Collectors.toList());
-
-        if (players.isEmpty()) {
-            throw new IllegalStateException("No opponents found for the provided IDs.");
-        }
-        return players;
+        return ids.stream()
+                  .map(playerRepository::findById)
+                  .filter(Optional::isPresent)
+                  .map(Optional::get)
+                  .collect(Collectors.toList());
     }
 
     private double calculateAverageWinrate(List<Player> players) {
@@ -53,21 +56,9 @@ public class PlayerWinrateService {
                       .orElse(0.0);
     }
 
-    public Player updatePlayerWinrate(Player player) {
-        List<String> opponentIds = player.getOpponentIds();
-        if (opponentIds.isEmpty()) {
-            player.setWinrate(0.0);
-            return playerRepository.save(player);
-        }
-
-        double winrate = (double) player.getEventPoints() / opponentIds.size();
-        player.setWinrate(winrate);
-        return playerRepository.save(player);
-    }
-
     public Player calculateWinRates(Player player) {
         validatePlayer(player);
-        player = updatePlayerWinrate(player);
+        player = calculateWinrate(player);
         return calculateOpponentsMatchWinrate(player);
     }
 

@@ -1,5 +1,6 @@
 package br.ufrn.imd.service;
 
+import br.ufrn.imd.model.Deck;
 import br.ufrn.imd.model.Event;
 import br.ufrn.imd.model.Pairing;
 import br.ufrn.imd.model.Player;
@@ -19,14 +20,16 @@ public class EventService {
     private final EventRepository eventRepository;
     private final MatchService matchService;
     private final PlayerService playerService;
+    private final DeckService deckService;
 
     @Autowired
     public EventService(PairingService pairingService, EventRepository eventRepository,
-                        MatchService matchService, PlayerService playerService) {
+                        MatchService matchService, PlayerService playerService, DeckService deckService) {
         this.pairingService = pairingService;
         this.eventRepository = eventRepository;
         this.matchService = matchService;
         this.playerService = playerService;
+        this.deckService = deckService;
     }
 
     public Event saveEvent(Event event) {
@@ -129,12 +132,15 @@ public class EventService {
             player.getAppliedEventsId().remove(eventId);
             player.addEventId(eventId);
 
-            if (player.getDeck() != null) {
+            if (player.getDeckId() != null) {
                 Integer currentPosition = playerPositions.get(player.getId());
                 if (currentPosition != null) {
-                    // Update the deck's position frequencies based on the current position
-                    player.getDeck().getPositionFrequencies().merge(currentPosition, 1, Integer::sum);
-                    // Save changes to deck if necessary, depending on your persistence logic
+                    Deck deck = deckService.getDeckById(player.getDeckId());
+                    if (deck != null) {
+                        // Update the deck's position frequencies based on the current position
+                        deck.getPositionFrequencies().merge(currentPosition, 1, Integer::sum);
+                        deckService.saveDeck(deck); // Save the updated deck
+                    }
                 }
             }
         });

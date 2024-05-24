@@ -14,7 +14,7 @@ public class Player extends User {
     private int rankPoints;
     private int eventPoints;
     private double winrate;
-    private Deck deck;
+    private String deckId;  // Changed from Deck object to String deckId
     private List<String> appliedEventsId;
     private List<String> opponentIds;
     private List<Event> historicoEventos;
@@ -25,7 +25,7 @@ public class Player extends User {
         this.rankPoints = 0;
         this.eventPoints = 0;
         this.winrate = 0.0;
-        this.deck = new Deck();
+        this.deckId = null;  // Initialize with null
         this.appliedEventsId = new ArrayList<>();
         this.opponentIds = new ArrayList<>();
         this.historicoEventos = new ArrayList<>();
@@ -76,20 +76,16 @@ public class Player extends User {
         this.winrate = winrate;
     }
 
-    public Deck getDeck() {
-        return deck;
-    }
-    
     public String getDeckId() {
-    	return deck.getId();
+        return deckId;
     }
 
-    public void setDeck(Deck deck) {
-        this.deck = deck;
+    public void setDeckId(String deckId) {
+        this.deckId = deckId;
     }
 
     public boolean hasDeck() {
-        return deck != null && deck.getDeckName() != null;
+        return deckId != null && !deckId.trim().isEmpty();
     }
 
     public List<String> getAppliedEventsId() {

@@ -37,7 +37,7 @@ public class SecurityConfig {
         http
             .csrf().disable()  // Disable CSRF for simplicity; enable it in production
             .authorizeHttpRequests(authz -> authz
-                .requestMatchers("/api/users/login", "/api/users/register", "/public/**").permitAll() // Allow access to login endpoints
+                .requestMatchers("/api/users/login", "/api/users/register/player", "/api/users/register/manager","/api/players/{id}/events/add" ,"/public/**").permitAll() // Allow access to login endpoints
                 .requestMatchers("/api/events/createEvent", "/api/events/{id}/update", "/api/events/{id}/delete",
                         "/api/events/{eventId}/finalize", "/api/events/{eventId}/start", "/api/events/{eventId}/generatePairings",
                         "/api/events/{eventId}/finalizeRound").hasRole("MANAGER")

@@ -11,7 +11,7 @@ import java.util.ArrayList;
  */
 @Document(collection = "managers")
 public class Manager extends User {
-    
+
     // List of events managed by this manager
     private List<Event> events;
 
@@ -41,5 +41,13 @@ public class Manager extends User {
      */
     public void setEvents(List<Event> events) {
         this.events = new ArrayList<>(events);
+    }
+
+    /**
+     * Adds an event to the manager's list of events.
+     * @param event the event to add
+     */
+    public void addEvent(Event event) {
+        this.events.add(event);
     }
 }

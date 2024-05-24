@@ -10,8 +10,8 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.List;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Service
@@ -53,6 +53,7 @@ public class PairingService {
     private Pairing createPairForPlayer(Player player1, List<Player> players, Set<String> pairedPlayerIds) {
         Player player2 = findMatchingPlayer(player1, players, pairedPlayerIds, players.indexOf(player1) + 1);
         if (player2 != null) {
+            addOpponentAndSave(player1, player2);
             return new Pairing(player1.getId(), player2.getId());
         } else {
             updatePlayerForBye(player1.getId());
@@ -80,5 +81,12 @@ public class PairingService {
             player.addEventPoints(1);  // Assumes 1 point for a bye.
             playerRepository.save(player);
         });
+    }
+
+    private void addOpponentAndSave(Player player1, Player player2) {
+        player1.addOpponentId(player2.getId());
+        player2.addOpponentId(player1.getId());
+        playerRepository.save(player1);
+        playerRepository.save(player2);
     }
 }

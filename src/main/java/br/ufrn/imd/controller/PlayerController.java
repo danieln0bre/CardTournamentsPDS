@@ -65,7 +65,7 @@ public class PlayerController {
     @PostMapping("/{id}/recalculateWinrates")
     public ResponseEntity<Player> recalculateWinrates(@PathVariable String id) {
         return playerService.getPlayerById(id)
-                .map(player -> ResponseEntity.ok(winrateService.calculateWinRates(player)))
+                .map(player -> ResponseEntity.ok(playerService.recalculateWinrates(id)))
                 .orElse(ResponseEntity.notFound().build());
     }
 
@@ -127,7 +127,7 @@ public class PlayerController {
                     if (deck == null) {
                         return ResponseEntity.badRequest().body("Deck not found");
                     }
-                    player.setDeck(deck);
+                    player.setDeckId(deckId);
                     playerService.savePlayer(player);
                     return ResponseEntity.ok("Deck updated successfully");
                 })
@@ -138,14 +138,5 @@ public class PlayerController {
     public ResponseEntity<List<Deck>> getWinningDecks() {
         List<Deck> decks = deckService.getAllWinningDecks();
         return ResponseEntity.ok(decks);
-    }
-
-
-    // Helper method to update a player's deck.
-    private ResponseEntity<?> updateDeckForPlayer(Player player, String deckId) {
-        Deck deck = deckService.findDeckById(deckId).orElseThrow(() -> new IllegalArgumentException("Deck ID not found."));
-        player.setDeck(deck);
-        playerService.updatePlayer(player.getId(), player);
-        return ResponseEntity.ok(player.getDeckId());
     }
 }

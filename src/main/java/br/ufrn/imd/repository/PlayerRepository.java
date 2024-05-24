@@ -15,4 +15,5 @@ public interface PlayerRepository extends MongoRepository<Player, String> {
     List<Player> findTop10ByOrderByIdAsc();
     List<Player> findAllById(Iterable<String> ids);
     Optional<Player> findByUsername(String username);
+    Optional<Player> findByEmail(String email);
 }

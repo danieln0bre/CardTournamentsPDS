@@ -4,7 +4,7 @@ import br.ufrn.imd.model.Manager;
 import br.ufrn.imd.model.Player;
 import br.ufrn.imd.model.User;
 import br.ufrn.imd.service.UserService;
-
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,21 +18,26 @@ public class UserController {
         this.userService = userService;
     }
 
-    // Registers a new player.
     @PostMapping("/register/player")
-    public ResponseEntity<Player> registerPlayer(@RequestBody Player player) {
-        Player savedPlayer = userService.savePlayer(player);
-        return ResponseEntity.ok(savedPlayer);
+    public ResponseEntity<?> registerPlayer(@RequestBody Player player) {
+        try {
+            Player savedPlayer = userService.savePlayer(player);
+            return ResponseEntity.ok(savedPlayer);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
     }
 
-    // Registers a new manager.
     @PostMapping("/register/manager")
-    public ResponseEntity<Manager> registerManager(@RequestBody Manager manager) {
-        Manager savedManager = userService.saveManager(manager);
-        return ResponseEntity.ok(savedManager);
+    public ResponseEntity<?> registerManager(@RequestBody Manager manager) {
+        try {
+            Manager savedManager = userService.saveManager(manager);
+            return ResponseEntity.ok(savedManager);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
     }
 
-    // Retrieves a user by ID and type.
     @GetMapping("/{id}")
     public ResponseEntity<User> getUserById(@PathVariable String id, @RequestParam String userType) {
         return userService.getUserById(id, userType)

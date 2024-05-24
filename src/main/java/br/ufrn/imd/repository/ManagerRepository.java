@@ -17,4 +17,5 @@ public interface ManagerRepository extends MongoRepository<Manager, String> {
     // Encontra Managers cujo username comece com um prefixo específico.
     List<Manager> findByUsernameStartingWith(String prefix);
     Optional<Manager> findByUsername(String username);
+    Optional<Manager> findByEmail(String email);
 }

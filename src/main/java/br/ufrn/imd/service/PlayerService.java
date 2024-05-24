@@ -106,6 +106,13 @@ public class PlayerService {
         }
     }
     
+    public Player recalculateWinrates(String playerId) {
+        Player player = getPlayerById(playerId).orElseThrow(() -> 
+            new IllegalArgumentException("Player not found with ID: " + playerId));
+        player = winrateService.calculateWinRates(player);
+        return savePlayer(player);
+    }
+    
     public Player savePlayer(Player player) {
         return playerRepository.save(player);
     }

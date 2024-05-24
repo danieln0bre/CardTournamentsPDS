@@ -74,6 +74,17 @@ public class EventPairingController {
                 .map(event -> ResponseEntity.ok(event.getPairings()))
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
+    
+    @PostMapping("/{eventId}/savePairings")
+    public ResponseEntity<String> savePairings(@PathVariable String eventId, @RequestBody List<Pairing> pairings) {
+        return eventService.getEventById(eventId)
+                .map(event -> {
+                    event.setPairings(pairings);
+                    eventService.saveEvent(event);
+                    return ResponseEntity.ok("Pairings saved successfully.");
+                })
+                .orElseGet(() -> ResponseEntity.notFound().build());
+    }
 
     // Finalizes the current round of an event and prepares the next round.
     @PostMapping("/{eventId}/finalizeRound")

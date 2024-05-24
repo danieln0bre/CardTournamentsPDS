@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { fetchPlayerEvents } from '../../services/api';
+import { fetchPlayerEvents, fetchManagerEvents } from '../../services/api';
 import { useUser } from '../../contexts/UserContext';
 import { generateUrlFriendlyName } from '../utils/utils';
 import './MyEvents.css';
@@ -16,7 +16,8 @@ function MyEvents() {
         if (user && user.id) {
             setLoading(true);
             setError(null);
-            fetchPlayerEvents(user.id)
+            const fetchEvents = user.role === 'ROLE_MANAGER' ? fetchManagerEvents : fetchPlayerEvents;
+            fetchEvents(user.id)
                 .then(data => {
                     // Sort events so finished events appear at the bottom
                     const sortedEvents = data.sort((a, b) => a.finished - b.finished);

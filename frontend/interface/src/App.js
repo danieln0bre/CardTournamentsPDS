@@ -13,6 +13,7 @@ import EventPairing from './components/EventPairing/EventPairing';
 import SelectDeck from './components/SelectDeck/SelectDeck';
 import EventStatistics from './components/EventStatistics/EventStatistics';
 import CreateEvent from './components/CreateEvent/CreateEvent';
+import UpdateEvent from './components/UpdateEvent/UpdateEvent';
 
 function App() {
   return (
@@ -31,6 +32,7 @@ function App() {
         <Route path="/events/:eventId/pairing" element={<EventPairing />} />
         <Route path="/events/:eventId/statistics" element={<EventStatistics />} />
         <Route path="/create-event" element={<CreateEvent />} />
+        <Route path="/update-event/:eventId" element={<UpdateEvent />} />
       </Routes>
     </BrowserRouter>
   );

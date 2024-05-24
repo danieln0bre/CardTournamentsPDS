@@ -1,35 +1,77 @@
-.event-pairing-container {
+.pairing-container {
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     max-width: 800px;
     margin: 0 auto;
-    padding: 20px;
-    background-color: #f8f9fa;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.pairing-container h1 {
     text-align: center;
-}
-
-.event-pairing-container h1 {
-    margin-bottom: 20px;
     font-size: 2em;
-    color: #343a40;
+    color: #333;
+    margin-bottom: 20px;
 }
 
-.pairing-list {
-    list-style: none;
+.pairing-container button {
+    display: inline-block;
+    margin: 10px 5px;
+    padding: 10px 20px;
+    font-size: 1em;
+    color: #fff;
+    background-color: #007bff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.pairing-container button:hover {
+    background-color: #0056b3;
+}
+
+.pairing-container ul {
+    list-style-type: none;
     padding: 0;
 }
 
 .pairing-item {
-    background-color: #ffffff;
-    margin: 10px 0;
-    padding: 10px;
-    border: 1px solid #dee2e6;
-    border-radius: 4px;
-    font-size: 1.1em;
-    color: #495057;
-    transition: background-color 0.3s;
+    padding: 15px;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
-.pairing-item:hover {
-    background-color: #e9ecef;
+.pairing-item div {
+    font-size: 1.2em;
+    color: #333;
+}
+
+.pairing-item label {
+    margin-right: 10px;
+    font-size: 1em;
+    color: #555;
+}
+
+.pairing-item input[type="radio"] {
+    margin-right: 5px;
+}
+
+.error-message {
+    color: red;
+    text-align: center;
+    margin-top: 10px;
+    font-size: 1em;
+}
+
+.success-message {
+    color: green;
+    text-align: center;
+    margin-top: 10px;
+    font-size: 1em;
 }

@@ -58,10 +58,16 @@ public class UserService {
     }
 
     public Player savePlayer(Player player) {
+        if (usernameExists(player.getUsername()) || emailExists(player.getEmail())) {
+            throw new IllegalArgumentException("Username or email already exists.");
+        }
         return playerRepository.save(player);
     }
 
     public Manager saveManager(Manager manager) {
+        if (usernameExists(manager.getUsername()) || emailExists(manager.getEmail())) {
+            throw new IllegalArgumentException("Username or email already exists.");
+        }
         return managerRepository.save(manager);
     }
 
@@ -72,5 +78,13 @@ public class UserService {
             return managerRepository.findById(id).map(manager -> (User) manager);
         }
         return Optional.empty();
+    }
+
+    private boolean usernameExists(String username) {
+        return playerRepository.findByUsername(username).isPresent() || managerRepository.findByUsername(username).isPresent();
+    }
+
+    private boolean emailExists(String email) {
+        return playerRepository.findByEmail(email).isPresent() || managerRepository.findByEmail(email).isPresent();
     }
 }

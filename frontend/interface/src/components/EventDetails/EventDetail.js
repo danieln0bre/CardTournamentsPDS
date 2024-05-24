@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { fetchEventByName, fetchPlayerById, addEventToPlayer } from '../../services/api';
+import { fetchEventByName, fetchPlayerById, addEventToPlayer, startEvent } from '../../services/api';
 import { useUser } from '../../contexts/UserContext';
 import './EventDetail.css';
 
@@ -13,6 +13,7 @@ function EventDetail() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [registrationError, setRegistrationError] = useState(null);
+    const [startError, setStartError] = useState(null);
 
     useEffect(() => {
         fetchEventByName(eventName)
@@ -47,6 +48,23 @@ function EventDetail() {
         }
     };
 
+    const handleStartEvent = () => {
+        if (user && event) {
+            startEvent(event.id)
+                .then(() => {
+                    setEvent(prevEvent => ({
+                        ...prevEvent,
+                        hasStarted: true
+                    }));
+                    setStartError(null);
+                    navigate(`/events/${event.id}/pairing`); // Redirect to Pairing page after starting event
+                })
+                .catch(err => {
+                    setStartError(err.message);
+                });
+        }
+    };
+
     if (loading) return <p>Loading event...</p>;
     if (error) return <p>Error loading event: {error.message}</p>;
     if (!event) return <p>No event found</p>;
@@ -59,25 +77,39 @@ function EventDetail() {
             <div><strong>Rounds:</strong> {event.currentRound}/{event.numberOfRounds}</div>
             <div><strong>Finished:</strong> {event.finished ? 'Sim' : 'Não'}</div>
             <div><strong>Started:</strong> {event.hasStarted ? 'Sim' : 'Não'}</div>
+            <div><strong>Current Round:</strong> {event.currentRound}</div>
 
             <h2 className="player-list-title">Players</h2>
             <ul>
                 {players.map(player => (
-                    <li key={player.id}>{player.name}</li>
+                    <li key={player.id}>{player.username}</li>
                 ))}
             </ul>
 
             <div className="button-group">
-                {event.playerIds.includes(user.id) ? (
+                {user.role === 'ROLE_MANAGER' ? (
                     <div>
                         <button onClick={() => navigate(`/events/${event.id}/ranking`)}>Ranking</button>
                         <button onClick={() => navigate(`/events/${event.id}/pairing`)}>Pareamento</button>
                         <button onClick={() => navigate(`/events/${event.id}/statistics`)}>Statistics</button>
+                        <button onClick={() => navigate(`/update-event/${event.id}`)}>Update Event</button>
+                        {!event.hasStarted && <button onClick={handleStartEvent}>Start Event</button>}
                     </div>
                 ) : (
-                    <button onClick={handleRegistration}>Se Inscrever</button>
+                    <>
+                        {event.playerIds.includes(user.id) ? (
+                            <div>
+                                <button onClick={() => navigate(`/events/${event.id}/ranking`)}>Ranking</button>
+                                <button onClick={() => navigate(`/events/${event.id}/pairing`)}>Pareamento</button>
+                                <button onClick={() => navigate(`/events/${event.id}/statistics`)}>Statistics</button>
+                            </div>
+                        ) : (
+                            <button onClick={handleRegistration}>Se Inscrever</button>
+                        )}
+                    </>
                 )}
                 {registrationError && <p className="error-message">{registrationError}</p>}
+                {startError && <p className="error-message">{startError}</p>}
             </div>
         </div>
     );

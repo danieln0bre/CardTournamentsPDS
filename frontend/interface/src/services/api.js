@@ -48,6 +48,11 @@ export const registerUser = (userDetails) => {
         .then(checkResponseStatus);
 };
 
+export const fetchManagerEvents = (managerId) => {
+    return axiosInstance.get(`/events/manager/${managerId}/events`)
+        .then(response => response.data);
+};
+
 export const fetchWinningDeckNames = () => {
     return axiosInstance.get('/players/winning-decks').then(response => response.data);
 };
@@ -89,6 +94,16 @@ export const loginUser = (credentials) => {
         });
 };
 
+export const createEvent = (managerId, eventData) => {
+    return axiosInstance.post(`/events/createEvent?managerId=${managerId}`, eventData)
+        .then(response => response.data);
+};
+
+export const updateEvent = (eventId, eventDetails) => {
+    return axiosInstance.put(`/events/${eventId}/update`, eventDetails)
+        .then(response => response.data);
+};
+
 // src/services/api.js
 export const fetchLoggedInPlayerEvents = () => {
     const user = JSON.parse(localStorage.getItem('user'));
@@ -99,6 +114,10 @@ export const fetchLoggedInPlayerEvents = () => {
     } else {
         return Promise.reject(new Error('No logged in user found'));
     }
+};
+
+export const startEvent = (eventId) => {
+    return axiosInstance.post(`/events/${eventId}/start`).then(response => response.data);
 };
 
 export const addEventToPlayer = (playerId, eventId) => {
@@ -113,3 +132,23 @@ export const fetchGeneralRankings = async () => {
     return axiosInstance.get('/players/rankings')
         .then(checkResponseStatus);
 };
+
+export const generatePairings = (eventId) => {
+    return axiosInstance.post(`/events/${eventId}/generatePairings`).then(response => response.data);
+};
+
+export const savePairings = (eventId, pairings) => {
+    return axiosInstance.post(`/events/${eventId}/savePairings`, pairings)
+        .then(response => response.data);
+};
+
+export const recalculateWinrates = (playerId) => {
+    return axiosInstance.post(`/players/${playerId}/recalculateWinrates`)
+        .then(response => response.data);
+};
+
+export const finalizeRound = (eventId) => {
+    return axiosInstance.post(`/events/${eventId}/finalizeRound`)
+        .then(response => response.data);
+};
+

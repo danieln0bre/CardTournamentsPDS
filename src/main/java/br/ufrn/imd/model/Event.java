@@ -24,6 +24,7 @@ public class Event {
     private boolean finished;
     private List<String> playerIds;
     private List<Pairing> pairings;
+    private String managerId; 
 
     /**
      * Constructor for creating a new Event with initial details.
@@ -33,7 +34,7 @@ public class Event {
      * @param location        the location of the event
      * @param numberOfRounds  the total number of rounds in the event
      */
-    public Event(String name, String date, String location, int numberOfRounds) {
+    public Event(String name, String date, String location, int numberOfRounds, String managerId) {
         this.name = name;
         this.date = date;
         this.location = location;
@@ -43,6 +44,7 @@ public class Event {
         this.hasStarted = false;
         this.playerIds = new ArrayList<>();
         this.pairings = new ArrayList<>();
+        this.managerId = managerId;
     }
 
     /**
@@ -153,5 +155,13 @@ public class Event {
     
     public void setPairings(List<Pairing> pairings) {
         this.pairings = new ArrayList<>(pairings);
+    }
+
+    public String getManagerId() {
+        return managerId;
+    }
+
+    public void setManagerId(String managerId) {
+        this.managerId = managerId;
     }
 }
