@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { fetchPlayerEvents, fetchManagerEvents } from '../../services/api';
+import { fetchPlayerEvents, fetchManagerEvents, fetchEventById } from '../../services/api';
 import { useUser } from '../../contexts/UserContext';
 import { generateUrlFriendlyName } from '../utils/utils';
 import './MyEvents.css';
@@ -16,22 +16,41 @@ function MyEvents() {
         if (user && user.id) {
             setLoading(true);
             setError(null);
+
             const fetchEvents = user.role === 'ROLE_MANAGER' ? fetchManagerEvents : fetchPlayerEvents;
             fetchEvents(user.id)
                 .then(data => {
-                    // Sort events so finished events appear at the bottom
-                    const sortedEvents = data.sort((a, b) => a.finished - b.finished);
+                    if (user.role === 'ROLE_MANAGER') {
+                        const eventPromises = data.map(event => fetchEventById(event.id));
+                        return Promise.all(eventPromises);
+                    } else {
+                        return data; // Player events are already fully fetched
+                    }
+                })
+                .then(fetchedEvents => {
+                    const uniqueEvents = filterUniqueEvents(fetchedEvents);
+                    const sortedEvents = uniqueEvents.sort((a, b) => a.finished - b.finished);
                     setEvents(sortedEvents);
                     setLoading(false);
                 })
                 .catch(err => {
-                    setError(err);
+                    setError(err.message);
                     setLoading(false);
                 });
         } else {
             setLoading(false);
         }
     }, [user]);
+
+    const filterUniqueEvents = (events) => {
+        const eventMap = new Map();
+        events.forEach(event => {
+            if (!eventMap.has(event.id)) {
+                eventMap.set(event.id, event);
+            }
+        });
+        return Array.from(eventMap.values());
+    };
 
     const handleEventClick = (event) => {
         const eventUrlName = generateUrlFriendlyName(event.name);

@@ -86,7 +86,6 @@ public class EventPairingController {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    // Finalizes the current round of an event and prepares the next round.
     @PostMapping("/{eventId}/finalizeRound")
     public ResponseEntity<String> finalizeRound(@PathVariable String eventId) {
         try {

@@ -1,25 +1,38 @@
 import React, { useEffect, useState } from 'react';
 import { useUser } from '../../contexts/UserContext';
-import { fetchPlayerById } from '../../services/api';
+import { fetchPlayerById, fetchManagerById, fetchDeckById } from '../../services/api';
 import './Profile.css';
 
 function Profile() {
     const { user } = useUser();
-    const [playerData, setPlayerData] = useState(null);
+    const [userData, setUserData] = useState(null);
+    const [deckName, setDeckName] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
     useEffect(() => {
         if (user && user.id) {
-            fetchPlayerById(user.id)
-                .then(data => {
-                    setPlayerData(data);
-                    setLoading(false);
-                })
-                .catch(err => {
+            const fetchData = async () => {
+                try {
+                    let data;
+                    if (user.role === 'ROLE_PLAYER') {
+                        data = await fetchPlayerById(user.id);
+                        if (data.deckId) {
+                            const deck = await fetchDeckById(data.deckId);
+                            setDeckName(deck.deckName);
+                        }
+                    } else if (user.role === 'ROLE_MANAGER') {
+                        data = await fetchManagerById(user.id);
+                    }
+                    setUserData(data);
+                } catch (err) {
                     setError(err.message);
+                } finally {
                     setLoading(false);
-                });
+                }
+            };
+
+            fetchData();
         }
     }, [user]);
 
@@ -29,15 +42,24 @@ function Profile() {
     return (
         <div className="profile-container">
             <h1>Profile</h1>
-            {playerData && (
+            {userData && (
                 <>
-                    <p><strong>Name:</strong> {playerData.name}</p>
-                    <p><strong>Username:</strong> {playerData.username}</p>
-                    <p><strong>Email:</strong> {playerData.email}</p>
-                    <p><strong>Rank Points:</strong> {playerData.rankPoints}</p>
-                    <p><strong>Winrate:</strong> {playerData.winrate}%</p>
-                    <p><strong>Deck:</strong> {playerData.deck ? playerData.deck.deckName : 'No deck'}</p>
-                    <p><strong>Applied Events:</strong> {playerData.appliedEventsId.length}</p>
+                    <p><strong>Name:</strong> {userData.name}</p>
+                    <p><strong>Username:</strong> {userData.username}</p>
+                    <p><strong>Email:</strong> {userData.email}</p>
+                    {user.role === 'ROLE_PLAYER' && (
+                        <>
+                            <p><strong>Rank Points:</strong> {userData.rankPoints}</p>
+                            <p><strong>Winrate:</strong> {userData.winrate}%</p>
+                            <p><strong>Deck:</strong> {deckName || 'No deck'}</p>
+                            <p><strong>Applied Events:</strong> {userData.appliedEventsId.length}</p>
+                        </>
+                    )}
+                    {user.role === 'ROLE_MANAGER' && (
+                        <>
+                            <p><strong>Managed Events:</strong> {userData.events.length}</p>
+                        </>
+                    )}
                 </>
             )}
         </div>

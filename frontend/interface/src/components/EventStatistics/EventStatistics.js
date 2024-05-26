@@ -1,11 +1,14 @@
+// EventStatistics.js
+
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { fetchDeckMatchups } from '../../services/api';
+import { fetchDeckMatchups, fetchDeckById } from '../../services/api';
 import './EventStatistics.css';
 
 function EventStatistics() {
     const { eventId } = useParams();
     const [statistics, setStatistics] = useState({});
+    const [deckNames, setDeckNames] = useState({});
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
@@ -13,6 +16,21 @@ function EventStatistics() {
         fetchDeckMatchups(eventId)
             .then(data => {
                 setStatistics(data);
+                const deckIds = new Set();
+                Object.keys(data).forEach(deckId => {
+                    deckIds.add(deckId);
+                    Object.keys(data[deckId]).forEach(opponentId => {
+                        deckIds.add(opponentId);
+                    });
+                });
+                return Promise.all(Array.from(deckIds).map(deckId => fetchDeckById(deckId)));
+            })
+            .then(decks => {
+                const deckNameMap = decks.reduce((acc, deck) => {
+                    acc[deck.id] = deck.deckName;
+                    return acc;
+                }, {});
+                setDeckNames(deckNameMap);
                 setLoading(false);
             })
             .catch(err => {
@@ -34,19 +52,23 @@ function EventStatistics() {
                     <thead>
                         <tr>
                             <th>Deck</th>
-                            <th>Opponent Deck</th>
-                            <th>Win Percentage</th>
+                            {Object.keys(deckNames).map(deckId => (
+                                <th key={deckId}>{deckNames[deckId] || deckId}</th>
+                            ))}
                         </tr>
                     </thead>
                     <tbody>
-                        {Object.entries(statistics).map(([deck, opponents]) => (
-                            Object.entries(opponents).map(([opponent, winPercentage]) => (
-                                <tr key={`${deck}-${opponent}`}>
-                                    <td>{deck}</td>
-                                    <td>{opponent}</td>
-                                    <td>{winPercentage.toFixed(2)}%</td>
-                                </tr>
-                            ))
+                        {Object.keys(statistics).map(deckId => (
+                            <tr key={deckId}>
+                                <td>{deckNames[deckId] || deckId}</td>
+                                {Object.keys(deckNames).map(opponentId => (
+                                    <td key={`${deckId}-${opponentId}`}>
+                                        {statistics[deckId][opponentId] !== undefined
+                                            ? statistics[deckId][opponentId].toFixed(2) + '%'
+                                            : '-'}
+                                    </td>
+                                ))}
+                            </tr>
                         ))}
                     </tbody>
                 </table>

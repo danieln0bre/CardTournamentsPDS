@@ -134,6 +134,16 @@ public class PlayerController {
                 .orElse(ResponseEntity.notFound().build());
     }
     
+    @GetMapping("/decks/{deckId}")
+    public ResponseEntity<Deck> getDeckById(@PathVariable String deckId) {
+        Deck deck = deckService.getDeckById(deckId);
+        if (deck != null) {
+            return ResponseEntity.ok(deck);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+    
     @GetMapping("/winning-decks")
     public ResponseEntity<List<Deck>> getWinningDecks() {
         List<Deck> decks = deckService.getAllWinningDecks();

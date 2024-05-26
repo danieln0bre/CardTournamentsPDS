@@ -16,4 +16,5 @@ public interface PlayerRepository extends MongoRepository<Player, String> {
     List<Player> findAllById(Iterable<String> ids);
     Optional<Player> findByUsername(String username);
     Optional<Player> findByEmail(String email);
+    List<Player> findByAppliedEventsIdContaining(String eventId);
 }

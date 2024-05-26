@@ -1,11 +1,14 @@
 package br.ufrn.imd.service;
 
+import br.ufrn.imd.model.EventResult;
 import br.ufrn.imd.model.Pairing;
 import br.ufrn.imd.model.Player;
+import br.ufrn.imd.model.PlayerResult;
 import br.ufrn.imd.repository.DeckRepository;
 import br.ufrn.imd.repository.PlayerRepository;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,37 +48,88 @@ public class MatchService {
         }
     }
 
-    public Map<String, Map<String, Double>> getDeckMatchupStatistics(String eventId) {
-        // Obtém os matchups de decks para o evento especificado. 
-        // Se não houver matchups para o evento, retorna um novo HashMap vazio.
-        Map<String, Map<String, Integer[]>> deckMatchups = eventDeckMatchups.getOrDefault(eventId, new HashMap<>());
-
-        // Cria um mapa para armazenar as porcentagens de vitória de cada deck contra os decks oponentes.
-        Map<String, Map<String, Double>> winPercentageMap = new HashMap<>();
-
-        // Itera sobre os matchups de cada deck.
-        for (Map.Entry<String, Map<String, Integer[]>> entry : deckMatchups.entrySet()) {
-            String deckId = entry.getKey(); // Obtém o ID do deck.
-            Map<String, Double> opponentWinPercentages = new HashMap<>(); // Mapa para armazenar as porcentagens de vitória contra cada deck oponente.
-
-            // Itera sobre os resultados dos matchups contra os decks oponentes.
-            for (Map.Entry<String, Integer[]> opponentEntry : entry.getValue().entrySet()) {
-                String opponentDeckId = opponentEntry.getKey(); // Obtém o ID do deck oponente.
-                Integer[] results = opponentEntry.getValue(); // Obtém os resultados (vitórias, jogos).
-
-                // Verifica se houve jogos contra o deck oponente para evitar divisão por zero.
-                if (results[1] != 0) {
-                    double winPercentage = (double) results[0] / results[1] * 100; // Calcula a porcentagem de vitórias.
-                    opponentWinPercentages.put(opponentDeckId, winPercentage); // Adiciona a porcentagem de vitórias ao mapa.
+    public Map<String, Map<String, Double>> getDeckMatchupStatistics(EventResult eventResult) {
+        Map<String, Map<String, Integer[]>> deckMatchups = new HashMap<>();
+        
+        for (PlayerResult playerResult : eventResult.getPlayerResults()) {
+            String deckId = playerResult.getDeckId();
+            for (String opponentId : playerResult.getOpponentIds()) {
+                String opponentDeckId = getOpponentDeckId(eventResult.getPlayerResults(), opponentId);
+                if (opponentDeckId != null) {
+                    deckMatchups.putIfAbsent(deckId, new HashMap<>());
+                    deckMatchups.get(deckId).putIfAbsent(opponentDeckId, new Integer[]{0, 0});
+                    deckMatchups.get(deckId).get(opponentDeckId)[1]++;
+                    if (playerResult.getWinrate() > 0.5) {
+                        deckMatchups.get(deckId).get(opponentDeckId)[0]++;
+                    }
                 }
             }
-
-            // Adiciona o mapa de porcentagens de vitória contra os oponentes para o deck atual.
-            winPercentageMap.put(deckId, opponentWinPercentages);
         }
 
-        // Retorna o mapa com as porcentagens de vitória de cada deck contra os decks oponentes.
+        Map<String, Map<String, Double>> winPercentageMap = new HashMap<>();
+        for (Map.Entry<String, Map<String, Integer[]>> entry : deckMatchups.entrySet()) {
+            String deckId = entry.getKey();
+            Map<String, Double> opponentWinPercentages = new HashMap<>();
+            for (Map.Entry<String, Integer[]> opponentEntry : entry.getValue().entrySet()) {
+                String opponentDeckId = opponentEntry.getKey();
+                Integer[] results = opponentEntry.getValue();
+                if (results[1] != 0) {
+                    double winPercentage = (double) results[0] / results[1] * 100;
+                    opponentWinPercentages.put(opponentDeckId, winPercentage);
+                }
+            }
+            winPercentageMap.put(deckId, opponentWinPercentages);
+        }
         return winPercentageMap;
+    }
+
+    private String getOpponentDeckId(List<PlayerResult> playerResults, String opponentId) {
+        for (PlayerResult playerResult : playerResults) {
+            if (playerResult.getPlayerId().equals(opponentId)) {
+                return playerResult.getDeckId();
+            }
+        }
+        return null;
+    }
+    
+    public void updateDeckMatchups(String eventId, List<Pairing> pairings) {
+        Map<String, Map<String, Integer[]>> deckMatchups = eventDeckMatchups.getOrDefault(eventId, new HashMap<>());
+
+        for (Pairing pairing : pairings) {
+            String playerOneId = pairing.getPlayerOneId();
+            String playerTwoId = pairing.getPlayerTwoId();
+
+            Player playerOne = playerRepository.findById(playerOneId).orElse(null);
+            Player playerTwo = playerRepository.findById(playerTwoId).orElse(null);
+
+            if (playerOne == null || playerTwo == null) continue;
+
+            String playerOneDeckId = playerOne.getDeckId();
+            String playerTwoDeckId = playerTwo.getDeckId();
+
+            deckMatchups.putIfAbsent(playerOneDeckId, new HashMap<>());
+            deckMatchups.putIfAbsent(playerTwoDeckId, new HashMap<>());
+
+            deckMatchups.get(playerOneDeckId).putIfAbsent(playerTwoDeckId, new Integer[]{0, 0});
+            deckMatchups.get(playerTwoDeckId).putIfAbsent(playerOneDeckId, new Integer[]{0, 0});
+
+            Integer[] resultsPlayerOne = deckMatchups.get(playerOneDeckId).get(playerTwoDeckId);
+            Integer[] resultsPlayerTwo = deckMatchups.get(playerTwoDeckId).get(playerOneDeckId);
+
+            if (pairing.getResult() == 0) {
+                resultsPlayerOne[0]++;
+            } else if (pairing.getResult() == 1) {
+                resultsPlayerTwo[0]++;
+            }
+
+            resultsPlayerOne[1]++;
+            resultsPlayerTwo[1]++;
+
+            deckMatchups.get(playerOneDeckId).put(playerTwoDeckId, resultsPlayerOne);
+            deckMatchups.get(playerTwoDeckId).put(playerOneDeckId, resultsPlayerTwo);
+        }
+
+        eventDeckMatchups.put(eventId, deckMatchups);
     }
 
     private void handleByeMatch(Pairing pairing) {

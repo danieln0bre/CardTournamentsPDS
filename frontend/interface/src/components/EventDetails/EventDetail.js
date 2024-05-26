@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { fetchEventByName, fetchPlayerById, addEventToPlayer, startEvent } from '../../services/api';
+import { fetchEventByName, fetchPlayerById, addEventToPlayer, startEvent, finalizeEvent } from '../../services/api';
 import { useUser } from '../../contexts/UserContext';
 import './EventDetail.css';
 
@@ -14,6 +14,7 @@ function EventDetail() {
     const [error, setError] = useState(null);
     const [registrationError, setRegistrationError] = useState(null);
     const [startError, setStartError] = useState(null);
+    const [finalizeError, setFinalizeError] = useState(null);
 
     useEffect(() => {
         fetchEventByName(eventName)
@@ -26,7 +27,7 @@ function EventDetail() {
                 setLoading(false);
             })
             .catch(err => {
-                setError(err);
+                setError(err.message);
                 setLoading(false);
             });
     }, [eventName]);
@@ -65,8 +66,25 @@ function EventDetail() {
         }
     };
 
+    const handleFinalizeEvent = () => {
+        if (user && event) {
+            finalizeEvent(event.id)
+                .then(() => {
+                    setEvent(prevEvent => ({
+                        ...prevEvent,
+                        finished: true
+                    }));
+                    setFinalizeError(null);
+                    navigate(`/events/${event.id}/ranking`); // Redirect to Ranking page after finalizing event
+                })
+                .catch(err => {
+                    setFinalizeError(err.message);
+                });
+        }
+    };
+
     if (loading) return <p>Loading event...</p>;
-    if (error) return <p>Error loading event: {error.message}</p>;
+    if (error) return <p>Error loading event: {error}</p>;
     if (!event) return <p>No event found</p>;
 
     return (
@@ -91,25 +109,33 @@ function EventDetail() {
                     <div>
                         <button onClick={() => navigate(`/events/${event.id}/ranking`)}>Ranking</button>
                         <button onClick={() => navigate(`/events/${event.id}/pairing`)}>Pareamento</button>
-                        <button onClick={() => navigate(`/events/${event.id}/statistics`)}>Statistics</button>
+                        {event.finished && <button onClick={() => navigate(`/events/${event.id}/statistics`)}>Statistics</button>}
                         <button onClick={() => navigate(`/update-event/${event.id}`)}>Update Event</button>
                         {!event.hasStarted && <button onClick={handleStartEvent}>Start Event</button>}
+                        {event.currentRound >= event.numberOfRounds && !event.finished && (
+                            <button onClick={handleFinalizeEvent}>Finalize Event</button>
+                        )}
                     </div>
                 ) : (
                     <>
                         {event.playerIds.includes(user.id) ? (
-                            <div>
-                                <button onClick={() => navigate(`/events/${event.id}/ranking`)}>Ranking</button>
-                                <button onClick={() => navigate(`/events/${event.id}/pairing`)}>Pareamento</button>
-                                <button onClick={() => navigate(`/events/${event.id}/statistics`)}>Statistics</button>
-                            </div>
+                            event.hasStarted ? (
+                                <div>
+                                    <button onClick={() => navigate(`/events/${event.id}/ranking`)}>Ranking</button>
+                                    <button onClick={() => navigate(`/events/${event.id}/pairing`)}>Pareamento</button>
+                                    {event.finished && <button onClick={() => navigate(`/events/${event.id}/statistics`)}>Statistics</button>}
+                                </div>
+                            ) : (
+                                <p>Aguarde o torneio começar</p>
+                            )
                         ) : (
-                            <button onClick={handleRegistration}>Se Inscrever</button>
+                            !event.hasStarted && <button onClick={handleRegistration}>Se Inscrever</button>
                         )}
                     </>
                 )}
                 {registrationError && <p className="error-message">{registrationError}</p>}
                 {startError && <p className="error-message">{startError}</p>}
+                {finalizeError && <p className="error-message">{finalizeError}</p>}
             </div>
         </div>
     );

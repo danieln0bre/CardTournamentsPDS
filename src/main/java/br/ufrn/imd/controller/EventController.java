@@ -1,8 +1,11 @@
 package br.ufrn.imd.controller;
 
 import br.ufrn.imd.model.Event;
+import br.ufrn.imd.model.EventResult;
 import br.ufrn.imd.model.Manager;
 import br.ufrn.imd.model.Player;
+import br.ufrn.imd.model.PlayerResult;
+import br.ufrn.imd.repository.EventResultRepository;
 import br.ufrn.imd.service.EventRankingService;
 import br.ufrn.imd.service.EventService;
 import br.ufrn.imd.service.ManagerService;
@@ -21,12 +24,14 @@ public class EventController {
     private final PlayerService playerService;
     private final EventService eventService;
     private final ManagerService managerService;
+    private final EventResultRepository eventResultRepository;
 
     @Autowired
-    public EventController(PlayerService playerService, EventService eventService, ManagerService managerService) {
+    public EventController(PlayerService playerService, EventService eventService, ManagerService managerService, EventResultRepository eventResultRepository) {
         this.playerService = playerService;
         this.eventService = eventService;
         this.managerService = managerService;
+        this.eventResultRepository = eventResultRepository;
     }
 
     @PostMapping("/createEvent")
@@ -111,18 +116,6 @@ public class EventController {
                            .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    @GetMapping("/{id}/deck-matchups")
-    public ResponseEntity<?> getDeckMatchups(@PathVariable String id) {
-        try {
-            Map<String, Map<String, Double>> matchups = eventService.getDeckMatchupStatistics(id);
-            return ResponseEntity.ok(matchups);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body("Error: " + e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError().body("Internal Server Error: Could not retrieve matchups.");
-        }
-    }
-
     @PutMapping("/{eventId}/finalize")
     public ResponseEntity<?> finalizeEvent(@PathVariable String eventId) {
         try {
@@ -134,7 +127,45 @@ public class EventController {
             return ResponseEntity.internalServerError().body("Internal Server Error: Unable to finalize event.");
         }
     }
+    
+    
+    @GetMapping("/{id}/results")
+    public ResponseEntity<EventResult> getEventResults(@PathVariable String id) {
+        try {
+            EventResult eventResult = eventService.getEventResultByEventId(id);
+            return ResponseEntity.ok(eventResult);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(null);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(null);
+        }
+    }
 
+    @GetMapping("/{id}/result-ranking")
+    public ResponseEntity<List<PlayerResult>> getEventResultRanking(@PathVariable String id) {
+        try {
+            List<PlayerResult> ranking = eventService.getEventResultRanking(id);
+            return ResponseEntity.ok(ranking);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(null);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(null);
+        }
+    }
+
+    @GetMapping("/{id}/deck-matchups")
+    public ResponseEntity<Map<String, Map<String, Double>>> getDeckMatchups(@PathVariable String id) {
+        try {
+            Map<String, Map<String, Double>> matchups = eventService.getDeckMatchupStatistics(id);
+            return ResponseEntity.ok(matchups);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(null);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(null);
+        }
+    }
+
+    
     @GetMapping("/manager/{managerId}/events")
     public ResponseEntity<List<Event>> getEventsByManagerId(@PathVariable String managerId) {
         try {

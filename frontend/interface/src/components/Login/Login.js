@@ -19,7 +19,7 @@ function Login() {
             const response = await loginUser(credentials);
             console.log('Login successful', response);
             setUser(response);  // Store user data in context
-            navigate('/events');  // Redirect to events
+            navigate('/my-events');  // Redirect to events
         } catch (error) {
             setError('Login failed. Please check your username and password.');
             console.error('Login error', error);

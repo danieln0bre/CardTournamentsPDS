@@ -9,6 +9,7 @@ function CreateEvent() {
     const [eventName, setEventName] = useState('');
     const [eventDate, setEventDate] = useState('');
     const [eventLocation, setEventLocation] = useState('');
+    const [numberOfRounds, setNumberOfRounds] = useState(0);
     const [error, setError] = useState(null);
     const [success, setSuccess] = useState(null);
     const navigate = useNavigate();
@@ -19,7 +20,7 @@ function CreateEvent() {
         setSuccess(null);
 
         try {
-            const newEvent = { name: eventName, date: eventDate, location: eventLocation };
+            const newEvent = { name: eventName, date: eventDate, location: eventLocation, numberOfRounds };
             await createEvent(user.id, newEvent);
             setSuccess('Event created successfully!');
             navigate('/my-events'); // Redirect to my events page after creation
@@ -57,6 +58,16 @@ function CreateEvent() {
                         id="eventLocation"
                         value={eventLocation}
                         onChange={(e) => setEventLocation(e.target.value)}
+                    />
+                </div>
+                <div className="form-group">
+                    <label htmlFor="numberOfRounds">Number of Rounds</label>
+                    <input
+                        type="number"
+                        id="numberOfRounds"
+                        value={numberOfRounds}
+                        onChange={(e) => setNumberOfRounds(e.target.value)}
+                        min="0"
                     />
                 </div>
                 <button type="submit">Create Event</button>

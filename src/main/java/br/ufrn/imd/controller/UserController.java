@@ -3,6 +3,7 @@ package br.ufrn.imd.controller;
 import br.ufrn.imd.model.Manager;
 import br.ufrn.imd.model.Player;
 import br.ufrn.imd.model.User;
+import br.ufrn.imd.service.ManagerService;
 import br.ufrn.imd.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,9 +14,11 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
 
     private final UserService userService;
+    private final ManagerService managerService;
 
-    public UserController(UserService userService) {
+    public UserController(UserService userService, ManagerService managerService) {
         this.userService = userService;
+        this.managerService = managerService;
     }
 
     @PostMapping("/register/player")
@@ -41,6 +44,13 @@ public class UserController {
     @GetMapping("/{id}")
     public ResponseEntity<User> getUserById(@PathVariable String id, @RequestParam String userType) {
         return userService.getUserById(id, userType)
+                          .map(ResponseEntity::ok)
+                          .orElse(ResponseEntity.notFound().build());
+    }
+    
+    @GetMapping("/manager/{id}")
+    public ResponseEntity<Manager> getManagerById(@PathVariable String id) {
+        return managerService.getManagerById(id)
                           .map(ResponseEntity::ok)
                           .orElse(ResponseEntity.notFound().build());
     }

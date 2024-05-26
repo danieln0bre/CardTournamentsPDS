@@ -2,12 +2,19 @@ package br.ufrn.imd.service;
 
 import br.ufrn.imd.model.Deck;
 import br.ufrn.imd.model.Event;
+import br.ufrn.imd.model.EventResult;
 import br.ufrn.imd.model.Pairing;
 import br.ufrn.imd.model.Player;
+import br.ufrn.imd.model.PlayerResult;
 import br.ufrn.imd.repository.EventRepository;
+import br.ufrn.imd.repository.EventResultRepository;
+import br.ufrn.imd.repository.PlayerRepository;
+import br.ufrn.imd.service.EventRankingService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,15 +28,21 @@ public class EventService {
     private final MatchService matchService;
     private final PlayerService playerService;
     private final DeckService deckService;
-
+    private final PlayerRepository playerRepository;
+    private final EventResultRepository eventResultRepository;
+    private final EventRankingService eventRankingService;
+    
     @Autowired
     public EventService(PairingService pairingService, EventRepository eventRepository,
-                        MatchService matchService, PlayerService playerService, DeckService deckService) {
+                        MatchService matchService, PlayerService playerService, DeckService deckService, PlayerRepository playerRepository, EventResultRepository eventResultRepository, EventRankingService eventRankingService) {
         this.pairingService = pairingService;
         this.eventRepository = eventRepository;
         this.matchService = matchService;
         this.playerService = playerService;
         this.deckService = deckService;
+        this.playerRepository = playerRepository;
+        this.eventResultRepository = eventResultRepository;
+        this.eventRankingService = eventRankingService;
     }
 
     public Event saveEvent(Event event) {
@@ -44,12 +57,6 @@ public class EventService {
         if (event.getLocation() == null || event.getLocation().trim().isEmpty()) {
             throw new IllegalArgumentException("Event location cannot be empty.");
         }
-    }
-    
-    public Map<String, Map<String, Double>> getDeckMatchupStatistics(String eventId) {
-        Event event = eventRepository.findById(eventId)
-                                     .orElseThrow(() -> new IllegalArgumentException("Event not found with ID: " + eventId));
-        return matchService.getDeckMatchupStatistics(eventId);
     }
     
     public Optional<Event> getEventByName(String name) {
@@ -107,47 +114,57 @@ public class EventService {
         Event event = getEventById(eventId).orElseThrow(() ->
             new IllegalArgumentException("Event not found with ID: " + eventId));
 
-        event.setFinished(true);  // Marks the event as finished
-        event = eventRepository.save(event);  // Saves the final state of the event
+        event.setFinished(true);
+        event = eventRepository.save(event);
 
         List<Player> players = playerService.getPlayersByIds(event.getPlayerIds());
         if (players.isEmpty()) {
             throw new IllegalStateException("No players found for the event.");
         }
 
-        // Use sortByEventPoints from EventRankingService to determine the player positions
-        List<Player> sortedPlayers = EventRankingService.sortByEventPoints(players);
-        Map<String, Integer> playerPositions = new HashMap<>();
-        for (int i = 0; i < sortedPlayers.size(); i++) {
-            playerPositions.put(sortedPlayers.get(i).getId(), i + 1);
-        }
-
+        List<PlayerResult> playerResults = new ArrayList<>();
         players.forEach(player -> {
-            int earnedEventPoints = player.getEventPoints();
-            player.setRankPoints(player.getRankPoints() + earnedEventPoints);
+            PlayerResult result = new PlayerResult();
+            result.setPlayerId(player.getId());
+            result.setEventPoints(player.getEventPoints());
+            result.setWinrate(player.getWinrate());
+            result.setOpponentIds(player.getOpponentIds());
+            result.setDeckId(player.getDeckId());
+            playerResults.add(result);
+
+            // Reset player attributes
+            player.setRankPoints(player.getRankPoints() + player.getEventPoints());
             player.setEventPoints(0);
             player.setWinrate(0);
             player.setOpponentsMatchWinrate(0);
             player.clearOpponents();
             player.getAppliedEventsId().remove(eventId);
             player.addEventId(eventId);
-
-            if (player.getDeckId() != null) {
-                Integer currentPosition = playerPositions.get(player.getId());
-                if (currentPosition != null) {
-                    Deck deck = deckService.getDeckById(player.getDeckId());
-                    if (deck != null) {
-                        // Update the deck's position frequencies based on the current position
-                        deck.getPositionFrequencies().merge(currentPosition, 1, Integer::sum);
-                        deckService.saveDeck(deck); // Save the updated deck
-                    }
-                }
-            }
+            playerRepository.save(player);
         });
 
-        playerService.saveAll(players);
+        // Save event results
+        EventResult eventResult = new EventResult();
+        eventResult.setEventId(eventId);
+        eventResult.setPlayerResults(playerResults);
+        eventResultRepository.save(eventResult);
 
         return event;
+    }
+    
+    public EventResult getEventResultByEventId(String eventId) {
+        return eventResultRepository.findByEventId(eventId)
+                .orElseThrow(() -> new IllegalArgumentException("Event result not found for ID: " + eventId));
+    }
+
+    public List<PlayerResult> getEventResultRanking(String eventId) {
+        EventResult eventResult = getEventResultByEventId(eventId);
+        return eventRankingService.sortByResultEventPoints(eventResult.getPlayerResults());
+    }
+
+    public Map<String, Map<String, Double>> getDeckMatchupStatistics(String eventId) {
+        EventResult eventResult = getEventResultByEventId(eventId);
+        return matchService.getDeckMatchupStatistics(eventResult);
     }
 
 
@@ -155,7 +172,7 @@ public class EventService {
         Event event = getEventById(eventId).orElseThrow(() ->
             new IllegalArgumentException("Event not found with ID: " + eventId));
 
-        if (event.getCurrentRound() >= event.getNumberOfRounds()) {
+        if (event.getCurrentRound() >= event.getNumberOfRounds()+1) {
             throw new IllegalStateException("All rounds already completed for this event.");
         }
 
@@ -164,8 +181,13 @@ public class EventService {
         List<Player> players = playerService.getPlayersByIds(event.getPlayerIds());
         List<Pairing> newPairings = pairingService.createPairings(players);
         event.setPairings(newPairings);
-        event.setCurrentRound(event.getCurrentRound() + 1);
+        if(event.getCurrentRound() < event.getNumberOfRounds()){
+        	event.setCurrentRound(event.getCurrentRound() + 1);
+        }
 
-        return eventRepository.save(event);
+        eventRepository.save(event);
+        matchService.updateDeckMatchups(eventId, event.getPairings());
+
+        return event;
     }
 }

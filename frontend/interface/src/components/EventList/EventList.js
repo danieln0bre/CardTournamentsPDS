@@ -41,7 +41,9 @@ function EventList() {
                         <div className="event-header">
                             <div className="event-name">
                                 {event.name}
-                                {playerEvents.includes(event.id) && <span className="tag">Inscrito</span>}
+                                {playerEvents.includes(event.id) && <span className="tag inscrito">Inscrito</span>}
+                                {!event.finished && event.hasStarted && playerEvents.includes(event.id) && <span className="tag ongoing">Em Andamento</span>}
+                                {!event.finished && event.hasStarted && !playerEvents.includes(event.id) && <span className="tag started">Iniciado</span>}
                             </div>
                             <div className="event-date">{event.date || 'Data não definida'}</div>
                         </div>

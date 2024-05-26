@@ -23,6 +23,11 @@ export const fetchEvents = () => {
         .then(checkResponseStatus);
 };
 
+export const finalizeEvent = (eventId) => {
+    return axiosInstance.put(`/events/${eventId}/finalize`)
+        .then(checkResponseStatus);
+};
+
 export const fetchEventById = (eventId) => {
     return axiosInstance.get(`/events/${eventId}/get`)
         .then(checkResponseStatus);
@@ -71,6 +76,14 @@ export const fetchDeckMatchups = (eventId) => {
 
 export const fetchEventRankings = (eventId) => {
     return axiosInstance.get(`/events/${eventId}/rankings`).then(response => response.data);
+};
+
+export const fetchEventResults = (eventId) => {
+    return axiosInstance.get(`/events/${eventId}/results`).then(checkResponseStatus);
+};
+
+export const fetchEventResultRanking = (eventId) => {
+    return axiosInstance.get(`/events/${eventId}/result-ranking`).then(checkResponseStatus);
 };
 
 export const fetchEventPairings = (eventId) => {
@@ -150,5 +163,13 @@ export const recalculateWinrates = (playerId) => {
 export const finalizeRound = (eventId) => {
     return axiosInstance.post(`/events/${eventId}/finalizeRound`)
         .then(response => response.data);
+};
+
+export const fetchManagerById = managerId => {
+    return axiosInstance.get(`/users/manager/${managerId}`).then(checkResponseStatus);
+};
+
+export const fetchDeckById = (deckId) => {
+    return axiosInstance.get(`/players/decks/${deckId}`).then(checkResponseStatus);
 };
 

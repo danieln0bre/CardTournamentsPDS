@@ -1,14 +1,21 @@
 package br.ufrn.imd.service;
 
 import br.ufrn.imd.model.Player;
+import br.ufrn.imd.model.PlayerResult;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.stereotype.Service;
 
 /**
  * Provides functionality to rank players based on event points and opponents' win rates.
  */
+
+@Service
 public class EventRankingService {
     
     /**
@@ -26,6 +33,12 @@ public class EventRankingService {
         List<Player> sortedPlayers = new ArrayList<>(players);
         Collections.sort(sortedPlayers, new EventPointsAndOpponentMatchWinrateComparator());
         return sortedPlayers;
+    }
+    
+    public List<PlayerResult> sortByResultEventPoints(List<PlayerResult> playerResults) {
+        return playerResults.stream()
+                .sorted(Comparator.comparingInt(PlayerResult::getEventPoints).reversed())
+                .collect(Collectors.toList());
     }
 
     /**

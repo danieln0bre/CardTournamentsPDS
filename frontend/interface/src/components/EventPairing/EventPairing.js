@@ -27,8 +27,8 @@ function EventPairing() {
                 setPairings(data);
                 const playerIds = new Set();
                 data.forEach(pairing => {
-                    playerIds.add(pairing.playerOneId);
-                    playerIds.add(pairing.playerTwoId);
+                    if (pairing.playerOneId !== 'Bye') playerIds.add(pairing.playerOneId);
+                    if (pairing.playerTwoId !== 'Bye') playerIds.add(pairing.playerTwoId);
                 });
                 return Promise.all(Array.from(playerIds).map(playerId => fetchPlayerById(playerId)));
             })
@@ -63,6 +63,7 @@ function EventPairing() {
         setPairings(prevPairings => {
             const updatedPairings = [...prevPairings];
             updatedPairings[index].result = result;
+            console.log('Updated pairings:', updatedPairings); // Debugging line
             return updatedPairings;
         });
     };
@@ -70,23 +71,32 @@ function EventPairing() {
     const handleSaveResults = async () => {
         try {
             const validPairings = pairings.filter(pairing => pairing.result !== -1);
-
+    
+            console.log('Valid pairings to save:', validPairings); // Debugging line
+    
             await savePairings(eventId, validPairings);
             const recalculatePromises = validPairings.flatMap(pairing => [
                 recalculateWinrates(pairing.playerOneId),
                 recalculateWinrates(pairing.playerTwoId)
             ]);
-
+    
             await Promise.all(recalculatePromises);
             await finalizeRound(eventId);
 
-            if (eventDetails) {
-                const updatedEventDetails = { ...eventDetails, currentRound: eventDetails.currentRound + 1 };
-                await updateEvent(eventId, updatedEventDetails);
-            }
+            // Reload the event details to get the updated current round
+            const updatedEventDetails = await fetchEventById(eventId);
 
+            if (updatedEventDetails.currentRound >= updatedEventDetails.numberOfRounds) {
+                navigate(`/events/${eventId}/ranking`);
+            } else {
+                setEventDetails(updatedEventDetails);
+            }
+    
             setSaveSuccess("Pairings and results saved successfully. Round finalized.");
             setSaveError(null);
+    
+            // Reload the page after successful save
+            window.location.reload();
         } catch (err) {
             setSaveError("Error saving pairings and results: " + err.message);
             setSaveSuccess(null);
@@ -108,8 +118,8 @@ function EventPairing() {
             <ul>
                 {pairings.map((pairing, index) => (
                     <li key={index} className="pairing-item">
-                        <div>{players[pairing.playerOneId]} vs {players[pairing.playerTwoId]}</div>
-                        {user.role === 'ROLE_MANAGER' && (
+                        <div>{players[pairing.playerOneId]} vs {pairing.playerTwoId === 'Bye' ? 'Bye' : players[pairing.playerTwoId]}</div>
+                        {user.role === 'ROLE_MANAGER' && pairing.playerTwoId !== 'Bye' && (
                             <div>
                                 <label>
                                     <input
