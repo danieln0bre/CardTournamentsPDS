@@ -177,10 +177,11 @@ public class EventService {
         }
 
         event.getPairings().forEach(matchService::updateMatchResult);
-
-        List<Player> players = playerService.getPlayersByIds(event.getPlayerIds());
-        List<Pairing> newPairings = pairingService.createPairings(players);
-        event.setPairings(newPairings);
+        if(event.getCurrentRound() < event.getNumberOfRounds()) {
+	        List<Player> players = playerService.getPlayersByIds(event.getPlayerIds());
+	        List<Pairing> newPairings = pairingService.createPairings(players);
+	        event.setPairings(newPairings);
+        }
         if(event.getCurrentRound() < event.getNumberOfRounds()){
         	event.setCurrentRound(event.getCurrentRound() + 1);
         }
