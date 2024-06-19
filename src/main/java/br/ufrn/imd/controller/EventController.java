@@ -6,10 +6,10 @@ import br.ufrn.imd.model.Manager;
 import br.ufrn.imd.model.Player;
 import br.ufrn.imd.model.PlayerResult;
 import br.ufrn.imd.repository.EventResultRepository;
-import br.ufrn.imd.service.EventRankingService;
 import br.ufrn.imd.service.EventService;
 import br.ufrn.imd.service.ManagerService;
 import br.ufrn.imd.service.PlayerService;
+import br.ufrn.imd.strategy.EventRankingStrategy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -25,13 +25,15 @@ public class EventController {
     private final EventService eventService;
     private final ManagerService managerService;
     private final EventResultRepository eventResultRepository;
+    private final EventRankingStrategy eventRankingStrategy;
 
     @Autowired
-    public EventController(PlayerService playerService, EventService eventService, ManagerService managerService, EventResultRepository eventResultRepository) {
+    public EventController(PlayerService playerService, EventService eventService, ManagerService managerService, EventResultRepository eventResultRepository, EventRankingStrategy eventRankingStrategy) {
         this.playerService = playerService;
         this.eventService = eventService;
         this.managerService = managerService;
         this.eventResultRepository = eventResultRepository;
+        this.eventRankingStrategy = eventRankingStrategy;
     }
 
     @PostMapping("/createEvent")
@@ -111,7 +113,7 @@ public class EventController {
         return eventService.getEventById(id)
                            .map(event -> {
                                List<Player> players = playerService.getPlayersByIds(event.getPlayerIds());
-                               return ResponseEntity.ok(EventRankingService.sortByEventPoints(players));
+                               return ResponseEntity.ok(eventRankingStrategy.rankPlayers(players));
                            })
                            .orElseGet(() -> ResponseEntity.notFound().build());
     }
@@ -127,8 +129,7 @@ public class EventController {
             return ResponseEntity.internalServerError().body("Internal Server Error: Unable to finalize event.");
         }
     }
-    
-    
+
     @GetMapping("/{id}/results")
     public ResponseEntity<EventResult> getEventResults(@PathVariable String id) {
         try {
@@ -165,7 +166,6 @@ public class EventController {
         }
     }
 
-    
     @GetMapping("/manager/{managerId}/events")
     public ResponseEntity<List<Event>> getEventsByManagerId(@PathVariable String managerId) {
         try {

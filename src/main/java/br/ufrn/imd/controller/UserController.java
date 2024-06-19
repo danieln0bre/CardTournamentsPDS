@@ -47,7 +47,7 @@ public class UserController {
                           .map(ResponseEntity::ok)
                           .orElse(ResponseEntity.notFound().build());
     }
-    
+
     @GetMapping("/manager/{id}")
     public ResponseEntity<Manager> getManagerById(@PathVariable String id) {
         return managerService.getManagerById(id)

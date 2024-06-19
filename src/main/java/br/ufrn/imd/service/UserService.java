@@ -25,20 +25,17 @@ public class UserService {
     public Optional<User> getUserByUsername(String username) {
         Optional<Player> player = playerRepository.findByUsername(username);
         if (player.isPresent()) {
-            System.out.println("Found player: " + player.get().getUsername());
             return Optional.of(player.get());
         }
 
         Optional<Manager> manager = managerRepository.findByUsername(username);
         if (manager.isPresent()) {
-            System.out.println("Found manager: " + manager.get().getUsername());
             return Optional.of(manager.get());
         }
 
-        System.out.println("User not found with username: " + username);
         return Optional.empty();
     }
-    
+
     public Optional<String> getUserIdByUsername(String username) {
         Optional<Player> player = playerRepository.findByUsername(username);
         if (player.isPresent()) {

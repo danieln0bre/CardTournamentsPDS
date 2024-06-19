@@ -9,13 +9,13 @@ import br.ufrn.imd.model.PlayerResult;
 import br.ufrn.imd.repository.EventRepository;
 import br.ufrn.imd.repository.EventResultRepository;
 import br.ufrn.imd.repository.PlayerRepository;
-import br.ufrn.imd.service.EventRankingService;
-
+import br.ufrn.imd.strategy.EventRankingStrategy;
+import br.ufrn.imd.strategy.MatchUpdateStrategy;
+import br.ufrn.imd.strategy.PairingStrategy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -23,26 +23,25 @@ import java.util.Optional;
 @Service
 public class EventService {
 
-    private final PairingService pairingService;
+    private final PairingStrategy pairingStrategy;
+    private final MatchUpdateStrategy matchUpdateStrategy;
+    private final EventRankingStrategy eventRankingStrategy;
     private final EventRepository eventRepository;
-    private final MatchService matchService;
     private final PlayerService playerService;
-    private final DeckService deckService;
     private final PlayerRepository playerRepository;
     private final EventResultRepository eventResultRepository;
-    private final EventRankingService eventRankingService;
     
     @Autowired
-    public EventService(PairingService pairingService, EventRepository eventRepository,
-                        MatchService matchService, PlayerService playerService, DeckService deckService, PlayerRepository playerRepository, EventResultRepository eventResultRepository, EventRankingService eventRankingService) {
-        this.pairingService = pairingService;
+    public EventService(PairingStrategy pairingStrategy, MatchUpdateStrategy matchUpdateStrategy, EventRankingStrategy eventRankingStrategy, 
+                        EventRepository eventRepository, PlayerService playerService, PlayerRepository playerRepository, 
+                        EventResultRepository eventResultRepository) {
+        this.pairingStrategy = pairingStrategy;
+        this.matchUpdateStrategy = matchUpdateStrategy;
+        this.eventRankingStrategy = eventRankingStrategy;
         this.eventRepository = eventRepository;
-        this.matchService = matchService;
         this.playerService = playerService;
-        this.deckService = deckService;
         this.playerRepository = playerRepository;
         this.eventResultRepository = eventResultRepository;
-        this.eventRankingService = eventRankingService;
     }
 
     public Event saveEvent(Event event) {
@@ -90,24 +89,15 @@ public class EventService {
     }
 
     public Event addPlayerToEvent(String eventId, String playerId) {
-        System.out.println("Fetching event by ID: " + eventId);
         Event event = getEventById(eventId).orElseThrow(() ->
             new IllegalArgumentException("Event not found with ID: " + eventId));
         
-        System.out.println("Event found: " + event);
-        System.out.println("Event ID: " + event.getId());
         if (event.getPlayerIds().contains(playerId)) {
             throw new IllegalArgumentException("Player already added to the event.");
         }
 
-        System.out.println("Adding player ID: " + playerId + " to event: " + event);
         event.addPlayerId(playerId);
-        System.out.println("Event's player IDs before save: " + event.getPlayerIds());
-
-        Event savedEvent = eventRepository.save(event);
-        System.out.println("Event saved: " + savedEvent);
-        System.out.println("Event's player IDs after save: " + savedEvent.getPlayerIds());
-        return savedEvent;
+        return eventRepository.save(event);
     }
 
     public Event finalizeEvent(String eventId) {
@@ -159,14 +149,13 @@ public class EventService {
 
     public List<PlayerResult> getEventResultRanking(String eventId) {
         EventResult eventResult = getEventResultByEventId(eventId);
-        return eventRankingService.sortByResultEventPoints(eventResult.getPlayerResults());
+        return eventRankingStrategy.rankPlayerResults(eventResult.getPlayerResults());
     }
 
     public Map<String, Map<String, Double>> getDeckMatchupStatistics(String eventId) {
         EventResult eventResult = getEventResultByEventId(eventId);
-        return matchService.getDeckMatchupStatistics(eventResult);
+        return matchUpdateStrategy.getDeckMatchupStatistics(eventResult);
     }
-
 
     public Event finalizeRound(String eventId) {
         Event event = getEventById(eventId).orElseThrow(() ->
@@ -176,10 +165,10 @@ public class EventService {
             throw new IllegalStateException("All rounds already completed for this event.");
         }
 
-        event.getPairings().forEach(matchService::updateMatchResult);
+        event.getPairings().forEach(matchUpdateStrategy::updateMatchResult);
         if(event.getCurrentRound() < event.getNumberOfRounds()) {
 	        List<Player> players = playerService.getPlayersByIds(event.getPlayerIds());
-	        List<Pairing> newPairings = pairingService.createPairings(players);
+	        List<Pairing> newPairings = pairingStrategy.createPairings(players);
 	        event.setPairings(newPairings);
         }
         if(event.getCurrentRound() < event.getNumberOfRounds()){
@@ -187,7 +176,7 @@ public class EventService {
         }
 
         eventRepository.save(event);
-        matchService.updateDeckMatchups(eventId, event.getPairings());
+        matchUpdateStrategy.updateDeckMatchups(eventId, event.getPairings());
 
         return event;
     }
