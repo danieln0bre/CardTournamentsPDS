@@ -4,7 +4,6 @@ import br.ufrn.imd.model.EventResult;
 import br.ufrn.imd.model.PlayerResult;
 import br.ufrn.imd.strategy.StatisticsGenerationStrategy;
 import org.springframework.stereotype.Component;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;

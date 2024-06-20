@@ -3,6 +3,8 @@ package br.ufrn.imd.model;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import br.ufrn.imd.observer.RankingObserver;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -25,6 +27,7 @@ public class Event {
     private List<String> playerIds;
     private List<Pairing> pairings;
     private String managerId; 
+    private List<RankingObserver> observers;
 
     /**
      * Constructor for creating a new Event with initial details.
@@ -45,6 +48,7 @@ public class Event {
         this.playerIds = new ArrayList<>();
         this.pairings = new ArrayList<>();
         this.managerId = managerId;
+        this.observers = new ArrayList<>();
     }
 
     /**
@@ -77,6 +81,21 @@ public class Event {
     }
 
     // Standard getters and setters
+    
+    public void addObserver(RankingObserver observer) {
+        observers.add(observer);
+    }
+
+    public void removeObserver(RankingObserver observer) {
+        observers.remove(observer);
+    }
+
+    public void notifyObservers() {
+        for (RankingObserver observer : observers) {
+            observer.updateRanking(this);
+        }
+    }
+        
     public String getName() {
         return name;
     }

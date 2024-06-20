@@ -4,7 +4,7 @@ import br.ufrn.imd.model.EventResult;
 import br.ufrn.imd.model.Pairing;
 import br.ufrn.imd.model.Player;
 import br.ufrn.imd.repository.PlayerRepository;
-import br.ufrn.imd.service.MatchService;
+import br.ufrn.imd.service.AbstractMatchService;
 import br.ufrn.imd.strategy.StatisticsGenerationStrategy;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Map;
 
 @Service
-public class ConcreteMatchService implements MatchService {
+public class ConcreteMatchService extends AbstractMatchService {
 
     private final PlayerRepository playerRepository;
     private final StatisticsGenerationStrategy statisticsGenerationStrategy;
@@ -31,15 +31,6 @@ public class ConcreteMatchService implements MatchService {
         validatePairing(pairing);
         handleByeMatch(pairing);
         updatePlayersResults(pairing);
-    }
-
-    private void validatePairing(Pairing pairing) {
-        if (pairing == null) {
-            throw new IllegalArgumentException("Pairing cannot be null.");
-        }
-        if (pairing.getResult() < 0 || pairing.getResult() > 1) {
-            throw new IllegalArgumentException("Invalid match result. Must be 0 or 1.");
-        }
     }
 
     @Override
@@ -88,7 +79,18 @@ public class ConcreteMatchService implements MatchService {
         // Save or update the matchups in the repository or other storage if needed.
     }
 
-    private void handleByeMatch(Pairing pairing) {
+    @Override
+	public void validatePairing(Pairing pairing) {
+        if (pairing == null) {
+            throw new IllegalArgumentException("Pairing cannot be null.");
+        }
+        if (pairing.getResult() < 0 || pairing.getResult() > 1) {
+            throw new IllegalArgumentException("Invalid match result. Must be 0 or 1.");
+        }
+    }
+
+    @Override
+	public void handleByeMatch(Pairing pairing) {
         if ("Bye".equals(pairing.getPlayerTwoId())) {
             updatePlayerForBye(pairing.getPlayerOneId());
         } else if ("Bye".equals(pairing.getPlayerOneId())) {
@@ -96,7 +98,8 @@ public class ConcreteMatchService implements MatchService {
         }
     }
 
-    private void updatePlayersResults(Pairing pairing) {
+    @Override
+	public void updatePlayersResults(Pairing pairing) {
         if ("Bye".equals(pairing.getPlayerOneId()) || "Bye".equals(pairing.getPlayerTwoId())) {
             return;
         }

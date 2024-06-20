@@ -1,7 +1,6 @@
 package br.ufrn.imd.strategy;
 
 import br.ufrn.imd.model.EventResult;
-
 import java.util.Map;
 
 public interface StatisticsGenerationStrategy {
