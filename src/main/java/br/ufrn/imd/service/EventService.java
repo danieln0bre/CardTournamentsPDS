@@ -8,9 +8,11 @@ import br.ufrn.imd.model.PlayerResult;
 import br.ufrn.imd.repository.EventRepository;
 import br.ufrn.imd.repository.EventResultRepository;
 import br.ufrn.imd.repository.PlayerRepository;
-import br.ufrn.imd.strategy.EventServiceStrategy;
-import br.ufrn.imd.strategy.MatchUpdateStrategy;
 import br.ufrn.imd.strategy.PairingStrategy;
+import br.ufrn.imd.strategy.MatchUpdateStrategy;
+import br.ufrn.imd.strategy.RoundAndEventFinalizationStrategy;
+import br.ufrn.imd.strategy.StatisticsGenerationStrategy;
+import br.ufrn.imd.strategy.EventRankingStrategy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -23,18 +25,23 @@ public class EventService {
 
     private final PairingStrategy pairingStrategy;
     private final MatchUpdateStrategy matchUpdateStrategy;
-    private final EventServiceStrategy eventServiceStrategy;
+    private final RoundAndEventFinalizationStrategy roundAndEventFinalizationStrategy;
+    private final StatisticsGenerationStrategy statisticsGenerationStrategy;
+    private final EventRankingStrategy eventRankingStrategy;
     private final EventRepository eventRepository;
     private final PlayerRepository playerRepository;
     private final PlayerService playerService;
 
     @Autowired
     public EventService(PairingStrategy pairingStrategy, MatchUpdateStrategy matchUpdateStrategy,
-                        EventServiceStrategy eventServiceStrategy, EventRepository eventRepository,
-                        PlayerRepository playerRepository, PlayerService playerService) {
+                        RoundAndEventFinalizationStrategy roundAndEventFinalizationStrategy,
+                        StatisticsGenerationStrategy statisticsGenerationStrategy, EventRankingStrategy eventRankingStrategy,
+                        EventRepository eventRepository, PlayerRepository playerRepository, PlayerService playerService) {
         this.pairingStrategy = pairingStrategy;
         this.matchUpdateStrategy = matchUpdateStrategy;
-        this.eventServiceStrategy = eventServiceStrategy;
+        this.roundAndEventFinalizationStrategy = roundAndEventFinalizationStrategy;
+        this.statisticsGenerationStrategy = statisticsGenerationStrategy;
+        this.eventRankingStrategy = eventRankingStrategy;
         this.eventRepository = eventRepository;
         this.playerRepository = playerRepository;
         this.playerService = playerService;
@@ -71,15 +78,16 @@ public class EventService {
     }
 
     public Event finalizeEvent(String eventId) {
-        return eventServiceStrategy.finalizeEvent(eventId);
+        return roundAndEventFinalizationStrategy.finalizeEvent(eventId);
     }
 
     public EventResult getEventResultByEventId(String eventId) {
-        return eventServiceStrategy.getEventResultByEventId(eventId);
+        return roundAndEventFinalizationStrategy.getEventResultByEventId(eventId);
     }
 
     public List<PlayerResult> getEventResultRanking(String eventId) {
-        return eventServiceStrategy.getEventResultRanking(eventId);
+        EventResult eventResult = getEventResultByEventId(eventId);
+        return eventRankingStrategy.rankPlayerResults(eventResult.getPlayerResults());
     }
 
     public void updateMatchResult(Pairing pairing) {
@@ -87,31 +95,12 @@ public class EventService {
     }
 
     public Event finalizeRound(String eventId) {
-        Event event = getEventById(eventId).orElseThrow(() ->
-            new IllegalArgumentException("Event not found with ID: " + eventId));
-
-        if (event.getCurrentRound() >= event.getNumberOfRounds()) {
-            throw new IllegalStateException("All rounds already completed for this event.");
-        }
-
-        event.getPairings().forEach(matchUpdateStrategy::updateMatchResult);
-
-        if (event.getCurrentRound() < event.getNumberOfRounds()) {
-            List<Player> players = playerService.getPlayersByIds(event.getPlayerIds());
-            List<Pairing> newPairings = pairingStrategy.createPairings(players);
-            event.setPairings(newPairings);
-            event.setCurrentRound(event.getCurrentRound() + 1);
-        }
-
-        eventRepository.save(event);
-        matchUpdateStrategy.updateDeckMatchups(eventId, event.getPairings());
-
-        return event;
+        return roundAndEventFinalizationStrategy.finalizeRound(eventId);
     }
 
     public Map<String, Map<String, Double>> getDeckMatchupStatistics(String eventId) {
         EventResult eventResult = getEventResultByEventId(eventId);
-        return matchUpdateStrategy.getDeckMatchupStatistics(eventResult);
+        return statisticsGenerationStrategy.generateStatistics(eventResult);
     }
 
     public Event addPlayerToEvent(String eventId, String playerId) {

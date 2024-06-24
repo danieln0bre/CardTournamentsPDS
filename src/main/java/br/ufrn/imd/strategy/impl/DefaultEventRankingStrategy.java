@@ -3,13 +3,12 @@ package br.ufrn.imd.strategy.impl;
 import br.ufrn.imd.model.Player;
 import br.ufrn.imd.model.PlayerResult;
 import br.ufrn.imd.strategy.EventRankingStrategy;
+import org.springframework.stereotype.Component;
 
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import org.springframework.stereotype.Component;
 
 @Component
 public class DefaultEventRankingStrategy implements EventRankingStrategy {
@@ -19,8 +18,7 @@ public class DefaultEventRankingStrategy implements EventRankingStrategy {
         if (players == null) {
             throw new IllegalArgumentException("List of players cannot be null.");
         }
-        List<Player> sortedPlayers = players.stream().sorted(new EventPointsAndOpponentMatchWinrateComparator()).collect(Collectors.toList());
-        return sortedPlayers;
+        return players.stream().sorted(new EventPointsAndOpponentMatchWinrateComparator()).collect(Collectors.toList());
     }
 
     @Override

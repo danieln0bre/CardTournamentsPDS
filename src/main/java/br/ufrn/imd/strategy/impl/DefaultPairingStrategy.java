@@ -4,6 +4,7 @@ import br.ufrn.imd.model.Pairing;
 import br.ufrn.imd.model.Player;
 import br.ufrn.imd.strategy.PairingStrategy;
 import org.springframework.stereotype.Component;
+
 import java.util.*;
 
 @Component

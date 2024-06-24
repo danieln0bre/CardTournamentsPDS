@@ -3,7 +3,6 @@ package br.ufrn.imd.strategy.impl;
 import br.ufrn.imd.model.EventResult;
 import br.ufrn.imd.model.Pairing;
 import br.ufrn.imd.model.Player;
-import br.ufrn.imd.model.PlayerResult;
 import br.ufrn.imd.repository.DeckRepository;
 import br.ufrn.imd.repository.PlayerRepository;
 import br.ufrn.imd.strategy.MatchUpdateStrategy;
@@ -20,7 +19,6 @@ public class DefaultMatchUpdateStrategy implements MatchUpdateStrategy {
     private final DeckRepository deckRepository;
     private final PlayerRepository playerRepository;
     private final Map<String, Map<String, Integer[]>> deckMatchups = new HashMap<>();
-    private final Map<String, Map<String, Map<String, Integer[]>>> eventDeckMatchups = new HashMap<>();
 
     @Autowired
     public DefaultMatchUpdateStrategy(PlayerRepository playerRepository, DeckRepository deckRepository) {
@@ -35,7 +33,8 @@ public class DefaultMatchUpdateStrategy implements MatchUpdateStrategy {
         updatePlayersResults(pairing);
     }
 
-    private void validatePairing(Pairing pairing) {
+    @Override
+    public void validatePairing(Pairing pairing) {
         if (pairing == null) {
             throw new IllegalArgumentException("Pairing cannot be null.");
         }
@@ -45,53 +44,36 @@ public class DefaultMatchUpdateStrategy implements MatchUpdateStrategy {
     }
 
     @Override
-    public Map<String, Map<String, Double>> getDeckMatchupStatistics(EventResult eventResult) {
-        Map<String, Map<String, Integer[]>> deckMatchups = new HashMap<>();
-
-        for (PlayerResult playerResult : eventResult.getPlayerResults()) {
-            String deckId = playerResult.getDeckId();
-            for (String opponentId : playerResult.getOpponentIds()) {
-                String opponentDeckId = getOpponentDeckId(eventResult.getPlayerResults(), opponentId);
-                if (opponentDeckId != null) {
-                    deckMatchups.putIfAbsent(deckId, new HashMap<>());
-                    deckMatchups.get(deckId).putIfAbsent(opponentDeckId, new Integer[]{0, 0});
-                    deckMatchups.get(deckId).get(opponentDeckId)[1]++;
-                    if (playerResult.getWinrate() > 0.5) {
-                        deckMatchups.get(deckId).get(opponentDeckId)[0]++;
-                    }
-                }
-            }
+    public void handleByeMatch(Pairing pairing) {
+        if ("Bye".equals(pairing.getPlayerTwoId())) {
+            updatePlayerForBye(pairing.getPlayerOneId());
+        } else if ("Bye".equals(pairing.getPlayerOneId())) {
+            updatePlayerForBye(pairing.getPlayerTwoId());
         }
-
-        Map<String, Map<String, Double>> winPercentageMap = new HashMap<>();
-        for (Map.Entry<String, Map<String, Integer[]>> entry : deckMatchups.entrySet()) {
-            String deckId = entry.getKey();
-            Map<String, Double> opponentWinPercentages = new HashMap<>();
-            for (Map.Entry<String, Integer[]> opponentEntry : entry.getValue().entrySet()) {
-                String opponentDeckId = opponentEntry.getKey();
-                Integer[] results = opponentEntry.getValue();
-                if (results[1] != 0) {
-                    double winPercentage = (double) results[0] / results[1] * 100;
-                    opponentWinPercentages.put(opponentDeckId, winPercentage);
-                }
-            }
-            winPercentageMap.put(deckId, opponentWinPercentages);
-        }
-        return winPercentageMap;
     }
 
-    private String getOpponentDeckId(List<PlayerResult> playerResults, String opponentId) {
-        for (PlayerResult playerResult : playerResults) {
-            if (playerResult.getPlayerId().equals(opponentId)) {
-                return playerResult.getDeckId();
-            }
+    @Override
+    public void updatePlayersResults(Pairing pairing) {
+        if ("Bye".equals(pairing.getPlayerOneId()) || "Bye".equals(pairing.getPlayerTwoId())) {
+            return;
         }
-        return null;
+
+        Player playerOne = fetchPlayer(pairing.getPlayerOneId());
+        Player playerTwo = fetchPlayer(pairing.getPlayerTwoId());
+
+        if (pairing.getResult() == 0) {
+            playerOne.setEventPoints(playerOne.getEventPoints() + 1);
+        } else if (pairing.getResult() == 1) {
+            playerTwo.setEventPoints(playerTwo.getEventPoints() + 1);
+        }
+
+        playerRepository.save(playerOne);
+        playerRepository.save(playerTwo);
     }
 
     @Override
     public void updateDeckMatchups(String eventId, List<Pairing> pairings) {
-        Map<String, Map<String, Integer[]>> deckMatchups = eventDeckMatchups.getOrDefault(eventId, new HashMap<>());
+        Map<String, Map<String, Integer[]>> deckMatchups = new HashMap<>();
 
         for (Pairing pairing : pairings) {
             String playerOneId = pairing.getPlayerOneId();
@@ -127,51 +109,7 @@ public class DefaultMatchUpdateStrategy implements MatchUpdateStrategy {
             deckMatchups.get(playerTwoDeckId).put(playerOneDeckId, resultsPlayerTwo);
         }
 
-        eventDeckMatchups.put(eventId, deckMatchups);
-    }
-
-    private void handleByeMatch(Pairing pairing) {
-        if ("Bye".equals(pairing.getPlayerTwoId())) {
-            updatePlayerForBye(pairing.getPlayerOneId());
-        } else if ("Bye".equals(pairing.getPlayerOneId())) {
-            updatePlayerForBye(pairing.getPlayerTwoId());
-        }
-    }
-
-    private void updatePlayersResults(Pairing pairing) {
-        if ("Bye".equals(pairing.getPlayerOneId()) || "Bye".equals(pairing.getPlayerTwoId())) {
-            return;
-        }
-
-        Player playerOne = fetchPlayer(pairing.getPlayerOneId());
-        Player playerTwo = fetchPlayer(pairing.getPlayerTwoId());
-
-        registerDeckMatchup(playerOne.getDeckId(), playerTwo.getDeckId(), pairing.getResult());
-
-        if (pairing.getResult() == 0) {
-            playerOne.setEventPoints(playerOne.getEventPoints() + 1);
-        } else if (pairing.getResult() == 1) {
-            playerTwo.setEventPoints(playerTwo.getEventPoints() + 1);
-        }
-
-        playerRepository.save(playerOne);
-        playerRepository.save(playerTwo);
-    }
-
-    private void registerDeckMatchup(String deckOneId, String deckTwoId, int result) {
-        deckMatchups.putIfAbsent(deckOneId, new HashMap<>());
-        deckMatchups.putIfAbsent(deckTwoId, new HashMap<>());
-
-        deckMatchups.get(deckOneId).putIfAbsent(deckTwoId, new Integer[]{0, 0});
-        deckMatchups.get(deckTwoId).putIfAbsent(deckOneId, new Integer[]{0, 0});
-
-        if (result == 0) {
-            deckMatchups.get(deckOneId).get(deckTwoId)[0]++;
-        } else {
-            deckMatchups.get(deckTwoId).get(deckOneId)[0]++;
-        }
-        deckMatchups.get(deckOneId).get(deckTwoId)[1]++;
-        deckMatchups.get(deckTwoId).get(deckOneId)[1]++;
+        // Save or update the matchups in the repository or other storage if needed.
     }
 
     private Player fetchPlayer(String playerId) {

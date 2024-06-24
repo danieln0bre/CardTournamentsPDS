@@ -4,6 +4,7 @@ import br.ufrn.imd.model.EventResult;
 import br.ufrn.imd.model.PlayerResult;
 import br.ufrn.imd.strategy.StatisticsGenerationStrategy;
 import org.springframework.stereotype.Component;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,7 +15,7 @@ public class DefaultStatisticsGenerationStrategy implements StatisticsGeneration
     @Override
     public Map<String, Map<String, Double>> generateStatistics(EventResult eventResult) {
         Map<String, Map<String, Integer[]>> deckMatchups = new HashMap<>();
-        
+
         for (PlayerResult playerResult : eventResult.getPlayerResults()) {
             String deckId = playerResult.getDeckId();
             for (String opponentId : playerResult.getOpponentIds()) {
