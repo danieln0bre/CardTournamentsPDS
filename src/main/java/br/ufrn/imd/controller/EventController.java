@@ -6,16 +6,17 @@ import br.ufrn.imd.model.Manager;
 import br.ufrn.imd.model.Player;
 import br.ufrn.imd.model.PlayerResult;
 import br.ufrn.imd.repository.EventResultRepository;
+import br.ufrn.imd.service.EventRankingService;
 import br.ufrn.imd.service.EventService;
 import br.ufrn.imd.service.ManagerService;
 import br.ufrn.imd.service.PlayerService;
-import br.ufrn.imd.strategy.EventRankingStrategy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/events")
@@ -25,15 +26,15 @@ public class EventController {
     private final EventService eventService;
     private final ManagerService managerService;
     private final EventResultRepository eventResultRepository;
-    private final EventRankingStrategy eventRankingStrategy;
+    private final EventRankingService eventRankingService;
 
     @Autowired
-    public EventController(PlayerService playerService, EventService eventService, ManagerService managerService, EventResultRepository eventResultRepository, EventRankingStrategy eventRankingStrategy) {
+    public EventController(PlayerService playerService, EventService eventService, ManagerService managerService, EventResultRepository eventResultRepository, EventRankingService eventRankingService) {
         this.playerService = playerService;
         this.eventService = eventService;
         this.managerService = managerService;
         this.eventResultRepository = eventResultRepository;
-        this.eventRankingStrategy = eventRankingStrategy;
+        this.eventRankingService = eventRankingService;
     }
 
     @PostMapping("/createEvent")
@@ -49,14 +50,16 @@ public class EventController {
 
     @PutMapping("/{id}/update")
     public ResponseEntity<Event> updateEvent(@PathVariable String id, @RequestBody Event eventDetails) {
-        return eventService.getEventById(id)
-                           .map(existingEvent -> {
-                               existingEvent.updateDetailsFrom(eventDetails);
-                               Event updatedEvent = eventService.saveEvent(existingEvent);
-                               updateManagerEvents(updatedEvent);
-                               return ResponseEntity.ok(updatedEvent);
-                           })
-                           .orElseGet(() -> ResponseEntity.notFound().build());
+        Optional<Event> existingEventOpt = eventService.getEventById(id);
+        if (existingEventOpt.isPresent()) {
+            Event existingEvent = existingEventOpt.get();
+            existingEvent.updateDetailsFrom(eventDetails);
+            Event updatedEvent = eventService.saveEvent(existingEvent);
+            updateManagerEvents(updatedEvent);
+            return ResponseEntity.ok(updatedEvent);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     private ResponseEntity<Event> updateAndSaveEvent(Event existingEvent, Event eventDetails) {
@@ -86,36 +89,45 @@ public class EventController {
 
     @GetMapping("/name/{name}")
     public ResponseEntity<Event> getEventByName(@PathVariable String name) {
-        return eventService.getEventByName(name.replace("-", " "))
-               .map(ResponseEntity::ok)
-               .orElseGet(() -> ResponseEntity.notFound().build());
+        Optional<Event> eventOpt = eventService.getEventByName(name.replace("-", " "));
+        if (eventOpt.isPresent()) {
+            return ResponseEntity.ok(eventOpt.get());
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @GetMapping("/{id}/get")
     public ResponseEntity<Event> getEventById(@PathVariable String id) {
-        return eventService.getEventById(id)
-                           .map(ResponseEntity::ok)
-                           .orElseGet(() -> ResponseEntity.notFound().build());
+        Optional<Event> eventOpt = eventService.getEventById(id);
+        if (eventOpt.isPresent()) {
+            return ResponseEntity.ok(eventOpt.get());
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @DeleteMapping("/{id}/delete")
     public ResponseEntity<Void> deleteEvent(@PathVariable String id) {
-        return eventService.getEventById(id)
-                           .map(event -> {
-                               eventService.deleteEvent(id);
-                               return ResponseEntity.ok().<Void>build();
-                           })
-                           .orElseGet(() -> ResponseEntity.notFound().build());
+        Optional<Event> eventOpt = eventService.getEventById(id);
+        if (eventOpt.isPresent()) {
+            eventService.deleteEvent(id);
+            return ResponseEntity.ok().build();
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @GetMapping("/{id}/rankings")
     public ResponseEntity<List<Player>> getEventRankings(@PathVariable String id) {
-        return eventService.getEventById(id)
-                           .map(event -> {
-                               List<Player> players = playerService.getPlayersByIds(event.getPlayerIds());
-                               return ResponseEntity.ok(eventRankingStrategy.rankPlayers(players));
-                           })
-                           .orElseGet(() -> ResponseEntity.notFound().build());
+        Optional<Event> eventOpt = eventService.getEventById(id);
+        if (eventOpt.isPresent()) {
+            Event event = eventOpt.get();
+            List<Player> players = playerService.getPlayersByIds(event.getPlayerIds());
+            return ResponseEntity.ok(eventRankingService.sortByEventPoints(players));
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @PutMapping("/{eventId}/finalize")

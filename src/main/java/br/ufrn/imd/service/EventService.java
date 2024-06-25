@@ -8,11 +8,9 @@ import br.ufrn.imd.model.PlayerResult;
 import br.ufrn.imd.repository.EventRepository;
 import br.ufrn.imd.repository.EventResultRepository;
 import br.ufrn.imd.repository.PlayerRepository;
-import br.ufrn.imd.strategy.PairingStrategy;
 import br.ufrn.imd.strategy.MatchUpdateStrategy;
 import br.ufrn.imd.strategy.RoundAndEventFinalizationStrategy;
 import br.ufrn.imd.strategy.StatisticsGenerationStrategy;
-import br.ufrn.imd.strategy.EventRankingStrategy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -23,25 +21,25 @@ import java.util.Optional;
 @Service
 public class EventService {
 
-    private final PairingStrategy pairingStrategy;
+    private final PairingService pairingService;
     private final MatchUpdateStrategy matchUpdateStrategy;
     private final RoundAndEventFinalizationStrategy roundAndEventFinalizationStrategy;
     private final StatisticsGenerationStrategy statisticsGenerationStrategy;
-    private final EventRankingStrategy eventRankingStrategy;
+    private final EventRankingService eventRankingService;
     private final EventRepository eventRepository;
     private final PlayerRepository playerRepository;
     private final PlayerService playerService;
 
     @Autowired
-    public EventService(PairingStrategy pairingStrategy, MatchUpdateStrategy matchUpdateStrategy,
+    public EventService(PairingService pairingService, MatchUpdateStrategy matchUpdateStrategy,
                         RoundAndEventFinalizationStrategy roundAndEventFinalizationStrategy,
-                        StatisticsGenerationStrategy statisticsGenerationStrategy, EventRankingStrategy eventRankingStrategy,
+                        StatisticsGenerationStrategy statisticsGenerationStrategy, EventRankingService eventRankingService,
                         EventRepository eventRepository, PlayerRepository playerRepository, PlayerService playerService) {
-        this.pairingStrategy = pairingStrategy;
+        this.pairingService = pairingService;
         this.matchUpdateStrategy = matchUpdateStrategy;
         this.roundAndEventFinalizationStrategy = roundAndEventFinalizationStrategy;
         this.statisticsGenerationStrategy = statisticsGenerationStrategy;
-        this.eventRankingStrategy = eventRankingStrategy;
+        this.eventRankingService = eventRankingService;
         this.eventRepository = eventRepository;
         this.playerRepository = playerRepository;
         this.playerService = playerService;
@@ -87,7 +85,7 @@ public class EventService {
 
     public List<PlayerResult> getEventResultRanking(String eventId) {
         EventResult eventResult = getEventResultByEventId(eventId);
-        return eventRankingStrategy.rankPlayerResults(eventResult.getPlayerResults());
+        return eventRankingService.sortByResultEventPoints(eventResult.getPlayerResults());
     }
 
     public void updateMatchResult(Pairing pairing) {

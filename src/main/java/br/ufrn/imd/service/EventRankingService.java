@@ -1,5 +1,6 @@
 package br.ufrn.imd.service;
 
+import br.ufrn.imd.model.Player;
 import br.ufrn.imd.model.PlayerResult;
 import br.ufrn.imd.strategy.EventRankingStrategy;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,5 +20,9 @@ public class EventRankingService {
 
     public List<PlayerResult> sortByResultEventPoints(List<PlayerResult> playerResults) {
         return eventRankingStrategy.rankPlayerResults(playerResults);
+    }
+    
+    public List<Player> sortByEventPoints(List<Player> players) {
+        return eventRankingStrategy.rankPlayers(players);
     }
 }

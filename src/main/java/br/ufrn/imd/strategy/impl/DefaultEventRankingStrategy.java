@@ -38,4 +38,18 @@ public class DefaultEventRankingStrategy implements EventRankingStrategy {
             return Double.compare(p2.getOpponentsMatchWinrate(), p1.getOpponentsMatchWinrate());
         }
     }
+    
+    public List<Player> sortByEventPoints(List<Player> players) {
+        Collections.sort(players, new Comparator<Player>() {
+            @Override
+            public int compare(Player p1, Player p2) {
+                int eventPointsComparison = Integer.compare(p2.getEventPoints(), p1.getEventPoints());
+                if (eventPointsComparison != 0) {
+                    return eventPointsComparison;
+                }
+                return Double.compare(p2.getOpponentsMatchWinrate(), p1.getOpponentsMatchWinrate());
+            }
+        });
+        return players;
+    }
 }
