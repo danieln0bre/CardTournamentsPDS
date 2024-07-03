@@ -72,7 +72,7 @@ public class DefaultRoundAndEventFinalizationStrategy implements RoundAndEventFi
         }
 
         eventRepository.save(event);
-        matchUpdateStrategy.updateDeckMatchups(eventId, event.getPairings());
+        matchUpdateStrategy.updateGameObjectMatchups(eventId, event.getPairings());
 
         return event;
     }
@@ -91,7 +91,7 @@ public class DefaultRoundAndEventFinalizationStrategy implements RoundAndEventFi
             result.setEventPoints(player.getEventPoints());
             result.setWinrate(player.getWinrate());
             result.setOpponentIds(player.getOpponentIds());
-            result.setDeckId(player.getDeckId());
+            result.setDeckId(player.getGameObjectId());
             playerResults.add(result);
         }
         return playerResults;

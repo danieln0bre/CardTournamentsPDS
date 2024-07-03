@@ -11,7 +11,7 @@ import java.util.HashMap;
  * Represents a deck with a name and a map of position frequencies used within a MongoDB collection.
  */
 @Document(collection = "winning_decks2")
-public class Deck {
+public class GameObject {
     @Id
     private String id;
 
@@ -24,7 +24,7 @@ public class Deck {
     /**
      * Constructs a new, empty Deck with no name or position frequencies.
      */
-    public Deck() {
+    public GameObject() {
         this.deckName = "";
         this.positionFrequencies = new HashMap<>();
     }
@@ -35,7 +35,7 @@ public class Deck {
      * @param deckName the name of the deck
      * @param positionFrequencies a map of position frequencies for the deck
      */
-    public Deck(String deckName, Map<Integer, Integer> positionFrequencies) {
+    public GameObject(String deckName, Map<Integer, Integer> positionFrequencies) {
         this.deckName = deckName;
         this.positionFrequencies = new HashMap<>(positionFrequencies);
     }

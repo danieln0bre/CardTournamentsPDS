@@ -10,5 +10,5 @@ public interface MatchUpdateStrategy {
     void validatePairing(Pairing pairing);
     void handleByeMatch(Pairing pairing);
     void updatePlayersResults(Pairing pairing);
-    void updateDeckMatchups(String eventId, List<Pairing> pairings);
+    void updateGameObjectMatchups(String eventId, List<Pairing> pairings);
 }

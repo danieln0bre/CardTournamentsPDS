@@ -45,6 +45,16 @@ public class ManagerService {
             .orElseThrow(() -> new IllegalArgumentException("Manager not found with ID: " + managerId));
         return manager.getEvents();
     }
+    
+    public void updateManagerEvents(Event event) {
+        Manager manager = getManagerById(event.getManagerId())
+                                        .orElseThrow(() -> new IllegalArgumentException("Manager not found with ID: " + event.getManagerId()));
+        List<Event> events = manager.getEvents();
+        events.removeIf(e -> e.getId().equals(event.getId())); // Remove the old event
+        events.add(event); // Add the updated event
+        manager.setEvents(events);
+       saveManager(manager);
+    }
 
     private void validateManager(Manager manager) {
         if (manager == null) {

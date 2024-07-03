@@ -3,7 +3,7 @@ package br.ufrn.imd.strategy.impl;
 import br.ufrn.imd.model.EventResult;
 import br.ufrn.imd.model.Pairing;
 import br.ufrn.imd.model.Player;
-import br.ufrn.imd.repository.DeckRepository;
+import br.ufrn.imd.repository.GameObjectRepository;
 import br.ufrn.imd.repository.PlayerRepository;
 import br.ufrn.imd.strategy.MatchUpdateStrategy;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,14 +16,14 @@ import java.util.Map;
 @Component
 public class DefaultMatchUpdateStrategy implements MatchUpdateStrategy {
 
-    private final DeckRepository deckRepository;
+    private final GameObjectRepository gameObjectRepository;
     private final PlayerRepository playerRepository;
-    private final Map<String, Map<String, Integer[]>> deckMatchups = new HashMap<>();
+    private final Map<String, Map<String, Integer[]>> gameObjectMatchups = new HashMap<>();
 
     @Autowired
-    public DefaultMatchUpdateStrategy(PlayerRepository playerRepository, DeckRepository deckRepository) {
+    public DefaultMatchUpdateStrategy(PlayerRepository playerRepository, GameObjectRepository gameObjectRepository) {
         this.playerRepository = playerRepository;
-        this.deckRepository = deckRepository;
+        this.gameObjectRepository = gameObjectRepository;
     }
 
     @Override
@@ -72,8 +72,8 @@ public class DefaultMatchUpdateStrategy implements MatchUpdateStrategy {
     }
 
     @Override
-    public void updateDeckMatchups(String eventId, List<Pairing> pairings) {
-        Map<String, Map<String, Integer[]>> deckMatchups = new HashMap<>();
+    public void updateGameObjectMatchups(String eventId, List<Pairing> pairings) {
+        Map<String, Map<String, Integer[]>> gameObjectMatchups = new HashMap<>();
 
         for (Pairing pairing : pairings) {
             String playerOneId = pairing.getPlayerOneId();
@@ -84,17 +84,17 @@ public class DefaultMatchUpdateStrategy implements MatchUpdateStrategy {
 
             if (playerOne == null || playerTwo == null) continue;
 
-            String playerOneDeckId = playerOne.getDeckId();
-            String playerTwoDeckId = playerTwo.getDeckId();
+            String playerOneDeckId = playerOne.getGameObjectId();
+            String playerTwoDeckId = playerTwo.getGameObjectId();
 
-            deckMatchups.putIfAbsent(playerOneDeckId, new HashMap<>());
-            deckMatchups.putIfAbsent(playerTwoDeckId, new HashMap<>());
+            gameObjectMatchups.putIfAbsent(playerOneDeckId, new HashMap<>());
+            gameObjectMatchups.putIfAbsent(playerTwoDeckId, new HashMap<>());
 
-            deckMatchups.get(playerOneDeckId).putIfAbsent(playerTwoDeckId, new Integer[]{0, 0});
-            deckMatchups.get(playerTwoDeckId).putIfAbsent(playerOneDeckId, new Integer[]{0, 0});
+            gameObjectMatchups.get(playerOneDeckId).putIfAbsent(playerTwoDeckId, new Integer[]{0, 0});
+            gameObjectMatchups.get(playerTwoDeckId).putIfAbsent(playerOneDeckId, new Integer[]{0, 0});
 
-            Integer[] resultsPlayerOne = deckMatchups.get(playerOneDeckId).get(playerTwoDeckId);
-            Integer[] resultsPlayerTwo = deckMatchups.get(playerTwoDeckId).get(playerOneDeckId);
+            Integer[] resultsPlayerOne = gameObjectMatchups.get(playerOneDeckId).get(playerTwoDeckId);
+            Integer[] resultsPlayerTwo = gameObjectMatchups.get(playerTwoDeckId).get(playerOneDeckId);
 
             if (pairing.getResult() == 0) {
                 resultsPlayerOne[0]++;
@@ -105,8 +105,8 @@ public class DefaultMatchUpdateStrategy implements MatchUpdateStrategy {
             resultsPlayerOne[1]++;
             resultsPlayerTwo[1]++;
 
-            deckMatchups.get(playerOneDeckId).put(playerTwoDeckId, resultsPlayerOne);
-            deckMatchups.get(playerTwoDeckId).put(playerOneDeckId, resultsPlayerTwo);
+            gameObjectMatchups.get(playerOneDeckId).put(playerTwoDeckId, resultsPlayerOne);
+            gameObjectMatchups.get(playerTwoDeckId).put(playerOneDeckId, resultsPlayerTwo);
         }
 
         // Save or update the matchups in the repository or other storage if needed.

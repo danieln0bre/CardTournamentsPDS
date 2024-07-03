@@ -62,7 +62,7 @@ public class PlayerService {
     public boolean allPlayersHaveDecks(List<String> playerIds) {
         validatePlayerIds(playerIds);
         List<Player> players = getPlayersByIds(playerIds);
-        return players.stream().allMatch(Player::hasDeck);
+        return players.stream().allMatch(Player::hasGameObject);
     }
 
     public List<Player> saveAll(List<Player> players) {

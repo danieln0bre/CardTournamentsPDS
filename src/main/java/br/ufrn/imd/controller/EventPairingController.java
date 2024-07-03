@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/events")
+@RequestMapping("/api/event-pairings")
 public class EventPairingController {
 
     private final EventService eventService;
@@ -45,7 +45,7 @@ public class EventPairingController {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    @PostMapping("/{eventId}/generatePairings")
+    @PostMapping("/{eventId}/generate-pairings")
     public ResponseEntity<String> generatePairings(@PathVariable String eventId) {
         return eventService.getEventById(eventId)
                 .map(event -> {
@@ -69,7 +69,7 @@ public class EventPairingController {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    @PostMapping("/{eventId}/savePairings")
+    @PostMapping("/{eventId}/save-pairings")
     public ResponseEntity<String> savePairings(@PathVariable String eventId, @RequestBody List<Pairing> pairings) {
         return eventService.getEventById(eventId)
                 .map(event -> {
@@ -80,7 +80,7 @@ public class EventPairingController {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    @PostMapping("/{eventId}/finalizeRound")
+    @PostMapping("/{eventId}/finalize-round")
     public ResponseEntity<String> finalizeRound(@PathVariable String eventId) {
         try {
             eventService.finalizeRound(eventId);

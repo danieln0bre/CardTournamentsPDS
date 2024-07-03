@@ -44,7 +44,7 @@ public class EventController {
         }
         event.setManagerId(managerId);
         Event savedEvent = eventService.saveEvent(event);
-        updateManagerEvents(savedEvent);
+        managerService.updateManagerEvents(savedEvent);
         return ResponseEntity.ok(savedEvent);
     }
 
@@ -55,7 +55,7 @@ public class EventController {
             Event existingEvent = existingEventOpt.get();
             existingEvent.updateDetailsFrom(eventDetails);
             Event updatedEvent = eventService.saveEvent(existingEvent);
-            updateManagerEvents(updatedEvent);
+            managerService.updateManagerEvents(updatedEvent);
             return ResponseEntity.ok(updatedEvent);
         } else {
             return ResponseEntity.notFound().build();
@@ -68,18 +68,8 @@ public class EventController {
         }
         existingEvent.updateDetailsFrom(eventDetails);
         Event updatedEvent = eventService.saveEvent(existingEvent);
-        updateManagerEvents(updatedEvent);
+        managerService.updateManagerEvents(updatedEvent);
         return ResponseEntity.ok(updatedEvent);
-    }
-
-    private void updateManagerEvents(Event event) {
-        Manager manager = managerService.getManagerById(event.getManagerId())
-                                        .orElseThrow(() -> new IllegalArgumentException("Manager not found with ID: " + event.getManagerId()));
-        List<Event> events = manager.getEvents();
-        events.removeIf(e -> e.getId().equals(event.getId())); // Remove the old event
-        events.add(event); // Add the updated event
-        manager.setEvents(events);
-        managerService.saveManager(manager);
     }
 
     @GetMapping("/")

@@ -2,30 +2,28 @@ package br.ufrn.imd.model;
 
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 
-/**
- * Represents a player with rankings, events, and performance statistics.
- */
 @Document(collection = "players2")
 public class Player extends User {
 
     private int rankPoints;
     private int eventPoints;
     private double winrate;
-    private String deckId;  // Changed from Deck object to String deckId
+    private String gameObjectId;  // Changed from Deck object to String deckId
     private List<String> appliedEventsId;
     private List<String> opponentIds;
     private List<Event> historicoEventos;
     private double opponentsMatchWinrate;
+    private Team team; // Adiciona o atributo team
 
     public Player(String name, String username, String email, String password) {
         super(name, username, email, password, Role.ROLE_PLAYER);
         this.rankPoints = 0;
         this.eventPoints = 0;
         this.winrate = 0.0;
-        this.deckId = null;  // Initialize with null
+        this.gameObjectId = null;  // Initialize with null
         this.appliedEventsId = new ArrayList<>();
         this.opponentIds = new ArrayList<>();
         this.historicoEventos = new ArrayList<>();
@@ -76,16 +74,16 @@ public class Player extends User {
         this.winrate = winrate;
     }
 
-    public String getDeckId() {
-        return deckId;
+    public String getGameObjectId() {
+        return gameObjectId;
     }
 
-    public void setDeckId(String deckId) {
-        this.deckId = deckId;
+    public void setGameObjectId(String deckId) {
+        this.gameObjectId = deckId;
     }
 
-    public boolean hasDeck() {
-        return deckId != null && !deckId.trim().isEmpty();
+    public boolean hasGameObject() {
+        return gameObjectId != null && !gameObjectId.trim().isEmpty();
     }
 
     public List<String> getAppliedEventsId() {
@@ -110,6 +108,14 @@ public class Player extends User {
 
     public void setOpponentsMatchWinrate(double opponentsMatchWinrate) {
         this.opponentsMatchWinrate = opponentsMatchWinrate;
+    }
+
+    public Team getTeam() {
+        return team;
+    }
+
+    public void setTeam(Team team) {
+        this.team = team;
     }
 
     // Clear methods for lists

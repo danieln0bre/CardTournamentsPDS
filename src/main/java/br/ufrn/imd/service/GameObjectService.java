@@ -1,7 +1,7 @@
 package br.ufrn.imd.service;
 
-import br.ufrn.imd.model.Deck;
-import br.ufrn.imd.repository.DeckRepository;
+import br.ufrn.imd.model.GameObject;
+import br.ufrn.imd.repository.GameObjectRepository;
 
 import java.util.List;
 
@@ -9,24 +9,24 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class DeckService {
+public class GameObjectService {
 
-    private final DeckRepository deckRepository;
+    private final GameObjectRepository deckRepository;
 
     @Autowired
-    public DeckService(DeckRepository deckRepository) {
+    public GameObjectService(GameObjectRepository deckRepository) {
         this.deckRepository = deckRepository;
     }
 
-    public Deck getDeckById(String deckId) {
+    public GameObject getGameObjectById(String deckId) {
         return deckRepository.findById(deckId).orElse(null);
     }
 
-    public List<Deck> getAllWinningDecks() {
+    public List<GameObject> getAllGameObjects() {
         return deckRepository.findAll(); // Update this if there's a specific query for winning decks
     }
 
-    public Deck saveDeck(Deck deck) {
+    public GameObject saveGameObject(GameObject deck) {
         return deckRepository.save(deck);
     }
 }

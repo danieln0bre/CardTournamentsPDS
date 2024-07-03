@@ -1,6 +1,6 @@
 package br.ufrn.imd.controller;
 
-import br.ufrn.imd.model.Deck;
+import br.ufrn.imd.model.GameObject;
 import br.ufrn.imd.model.Event;
 import br.ufrn.imd.model.Player;
 import br.ufrn.imd.service.*;
@@ -19,15 +19,15 @@ public class PlayerController {
     private final GeneralRankingService generalRankingService;
     private final PlayerService playerService;
     private final EventService eventService;
-    private final DeckService deckService;
+    private final GameObjectService gameObjectService;
 
     @Autowired
     public PlayerController(GeneralRankingService generalRankingService, PlayerService playerService,
-                            EventService eventService, DeckService deckService) {
+                            EventService eventService, GameObjectService gameObjectService) {
         this.generalRankingService = generalRankingService;
         this.playerService = playerService;
         this.eventService = eventService;
-        this.deckService = deckService;
+        this.gameObjectService = gameObjectService;
     }
 
     @PutMapping("/{id}/update")
@@ -53,7 +53,7 @@ public class PlayerController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @PostMapping("/{id}/recalculateWinrates")
+    @PostMapping("/{id}/recalculate-winrates")
     public ResponseEntity<Player> recalculateWinrates(@PathVariable String id) {
         return playerService.getPlayerById(id)
                 .map(player -> ResponseEntity.ok(playerService.recalculateWinrates(id)))
@@ -98,24 +98,24 @@ public class PlayerController {
         return rankedPlayers.isEmpty() ? ResponseEntity.notFound().build() : ResponseEntity.ok(rankedPlayers);
     }
 
-    @PutMapping("/{id}/updateDeck")
-    public ResponseEntity<?> updatePlayerDeck(@PathVariable String id, @RequestBody String deckId) {
+    @PutMapping("/{id}/update-game-object")
+    public ResponseEntity<?> updatePlayerGameObject(@PathVariable String id, @RequestBody String deckId) {
         return playerService.getPlayerById(id)
                 .map(player -> {
-                    Deck deck = deckService.getDeckById(deckId);
+                    GameObject deck = gameObjectService.getGameObjectById(deckId);
                     if (deck == null) {
-                        return ResponseEntity.badRequest().body("Deck not found");
+                        return ResponseEntity.badRequest().body("GameObject not found");
                     }
-                    player.setDeckId(deckId);
+                    player.setGameObjectId(deckId);
                     playerService.savePlayer(player);
                     return ResponseEntity.ok("Deck updated successfully");
                 })
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @GetMapping("/decks/{deckId}")
-    public ResponseEntity<Deck> getDeckById(@PathVariable String deckId) {
-        Deck deck = deckService.getDeckById(deckId);
+    @GetMapping("/game-objects/{gameObjectId}")
+    public ResponseEntity<GameObject> getGameObjectById(@PathVariable String deckId) {
+        GameObject deck = gameObjectService.getGameObjectById(deckId);
         if (deck != null) {
             return ResponseEntity.ok(deck);
         } else {
@@ -123,9 +123,9 @@ public class PlayerController {
         }
     }
 
-    @GetMapping("/winning-decks")
-    public ResponseEntity<List<Deck>> getWinningDecks() {
-        List<Deck> decks = deckService.getAllWinningDecks();
+    @GetMapping("/game-objects")
+    public ResponseEntity<List<GameObject>> getGameObjects() {
+        List<GameObject> decks = gameObjectService.getAllGameObjects();
         return ResponseEntity.ok(decks);
     }
 }
