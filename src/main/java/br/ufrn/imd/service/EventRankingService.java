@@ -19,10 +19,10 @@ public class EventRankingService {
     }
 
     public List<PlayerResult> sortByResultEventPoints(List<PlayerResult> playerResults) {
-        return eventRankingStrategy.rankPlayerResults(playerResults);
+        return eventRankingStrategy.rankEntities(playerResults);
     }
     
     public List<Player> sortByEventPoints(List<Player> players) {
-        return eventRankingStrategy.rankPlayers(players);
+        return eventRankingStrategy.rankEntityResults(players);
     }
 }

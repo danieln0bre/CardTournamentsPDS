@@ -11,24 +11,24 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Component
-public class DefaultEventRankingStrategy implements EventRankingStrategy {
+public class DefaultPlayerEventRankingStrategy implements EventRankingStrategy<Player, PlayerResult> {
 
     @Override
-    public List<Player> rankPlayers(List<Player> players) {
+    public List<Player> rankEntities(List<Player> players) {
         if (players == null) {
             throw new IllegalArgumentException("List of players cannot be null.");
         }
-        return players.stream().sorted(new EventPointsAndOpponentMatchWinrateComparator()).collect(Collectors.toList());
+        return players.stream().sorted(new PlayerPointsAndWinrateComparator()).collect(Collectors.toList());
     }
 
     @Override
-    public List<PlayerResult> rankPlayerResults(List<PlayerResult> playerResults) {
+    public List<PlayerResult> rankEntityResults(List<PlayerResult> playerResults) {
         return playerResults.stream()
                 .sorted(Comparator.comparingInt(PlayerResult::getEventPoints).reversed())
                 .collect(Collectors.toList());
     }
 
-    private static class EventPointsAndOpponentMatchWinrateComparator implements Comparator<Player> {
+    private static class PlayerPointsAndWinrateComparator implements Comparator<Player> {
         @Override
         public int compare(Player p1, Player p2) {
             int eventPointsComparison = Integer.compare(p2.getEventPoints(), p1.getEventPoints());
@@ -38,7 +38,7 @@ public class DefaultEventRankingStrategy implements EventRankingStrategy {
             return Double.compare(p2.getOpponentsMatchWinrate(), p1.getOpponentsMatchWinrate());
         }
     }
-    
+
     public List<Player> sortByEventPoints(List<Player> players) {
         Collections.sort(players, new Comparator<Player>() {
             @Override
