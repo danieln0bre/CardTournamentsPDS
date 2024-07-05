@@ -34,7 +34,7 @@ public class EventPairingController {
                         return ResponseEntity.badRequest().body("Event has already started.");
                     }
 
-                    if (!playerService.allPlayersHaveDecks(event.getPlayerIds())) {
+                    if (!playerService.allPlayersHaveDecks(event.getEntityIds())) {
                         return ResponseEntity.badRequest().body("Not all players have registered decks.");
                     }
 
@@ -53,7 +53,7 @@ public class EventPairingController {
                         return ResponseEntity.badRequest().body("Event has not started yet.");
                     }
 
-                    List<Player> players = playerService.getPlayersByIds(event.getPlayerIds());
+                    List<Player> players = playerService.getPlayersByIds(event.getEntityIds());
                     List<Pairing> pairings = pairingService.createPairings(players);
                     event.setPairings(pairings);
                     eventService.saveEvent(event);

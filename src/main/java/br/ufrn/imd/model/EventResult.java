@@ -10,6 +10,7 @@ public class EventResult {
     private String id;
     private String eventId;
     private List<PlayerResult> playerResults;
+	private List<TeamResult> teamResult;
 
     // Getters and Setters
     public String getId() {
@@ -34,5 +35,13 @@ public class EventResult {
 
     public void setPlayerResults(List<PlayerResult> playerResults) {
         this.playerResults = playerResults;
+    }
+    
+    public List<TeamResult> getTeamResults(){
+    	return this.teamResult;
+    }
+    
+    public void setTeamResults(List<TeamResult> teamResult) {
+    	this.teamResult = teamResult;
     }
 }

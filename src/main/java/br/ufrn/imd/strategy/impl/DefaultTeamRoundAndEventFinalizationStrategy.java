@@ -4,6 +4,8 @@ import br.ufrn.imd.model.*;
 import br.ufrn.imd.repository.*;
 import br.ufrn.imd.strategy.RoundAndEventFinalizationStrategy;
 import br.ufrn.imd.strategy.MatchUpdateStrategy;
+import br.ufrn.imd.strategy.PairingStrategy;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -11,22 +13,22 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Component
-public class DefaultRoundAndEventFinalizationStrategy implements RoundAndEventFinalizationStrategy {
+public class DefaultTeamRoundAndEventFinalizationStrategy implements RoundAndEventFinalizationStrategy {
 
     private final EventRepository eventRepository;
     private final EventResultRepository eventResultRepository;
-    private final PlayerRepository playerRepository;
+    private final TeamRepository teamRepository;
     private final MatchUpdateStrategy matchUpdateStrategy;
-    private final DefaultPairingStrategy defaultPairingStrategy;
+    private final PairingStrategy pairingStrategy;
 
     @Autowired
-    public DefaultRoundAndEventFinalizationStrategy(EventRepository eventRepository, EventResultRepository eventResultRepository,
-                                                    PlayerRepository playerRepository, MatchUpdateStrategy matchUpdateStrategy, DefaultPairingStrategy defaultPairingStrategy) {
+    public DefaultTeamRoundAndEventFinalizationStrategy(EventRepository eventRepository, EventResultRepository eventResultRepository,
+                                                        TeamRepository teamRepository, MatchUpdateStrategy matchUpdateStrategy, PairingStrategy pairingStrategy) {
         this.eventRepository = eventRepository;
         this.eventResultRepository = eventResultRepository;
-        this.playerRepository = playerRepository;
+        this.teamRepository = teamRepository;
         this.matchUpdateStrategy = matchUpdateStrategy;
-        this.defaultPairingStrategy = defaultPairingStrategy;
+        this.pairingStrategy = pairingStrategy;
     }
 
     @Override
@@ -37,15 +39,15 @@ public class DefaultRoundAndEventFinalizationStrategy implements RoundAndEventFi
         event.setFinished(true);
         event = eventRepository.save(event);
 
-        List<Player> players = playerRepository.findAllById(event.getEntityIds());
-        if (players.isEmpty()) {
-            throw new IllegalStateException("No players found for the event.");
+        List<Team> teams = teamRepository.findAllById(event.getEntityIds());
+        if (teams.isEmpty()) {
+            throw new IllegalStateException("No teams found for the event.");
         }
 
-        List<PlayerResult> playerResults = createPlayerResults(players, eventId);
-        resetPlayerAttributes(players, eventId);
+        List<TeamResult> teamResults = createTeamResults(teams, eventId);
+        resetTeamAttributes(teams, eventId);
 
-        saveEventResults(eventId, playerResults);
+        saveEventResults(eventId, teamResults);
 
         return event;
     }
@@ -63,8 +65,8 @@ public class DefaultRoundAndEventFinalizationStrategy implements RoundAndEventFi
             matchUpdateStrategy.updateMatchResult(pairing);
         }
         if (event.getCurrentRound() < event.getNumberOfRounds()) {
-            List<Player> players = playerRepository.findAllById(event.getEntityIds());
-            List<Pairing> newPairings = defaultPairingStrategy.createPairings(players);
+            List<Team> teams = teamRepository.findAllById(event.getEntityIds());
+            List<Pairing> newPairings = pairingStrategy.createPairings(teams);
             event.setPairings(newPairings);
         }
         if (event.getCurrentRound() < event.getNumberOfRounds()) {
@@ -83,37 +85,37 @@ public class DefaultRoundAndEventFinalizationStrategy implements RoundAndEventFi
                 .orElseThrow(() -> new IllegalArgumentException("Event result not found for ID: " + eventId));
     }
 
-    private List<PlayerResult> createPlayerResults(List<Player> players, String eventId) {
-        List<PlayerResult> playerResults = new ArrayList<>();
-        for (Player player : players) {
-            PlayerResult result = new PlayerResult();
-            result.setPlayerId(player.getId());
-            result.setEventPoints(player.getEventPoints());
-            result.setWinrate(player.getWinrate());
-            result.setOpponentIds(player.getOpponentIds());
-            result.setDeckId(player.getGameObjectId());
-            playerResults.add(result);
+    private List<TeamResult> createTeamResults(List<Team> teams, String eventId) {
+        List<TeamResult> teamResults = new ArrayList<>();
+        for (Team team : teams) {
+            TeamResult result = new TeamResult();
+            result.setTeamId(team.getId());
+            result.setEventPoints(team.getEventPoints());
+            result.setWinrate(team.getWinrate());
+            teamResults.add(result);
         }
-        return playerResults;
+        return teamResults;
     }
 
-    private void resetPlayerAttributes(List<Player> players, String eventId) {
-        for (Player player : players) {
-            player.setRankPoints(player.getRankPoints() + player.getEventPoints());
-            player.setEventPoints(0);
-            player.setWinrate(0);
-            player.setOpponentsMatchWinrate(0);
-            player.clearOpponents();
-            player.getAppliedEventsId().remove(eventId);
-            player.addEventId(eventId);
-            playerRepository.save(player);
+    private void resetTeamAttributes(List<Team> teams, String eventId) {
+        for (Team team : teams) {
+            for (Player player : team.getPlayers()) {
+                player.setRankPoints(player.getRankPoints() + player.getEventPoints());
+                player.setEventPoints(0);
+                player.setWinrate(0);
+                player.setOpponentsMatchWinrate(0);
+                player.clearOpponents();
+                player.getAppliedEventsId().remove(eventId);
+                player.addEventId(eventId);
+                teamRepository.save(team);
+            }
         }
     }
 
-    private void saveEventResults(String eventId, List<PlayerResult> playerResults) {
+    private void saveEventResults(String eventId, List<TeamResult> teamResults) {
         EventResult eventResult = new EventResult();
         eventResult.setEventId(eventId);
-        eventResult.setPlayerResults(playerResults);
+        eventResult.setTeamResults(teamResults);
         eventResultRepository.save(eventResult);
     }
 }

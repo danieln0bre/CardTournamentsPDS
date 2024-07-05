@@ -22,7 +22,7 @@ public class Event {
     private int currentRound;
     private boolean hasStarted;
     private boolean finished;
-    private List<String> playerIds;
+    private List<String> entityIds;
     private List<Pairing> pairings;
     private String managerId; 
 
@@ -42,7 +42,7 @@ public class Event {
         this.currentRound = 0;
         this.finished = false;
         this.hasStarted = false;
-        this.playerIds = new ArrayList<>();
+        this.entityIds = new ArrayList<>();
         this.pairings = new ArrayList<>();
         this.managerId = managerId;
     }
@@ -61,7 +61,7 @@ public class Event {
         this.currentRound = source.currentRound;
         this.finished = source.finished;
         this.hasStarted = source.hasStarted;
-        setPlayerIds(new ArrayList<>(source.playerIds));
+        setEntityIds(new ArrayList<>(source.entityIds));
         setPairings(new ArrayList<>(source.pairings));
     }
 
@@ -70,9 +70,9 @@ public class Event {
      *
      * @param playerId the ID of the player to add
      */
-    public void addPlayerId(String playerId) {
-        if (!playerIds.contains(playerId)) {
-            playerIds.add(playerId);
+    public void addEntityId(String entityId) {
+        if (!entityIds.contains(entityId)) {
+        	entityIds.add(entityId);
         }
     }
 
@@ -142,12 +142,12 @@ public class Event {
         this.hasStarted = hasStarted;
     }
 
-    public List<String> getPlayerIds() {
-        return Collections.unmodifiableList(playerIds);
+    public List<String> getEntityIds() {
+        return Collections.unmodifiableList(entityIds);
     }
 
-    public void setPlayerIds(List<String> playerIds) {
-        this.playerIds = new ArrayList<>(playerIds);
+    public void setEntityIds(List<String> playerIds) {
+        this.entityIds = new ArrayList<>(playerIds);
     }
     
     public List<Pairing> getPairings() {

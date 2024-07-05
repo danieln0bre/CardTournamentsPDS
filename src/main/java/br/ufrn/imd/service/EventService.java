@@ -105,11 +105,11 @@ public class EventService {
         Event event = getEventById(eventId).orElseThrow(() ->
             new IllegalArgumentException("Event not found with ID: " + eventId));
         
-        if (event.getPlayerIds().contains(playerId)) {
+        if (event.getEntityIds().contains(playerId)) {
             throw new IllegalArgumentException("Player already added to the event.");
         }
 
-        event.addPlayerId(playerId);
+        event.addEntityId(playerId);
         return eventRepository.save(event);
     }
 }

@@ -113,7 +113,7 @@ public class EventController {
         Optional<Event> eventOpt = eventService.getEventById(id);
         if (eventOpt.isPresent()) {
             Event event = eventOpt.get();
-            List<Player> players = playerService.getPlayersByIds(event.getPlayerIds());
+            List<Player> players = playerService.getPlayersByIds(event.getEntityIds());
             return ResponseEntity.ok(eventRankingService.sortByEventPoints(players));
         } else {
             return ResponseEntity.notFound().build();

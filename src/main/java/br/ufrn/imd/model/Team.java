@@ -14,6 +14,7 @@ public class Team {
     private String name;
     private String ownerId;
     private List<Player> players;
+    private int eventPoints;
 
     public Team(String name, String ownerId) {
         this.name = name;
@@ -69,4 +70,9 @@ public class Team {
     public double getWinrate() {
         return players.stream().mapToDouble(Player::getWinrate).average().orElse(0.0);
     }
+
+	public void setEventPoints(int eventPoints) {
+		this.eventPoints = eventPoints;
+	}
+
 }

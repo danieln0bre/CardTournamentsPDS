@@ -4,8 +4,8 @@ package br.ufrn.imd.model;
  * Represents a pairing between two players in a competition, along with the result of their match.
  */
 public class Pairing {
-    private final String playerOneId;
-    private final String playerTwoId;
+    private final String entityOneId;
+    private final String entityTwoId;
     private int result;
 
     public static final int NO_RESULT = -1; // Indicates that no result has been set yet.
@@ -16,9 +16,9 @@ public class Pairing {
      * @param playerOneId the unique identifier for the first player
      * @param playerTwoId the unique identifier for the second player
      */
-    public Pairing(String playerOneId, String playerTwoId) {
-        this.playerOneId = playerOneId;
-        this.playerTwoId = playerTwoId;
+    public Pairing(String entityOneId, String entityTwoId) {
+        this.entityOneId = entityOneId;
+        this.entityTwoId = entityTwoId;
         this.result = NO_RESULT;
     }
 
@@ -28,16 +28,16 @@ public class Pairing {
      * Returns the player ID for player one.
      * @return player one's ID
      */
-    public String getPlayerOneId() {
-        return playerOneId;
+    public String getEntityOneId() {
+        return entityOneId;
     }
 
     /**
      * Returns the player ID for player two.
      * @return player two's ID
      */
-    public String getPlayerTwoId() {
-        return playerTwoId;
+    public String getEntityTwoId() {
+        return entityTwoId;
     }
 
     /**
