@@ -64,6 +64,10 @@ public class PlayerService {
         List<Player> players = getPlayersByIds(playerIds);
         return players.stream().allMatch(Player::hasGameObject);
     }
+    
+    public boolean existsById(String playerId) {
+        return playerRepository.existsById(playerId);
+    }
 
     public List<Player> saveAll(List<Player> players) {
         validatePlayerIdsList(players);

@@ -16,6 +16,7 @@ public class Team {
     private String id;
     private String name;
     private String ownerId;
+    private List<String> eventIds;
     @JsonManagedReference
     private List<String> playerIds = new ArrayList<>(5);
     private int eventPoints;
@@ -24,6 +25,7 @@ public class Team {
         this.name = name;
         this.ownerId = ownerId;
         this.playerIds = new ArrayList<>(5); // Inicializa a lista com capacidade máxima de 5 jogadores
+        this.eventIds = new ArrayList<String>();
     }
 
     public boolean addPlayer(Player player) {
@@ -42,6 +44,24 @@ public class Team {
     public List<String> getPlayerIds() {
         return new ArrayList<>(playerIds);
     }
+    
+    public List<String> getEventIds() { // Adicione este getter
+        return eventIds;
+    }
+
+    public void setEventIds(List<String> eventIds) { // Adicione este setter
+        this.eventIds = eventIds;
+    }
+
+    // Adicione o método addEventId
+    public void addEventId(String eventId) {
+        if (!this.eventIds.contains(eventId)) {
+            this.eventIds.add(eventId);
+        } else {
+            throw new IllegalArgumentException("Event ID already added.");
+        }
+    }
+    
     public String getName() {
         return name;
     }

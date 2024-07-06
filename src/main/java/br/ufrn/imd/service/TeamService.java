@@ -72,6 +72,25 @@ public class TeamService {
                 .average()
                 .orElse(0.0);
     }
+    
+    public boolean existsById(String teamId) {
+        return teamRepository.existsById(teamId);
+    }
+
+    public void addEventToTeam(String teamId, String eventId) {
+        Optional<Team> teamOptional = teamRepository.findById(teamId);
+        if (teamOptional.isPresent()) {
+            Team team = teamOptional.get();
+            team.addEventId(eventId);
+            teamRepository.save(team);
+        } else {
+            throw new IllegalArgumentException("Team not found with ID: " + teamId);
+        }
+    }
+    
+    public Optional<Team> getTeamById(String teamId) {
+        return teamRepository.findById(teamId);
+    }
 
     public Team addPlayerToTeam(String teamId, String playerId) {
         Optional<Team> teamOptional = teamRepository.findById(teamId);

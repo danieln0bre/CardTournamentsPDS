@@ -132,8 +132,8 @@ export const startEvent = (eventId) => {
     return axiosInstance.post(`/events/${eventId}/start`).then(response => response.data);
 };
 
-export const addEventToPlayer = (playerId, eventId) => {
-    return axiosInstance.put(`/players/${playerId}/events/add`, eventId, {
+export const addEventToEntity = (entityId, eventId) => {
+    return axiosInstance.put(`/players/${entityId}/entities/add`, eventId, {
         headers: {
             'Content-Type': 'text/plain'
         }
@@ -199,5 +199,10 @@ export const getUserIdByName = (username) => {
     return axiosInstance.get(`/users/getUserIdByName`, {
         params: { username }
     }).then(response => response.data);
+};
+
+export const fetchTeamById = (teamId) => {
+    return axiosInstance.get(`/teams/${teamId}`)
+        .then(checkResponseStatus);
 };
 

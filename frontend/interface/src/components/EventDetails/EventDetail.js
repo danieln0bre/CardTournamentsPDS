@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { fetchEventByName, fetchPlayerById, addEventToPlayer, startEvent, finalizeEvent } from '../../services/api';
+import { fetchEventByName, fetchPlayerById, startEvent, finalizeEvent, fetchPlayerTeam, addEventToEntity } from '../../services/api';
 import { useUser } from '../../contexts/UserContext';
 import './EventDetail.css';
 
@@ -10,6 +10,7 @@ function EventDetail() {
     const { user } = useUser();
     const [event, setEvent] = useState(null);
     const [players, setPlayers] = useState([]);
+    const [teamId, setTeamId] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [registrationError, setRegistrationError] = useState(null);
@@ -20,7 +21,7 @@ function EventDetail() {
         fetchEventByName(eventName)
             .then(eventData => {
                 setEvent(eventData);
-                return Promise.all(eventData.playerIds.map(playerId => fetchPlayerById(playerId)));
+                return Promise.all(eventData.entityIds.map(entityId => fetchPlayerById(entityId)));
             })
             .then(playerDataArray => {
                 setPlayers(playerDataArray);
@@ -30,15 +31,31 @@ function EventDetail() {
                 setError(err.message);
                 setLoading(false);
             });
-    }, [eventName]);
+
+        fetchPlayerTeam(user.id)
+            .then(teamId => setTeamId(teamId))
+            .catch(err => console.error('Failed to fetch team:', err));
+    }, [eventName, user.id]);
 
     const handleRegistration = () => {
-        if (user && event) {
-            addEventToPlayer(user.id, event.id)
+        if (user && event && teamId) {
+            addEventToEntity(teamId, event.id)
                 .then(() => {
                     setEvent(prevEvent => ({
                         ...prevEvent,
-                        playerIds: [...prevEvent.playerIds, user.id]
+                        entityIds: [...prevEvent.entityIds, teamId]
+                    }));
+                    setRegistrationError(null);
+                })
+                .catch(err => {
+                    setRegistrationError(err.message);
+                });
+        } else if (user && event) {
+            addEventToEntity(user.id, event.id)
+                .then(() => {
+                    setEvent(prevEvent => ({
+                        ...prevEvent,
+                        entityIds: [...prevEvent.entityIds, user.id]
                     }));
                     setPlayers(prevPlayers => [...prevPlayers, user]);
                     setRegistrationError(null);
@@ -118,7 +135,7 @@ function EventDetail() {
                     </div>
                 ) : (
                     <>
-                        {event.playerIds.includes(user.id) ? (
+                        {event.entityIds.includes(user.id) || (teamId && event.entityIds.includes(teamId)) ? (
                             event.hasStarted ? (
                                 <div>
                                     <button onClick={() => navigate(`/events/${event.id}/ranking`)}>Ranking</button>

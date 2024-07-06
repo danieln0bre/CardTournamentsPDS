@@ -55,7 +55,13 @@ public class TeamController {
             return ResponseEntity.notFound().build();
         }
     }
-
+    
+    @GetMapping("/{teamId}")
+    public ResponseEntity<Team> getTeamById(@PathVariable String teamId) {
+        Optional<Team> team = teamService.getTeamById(teamId);
+        return team.map(ResponseEntity::ok)
+                   .orElseGet(() -> ResponseEntity.notFound().build());
+    }
 
     @GetMapping("/{playerId}/team")
     public ResponseEntity<String> getPlayerTeam(@PathVariable String playerId) {

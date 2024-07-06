@@ -14,8 +14,11 @@ import br.ufrn.imd.strategy.StatisticsGenerationStrategy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 @Service
@@ -90,6 +93,19 @@ public class EventService {
 
     public void updateMatchResult(Pairing pairing) {
         matchUpdateStrategy.updateMatchResult(pairing);
+    }
+    
+    public void addTeamToEvent(String eventId, String teamId) {
+        Optional<Event> optionalEvent = eventRepository.findById(eventId);
+        if (optionalEvent.isPresent()) {
+            Event event = optionalEvent.get();
+            List<String> entityIds = new ArrayList<>(event.getEntityIds()); // Garante que a coleção é mutável
+            entityIds.add(teamId);
+            event.setEntityIds(entityIds);
+            eventRepository.save(event);
+        } else {
+            throw new NoSuchElementException("Event not found");
+        }
     }
 
     public Event finalizeRound(String eventId) {
