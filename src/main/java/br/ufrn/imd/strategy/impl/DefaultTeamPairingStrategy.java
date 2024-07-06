@@ -1,15 +1,24 @@
 package br.ufrn.imd.strategy.impl;
 
 import br.ufrn.imd.model.Pairing;
-import br.ufrn.imd.model.Team;
 import br.ufrn.imd.model.Player;
+import br.ufrn.imd.model.Team;
+import br.ufrn.imd.service.TeamService;
 import br.ufrn.imd.strategy.PairingStrategy;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
 
 @Component
 public class DefaultTeamPairingStrategy implements PairingStrategy<Team> {
+
+    private final TeamService teamService;
+
+    @Autowired
+    public DefaultTeamPairingStrategy(TeamService teamService) {
+        this.teamService = teamService;
+    }
 
     @Override
     public List<Pairing> createPairings(List<Team> teams) {
@@ -66,14 +75,14 @@ public class DefaultTeamPairingStrategy implements PairingStrategy<Team> {
     }
 
     private double calculateAverageRankPoints(Team team) {
-        return team.getPlayers().stream()
+        return teamService.getPlayers(team).stream()
                 .mapToInt(Player::getRankPoints)
                 .average()
                 .orElse(0.0);
     }
 
-    private static Comparator<Team> getRankComparator() {
-        return Comparator.comparing(Team::getEventPoints, Comparator.reverseOrder())
-                         .thenComparing(Team::getWinrate);
+    private Comparator<Team> getRankComparator() {
+        return Comparator.comparingInt(teamService::getEventPoints).reversed()
+                         .thenComparingDouble(teamService::getWinrate);
     }
 }

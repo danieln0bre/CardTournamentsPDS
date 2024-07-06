@@ -156,8 +156,8 @@ public class EventController {
         }
     }
 
-    @GetMapping("/{id}/deck-matchups")
-    public ResponseEntity<Map<String, Map<String, Double>>> getDeckMatchups(@PathVariable String id) {
+    @GetMapping("/{id}/gameobject-matchups")
+    public ResponseEntity<Map<String, Map<String, Double>>> getGameObjectMatchups(@PathVariable String id) {
         try {
             Map<String, Map<String, Double>> matchups = eventService.getDeckMatchupStatistics(id);
             return ResponseEntity.ok(matchups);

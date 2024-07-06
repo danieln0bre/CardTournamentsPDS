@@ -7,8 +7,6 @@ function Navbar() {
     const location = useLocation();
     const { user } = useUser();
 
-    console.log('Navbar user:', user); // Debugging log
-
     if (!user) {
         return null; // Or a loading spinner
     }
@@ -25,6 +23,7 @@ function Navbar() {
                             <Link to="/my-events" className={location.pathname === '/my-events' ? 'active' : ''}>Meus Eventos</Link>
                             <Link to="/events" className={location.pathname === '/events' ? 'active' : ''}>Ver Eventos</Link>
                             <Link to="/profile" className={location.pathname === '/profile' ? 'active' : ''}>Perfil do Usuário</Link>
+                            <Link to="/team" className={location.pathname === '/team' ? 'active' : ''}>Times</Link>
                         </>
                     )}
                     {user.role === 'ROLE_MANAGER' && (

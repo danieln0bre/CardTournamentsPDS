@@ -4,6 +4,7 @@ import br.ufrn.imd.model.Pairing;
 import br.ufrn.imd.model.Player;
 import br.ufrn.imd.model.Team;
 import br.ufrn.imd.repository.TeamRepository;
+import br.ufrn.imd.service.TeamService;
 import br.ufrn.imd.strategy.MatchUpdateStrategy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -16,11 +17,13 @@ import java.util.Map;
 public class DefaultTeamMatchUpdateStrategy implements MatchUpdateStrategy {
 
     private final TeamRepository teamRepository;
+    private final TeamService teamService;
     private final Map<String, Map<String, Integer[]>> gameObjectMatchups = new HashMap<>();
 
     @Autowired
-    public DefaultTeamMatchUpdateStrategy(TeamRepository teamRepository) {
+    public DefaultTeamMatchUpdateStrategy(TeamRepository teamRepository, TeamService teamService) {
         this.teamRepository = teamRepository;
+        this.teamService = teamService;
     }
 
     @Override
@@ -63,9 +66,9 @@ public class DefaultTeamMatchUpdateStrategy implements MatchUpdateStrategy {
         Team teamTwo = fetchTeam(pairing.getEntityTwoId());
 
         if (pairing.getResult() == 0) {
-            teamOne.setEventPoints(teamOne.getEventPoints() + 1);
+            teamOne.setEventPoints(teamService.getEventPoints(teamOne) + 1);
         } else if (pairing.getResult() == 1) {
-            teamTwo.setEventPoints(teamTwo.getEventPoints() + 1);
+            teamTwo.setEventPoints(teamService.getEventPoints(teamTwo) + 1);
         }
 
         teamRepository.save(teamOne);
@@ -85,8 +88,8 @@ public class DefaultTeamMatchUpdateStrategy implements MatchUpdateStrategy {
 
             if (teamOne == null || teamTwo == null) continue;
 
-            for (Player playerOne : teamOne.getPlayers()) {
-                for (Player playerTwo : teamTwo.getPlayers()) {
+            for (Player playerOne : teamService.getPlayers(teamOne)) {
+                for (Player playerTwo : teamService.getPlayers(teamTwo)) {
                     String playerOneGameObjectId = playerOne.getGameObjectId();
                     String playerTwoGameObjectId = playerTwo.getGameObjectId();
 
@@ -124,7 +127,7 @@ public class DefaultTeamMatchUpdateStrategy implements MatchUpdateStrategy {
 
     private void updateTeamForBye(String teamId) {
         Team team = fetchTeam(teamId);
-        team.setEventPoints(team.getEventPoints() + 1);
+        team.setEventPoints(teamService.getEventPoints(team) + 1);
         teamRepository.save(team);
     }
 }

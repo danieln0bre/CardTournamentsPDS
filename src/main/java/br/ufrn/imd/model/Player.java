@@ -1,6 +1,9 @@
 package br.ufrn.imd.model;
 
+import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
+
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,7 +19,8 @@ public class Player extends User {
     private List<String> opponentIds;
     private List<Event> historicoEventos;
     private double opponentsMatchWinrate;
-    private Team team; // Adiciona o atributo team
+    @JsonBackReference
+    private String teamId; 
 
     public Player(String name, String username, String email, String password) {
         super(name, username, email, password, Role.ROLE_PLAYER);
@@ -110,12 +114,12 @@ public class Player extends User {
         this.opponentsMatchWinrate = opponentsMatchWinrate;
     }
 
-    public Team getTeam() {
-        return team;
+    public String getTeamId() {
+        return teamId;
     }
 
-    public void setTeam(Team team) {
-        this.team = team;
+    public void setTeamId(String teamId) {
+        this.teamId = teamId;
     }
 
     // Clear methods for lists

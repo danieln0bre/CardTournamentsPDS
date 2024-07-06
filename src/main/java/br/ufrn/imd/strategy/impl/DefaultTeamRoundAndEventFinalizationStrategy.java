@@ -2,10 +2,10 @@ package br.ufrn.imd.strategy.impl;
 
 import br.ufrn.imd.model.*;
 import br.ufrn.imd.repository.*;
+import br.ufrn.imd.service.TeamService;
 import br.ufrn.imd.strategy.RoundAndEventFinalizationStrategy;
 import br.ufrn.imd.strategy.MatchUpdateStrategy;
 import br.ufrn.imd.strategy.PairingStrategy;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -20,15 +20,18 @@ public class DefaultTeamRoundAndEventFinalizationStrategy implements RoundAndEve
     private final TeamRepository teamRepository;
     private final MatchUpdateStrategy matchUpdateStrategy;
     private final PairingStrategy pairingStrategy;
+    private final TeamService teamService;
 
     @Autowired
     public DefaultTeamRoundAndEventFinalizationStrategy(EventRepository eventRepository, EventResultRepository eventResultRepository,
-                                                        TeamRepository teamRepository, MatchUpdateStrategy matchUpdateStrategy, PairingStrategy pairingStrategy) {
+                                                        TeamRepository teamRepository, MatchUpdateStrategy matchUpdateStrategy,
+                                                        PairingStrategy pairingStrategy, TeamService teamService) {
         this.eventRepository = eventRepository;
         this.eventResultRepository = eventResultRepository;
         this.teamRepository = teamRepository;
         this.matchUpdateStrategy = matchUpdateStrategy;
         this.pairingStrategy = pairingStrategy;
+        this.teamService = teamService;
     }
 
     @Override
@@ -90,8 +93,8 @@ public class DefaultTeamRoundAndEventFinalizationStrategy implements RoundAndEve
         for (Team team : teams) {
             TeamResult result = new TeamResult();
             result.setTeamId(team.getId());
-            result.setEventPoints(team.getEventPoints());
-            result.setWinrate(team.getWinrate());
+            result.setEventPoints(teamService.getEventPoints(team));
+            result.setWinrate(teamService.getWinrate(team));
             teamResults.add(result);
         }
         return teamResults;
@@ -99,7 +102,7 @@ public class DefaultTeamRoundAndEventFinalizationStrategy implements RoundAndEve
 
     private void resetTeamAttributes(List<Team> teams, String eventId) {
         for (Team team : teams) {
-            for (Player player : team.getPlayers()) {
+            for (Player player : teamService.getPlayers(team)) {
                 player.setRankPoints(player.getRankPoints() + player.getEventPoints());
                 player.setEventPoints(0);
                 player.setWinrate(0);
@@ -107,8 +110,8 @@ public class DefaultTeamRoundAndEventFinalizationStrategy implements RoundAndEve
                 player.clearOpponents();
                 player.getAppliedEventsId().remove(eventId);
                 player.addEventId(eventId);
-                teamRepository.save(team);
             }
+            teamRepository.save(team);
         }
     }
 

@@ -1,0 +1,111 @@
+.team-container {
+    padding: 20px;
+    background-color: #f9f9f9;
+}
+
+.team-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.team-name {
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.team-list {
+    list-style-type: none;
+    padding: 0;
+}
+
+.team-item {
+    border: 1px solid #ddd;
+    margin-bottom: 10px;
+    padding: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: background-color 0.3s ease;
+}
+
+.team-item:hover {
+    background-color: #f1f1f1;
+}
+
+.team-controls {
+    display: flex;
+    gap: 10px;
+}
+
+.team-controls button {
+    background-color: #f44336; /* Red */
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    border-radius: 3px;
+}
+
+.team-controls button:hover {
+    background-color: #d32f2f; /* Darker red */
+}
+
+.create-team {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.create-team input {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+}
+
+.create-team button {
+    background-color: #4caf50; /* Green */
+    color: white;
+    border: none;
+    padding: 10px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    border-radius: 3px;
+}
+
+.create-team button:hover {
+    background-color: #388e3c; /* Darker green */
+}
+
+.add-player {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.add-player input {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+}
+
+.add-player button {
+    background-color: #2196f3; /* Blue */
+    color: white;
+    border: none;
+    padding: 10px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    border-radius: 3px;
+}
+
+.add-player button:hover {
+    background-color: #1976d2; /* Darker blue */
+}
+
+.error-message {
+    color: red;
+    margin-top: 10px;
+}

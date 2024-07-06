@@ -14,6 +14,7 @@ import SelectDeck from './components/SelectDeck/SelectDeck';
 import EventStatistics from './components/EventStatistics/EventStatistics';
 import CreateEvent from './components/CreateEvent/CreateEvent';
 import UpdateEvent from './components/UpdateEvent/UpdateEvent';
+import Team from './components/Team/Team';
 
 function App() {
   return (
@@ -33,6 +34,7 @@ function App() {
         <Route path="/events/:eventId/statistics" element={<EventStatistics />} />
         <Route path="/create-event" element={<CreateEvent />} />
         <Route path="/update-event/:eventId" element={<UpdateEvent />} />
+        <Route path="/team" element={<Team />} />
       </Routes>
     </BrowserRouter>
   );

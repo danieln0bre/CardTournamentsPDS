@@ -1,7 +1,10 @@
 package br.ufrn.imd.model;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
+
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,32 +16,32 @@ public class Team {
     private String id;
     private String name;
     private String ownerId;
-    private List<Player> players;
+    @JsonManagedReference
+    private List<String> playerIds = new ArrayList<>(5);
     private int eventPoints;
 
     public Team(String name, String ownerId) {
         this.name = name;
         this.ownerId = ownerId;
-        this.players = new ArrayList<>(5); // Inicializa a lista com capacidade máxima de 5 jogadores
+        this.playerIds = new ArrayList<>(5); // Inicializa a lista com capacidade máxima de 5 jogadores
     }
 
     public boolean addPlayer(Player player) {
-        if (players.size() < 5) {
-            player.setTeam(this); // Set the team for the player
-            return players.add(player);
+        if (playerIds.size() < 5) {
+            player.setTeamId(this.id);
+            return playerIds.add(player.getId());
         }
-        return false; // Retorna false se já houver 5 jogadores no time
+        return false;
     }
 
     public boolean removePlayer(Player player) {
-        player.setTeam(null); // Remove the team from the player
-        return players.remove(player);
+        player.setTeamId(null);
+        return playerIds.remove(player.getId());
     }
 
-    public List<Player> getPlayers() {
-        return new ArrayList<>(players); // Retorna uma cópia da lista de jogadores
+    public List<String> getPlayerIds() {
+        return new ArrayList<>(playerIds);
     }
-
     public String getName() {
         return name;
     }
@@ -61,14 +64,6 @@ public class Team {
 
     public void setId(String id) {
         this.id = id;
-    }
-
-    public int getEventPoints() {
-        return players.stream().mapToInt(Player::getEventPoints).sum();
-    }
-
-    public double getWinrate() {
-        return players.stream().mapToDouble(Player::getWinrate).average().orElse(0.0);
     }
 
 	public void setEventPoints(int eventPoints) {
