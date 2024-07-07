@@ -59,11 +59,11 @@ export const fetchManagerEvents = (managerId) => {
 };
 
 export const fetchWinningDeckNames = () => {
-    return axiosInstance.get('/players/winning-decks').then(response => response.data);
+    return axiosInstance.get('/players/game-objects').then(response => response.data);
 };
 
-export const updatePlayerDeck = (playerId, deckId) => {
-    return axiosInstance.put(`/players/${playerId}/updateDeck`, deckId, {
+export const updatePlayerDeck = (playerId, gameObjectId) => {
+    return axiosInstance.put(`/players/${playerId}/update-game-object`, gameObjectId, {
         headers: {
             'Content-Type': 'text/plain'
         }
@@ -71,7 +71,7 @@ export const updatePlayerDeck = (playerId, deckId) => {
 };
 
 export const fetchDeckMatchups = (eventId) => {
-    return axiosInstance.get(`/events/${eventId}/deck-matchups`).then(response => response.data);
+    return axiosInstance.get(`/events/${eventId}/game-object-matchups`).then(response => response.data);
 };
 
 export const fetchEventRankings = (eventId) => {
@@ -87,9 +87,9 @@ export const fetchEventResultRanking = (eventId) => {
 };
 
 export const fetchEventPairings = (eventId) => {
-    return axiosInstance.get(`/events/${eventId}/pairings`).then(response => response.data);
+    return axiosInstance.get(`/event-pairings/${eventId}/pairings`).then(response => response.data);
 };
-// src/services/api.js
+
 export const loginUser = (credentials) => {
     return axiosInstance.post('/users/login', credentials)
         .then(response => {
@@ -117,7 +117,6 @@ export const updateEvent = (eventId, eventDetails) => {
         .then(response => response.data);
 };
 
-// src/services/api.js
 export const fetchLoggedInPlayerEvents = () => {
     const user = JSON.parse(localStorage.getItem('user'));
     const playerId = user && user.id;
@@ -130,7 +129,7 @@ export const fetchLoggedInPlayerEvents = () => {
 };
 
 export const startEvent = (eventId) => {
-    return axiosInstance.post(`/events/${eventId}/start`).then(response => response.data);
+    return axiosInstance.post(`/event-pairings/${eventId}/start`).then(response => response.data);
 };
 
 export const addEventToPlayer = (playerId, eventId) => {
@@ -147,21 +146,21 @@ export const fetchGeneralRankings = async () => {
 };
 
 export const generatePairings = (eventId) => {
-    return axiosInstance.post(`/events/${eventId}/generatePairings`).then(response => response.data);
+    return axiosInstance.post(`/event-pairings/${eventId}/generate-pairings`).then(response => response.data);
 };
 
 export const savePairings = (eventId, pairings) => {
-    return axiosInstance.post(`/events/${eventId}/savePairings`, pairings)
+    return axiosInstance.post(`/event-pairings/${eventId}/save-pairings`, pairings)
         .then(response => response.data);
 };
 
 export const recalculateWinrates = (playerId) => {
-    return axiosInstance.post(`/players/${playerId}/recalculateWinrates`)
+    return axiosInstance.post(`/players/${playerId}/recalculate-winrates`)
         .then(response => response.data);
 };
 
 export const finalizeRound = (eventId) => {
-    return axiosInstance.post(`/events/${eventId}/finalizeRound`)
+    return axiosInstance.post(`/event-pairings/${eventId}/finalize-round`)
         .then(response => response.data);
 };
 
@@ -169,7 +168,41 @@ export const fetchManagerById = managerId => {
     return axiosInstance.get(`/users/manager/${managerId}`).then(checkResponseStatus);
 };
 
-export const fetchDeckById = (deckId) => {
-    return axiosInstance.get(`/players/decks/${deckId}`).then(checkResponseStatus);
+export const fetchDeckById = (gameObjectId) => {
+    return axiosInstance.get(`/players/game-objects/${gameObjectId}`).then(checkResponseStatus);
 };
 
+export const createTeam = (name, ownerId) => {
+    return axiosInstance.post(`/teams/create`, null, {
+        params: { name, ownerId }
+    })
+    .then(checkResponseStatus);
+};
+
+export const addPlayerToTeam = (teamId, playerId) => {
+    return axiosInstance.post(`/teams/${teamId}/add-player`, null, {
+        params: { playerId }
+    })
+    .then(checkResponseStatus);
+};
+
+export const removePlayerFromTeam = async (teamId, playerId) => {
+    const response = await axiosInstance.delete(`/teams/${teamId}/remove-player/${playerId}`);
+    return response.data;
+};
+
+export const fetchPlayerTeam = (playerId) => {
+    return axiosInstance.get(`/teams/${playerId}/team`)
+        .then(checkResponseStatus);
+};
+
+export const getUserIdByName = (username) => {
+    return axiosInstance.get(`/users/getUserIdByName`, {
+        params: { username }
+    }).then(response => response.data);
+};
+
+export const fetchTeamById = (teamId) => {
+    return axiosInstance.get(`/teams/${teamId}`)
+        .then(checkResponseStatus);
+};

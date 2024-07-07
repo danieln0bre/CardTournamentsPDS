@@ -16,21 +16,19 @@ public class Player extends User {
     private List<String> opponentIds;
     private List<Event> historicoEventos;
     private double opponentsMatchWinrate;
-    private Team team; // Adiciona o atributo team
+    private String teamId; // Adiciona o atributo team
 
     public Player(String name, String username, String email, String password) {
         super(name, username, email, password, Role.ROLE_PLAYER);
         this.rankPoints = 0;
         this.eventPoints = 0;
         this.winrate = 0.0;
-        this.gameObjectId = null;  // Initialize with null
+        this.gameObjectId = null;
         this.appliedEventsId = new ArrayList<>();
         this.opponentIds = new ArrayList<>();
         this.historicoEventos = new ArrayList<>();
         this.opponentsMatchWinrate = 0.0;
     }
-
-    // Auxiliary methods to manipulate player data.
 
     public void addEventPoints(int points) {
         this.eventPoints += points;
@@ -47,8 +45,6 @@ public class Player extends User {
     public void removeOpponentId(String opponentId) {
         opponentIds.remove(opponentId);
     }
-
-    // Getters and setters.
 
     public int getRankPoints() {
         return rankPoints;
@@ -78,8 +74,8 @@ public class Player extends User {
         return gameObjectId;
     }
 
-    public void setGameObjectId(String deckId) {
-        this.gameObjectId = deckId;
+    public void setGameObjectId(String gameObjectId) {
+        this.gameObjectId = gameObjectId;
     }
 
     public boolean hasGameObject() {
@@ -110,15 +106,13 @@ public class Player extends User {
         this.opponentsMatchWinrate = opponentsMatchWinrate;
     }
 
-    public Team getTeam() {
-        return team;
+    public String getTeamId() {
+        return teamId;
     }
 
-    public void setTeam(Team team) {
-        this.team = team;
+    public void setTeamId(String teamId) {
+        this.teamId = teamId;
     }
-
-    // Clear methods for lists
 
     public void clearOpponents() {
         opponentIds.clear();

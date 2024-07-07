@@ -8,12 +8,12 @@ import org.springframework.stereotype.Component;
 import java.util.*;
 
 @Component
-public class DefaultPairingStrategy implements PairingStrategy {
+public class DefaultPairingStrategy implements PairingStrategy<Player> {
 
     @Override
     public List<Pairing> createPairings(List<Player> players) {
         validatePlayers(players);
-        Collections.sort(players, getRankComparator());
+        players.sort(getRankComparator());
 
         List<Pairing> pairings = new ArrayList<>();
         Set<String> pairedPlayerIds = new HashSet<>();
@@ -23,8 +23,8 @@ public class DefaultPairingStrategy implements PairingStrategy {
                 Pairing pairing = createPairForPlayer(player1, players, pairedPlayerIds);
                 pairings.add(pairing);
                 pairedPlayerIds.add(player1.getId());
-                if (!"Bye".equals(pairing.getPlayerTwoId())) {
-                    pairedPlayerIds.add(pairing.getPlayerTwoId());
+                if (!"Bye".equals(pairing.getEntityTwoId())) {
+                    pairedPlayerIds.add(pairing.getEntityTwoId());
                 }
             }
         }
@@ -58,8 +58,8 @@ public class DefaultPairingStrategy implements PairingStrategy {
         return null;
     }
 
-    private static Comparator<Player> getRankComparator() {
-        return Comparator.comparing(Player::getEventPoints, Comparator.reverseOrder())
-                         .thenComparing(Player::getRankPoints);
+    private Comparator<Player> getRankComparator() {
+        return Comparator.comparingInt(Player::getEventPoints).reversed()
+                         .thenComparingInt(Player::getRankPoints);
     }
 }

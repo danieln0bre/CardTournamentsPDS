@@ -47,6 +47,13 @@ public class UserController {
                           .map(ResponseEntity::ok)
                           .orElse(ResponseEntity.notFound().build());
     }
+    
+    @GetMapping("/getUserIdByName")
+    public ResponseEntity<String> getUserIdByName(@RequestParam String username) {
+        User user = userService.getUserByUsername(username)
+                .orElseThrow(() -> new IllegalArgumentException("User not found with username: " + username));
+        return ResponseEntity.ok(user.getId());
+    }
 
     @GetMapping("/manager/{id}")
     public ResponseEntity<Manager> getManagerById(@PathVariable String id) {

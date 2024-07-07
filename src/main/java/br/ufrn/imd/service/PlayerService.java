@@ -1,6 +1,8 @@
 package br.ufrn.imd.service;
 
+import br.ufrn.imd.model.Event;
 import br.ufrn.imd.model.Player;
+import br.ufrn.imd.repository.EventRepository;
 import br.ufrn.imd.repository.PlayerRepository;
 import br.ufrn.imd.util.PlayerValidationUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,14 +13,15 @@ import java.util.Optional;
 
 @Service
 public class PlayerService {
-
     private final PlayerRepository playerRepository;
     private final PlayerWinrateService winrateService;
+    private final EventRepository eventRepository;
 
     @Autowired
-    public PlayerService(PlayerRepository playerRepository, PlayerWinrateService winrateService) {
+    public PlayerService(PlayerRepository playerRepository, PlayerWinrateService winrateService, EventRepository eventRepository) {
         this.playerRepository = playerRepository;
         this.winrateService = winrateService;
+        this.eventRepository = eventRepository;
     }
 
     public Player createPlayer(Player player) {
@@ -31,6 +34,16 @@ public class PlayerService {
         PlayerValidationUtil.validatePlayer(playerDetails);
         playerDetails.setId(id);
         return createPlayer(playerDetails);
+    }
+    
+    public List<Player> getPlayersByEventId(String eventId) {
+        Optional<Event> eventOptional = eventRepository.findById(eventId);
+        if (eventOptional.isPresent()) {
+            Event event = eventOptional.get();
+            return playerRepository.findAllById(event.getEntityIds());
+        } else {
+            throw new IllegalArgumentException("Event not found with ID: " + eventId);
+        }
     }
 
     public void updatePlayerOpponents(String playerId, String opponentId) {
@@ -53,8 +66,8 @@ public class PlayerService {
 
     public Player addEventToPlayer(String playerId, String eventId) {
         validateId(eventId, "Event ID");
-        Player player = getPlayerById(playerId).orElseThrow(() -> 
-            new IllegalArgumentException("Player not found with ID: " + playerId));
+        Player player = getPlayerById(playerId).orElseThrow(() ->
+                new IllegalArgumentException("Player not found with ID: " + playerId));
         player.addEventId(eventId);
         return playerRepository.save(player);
     }
@@ -63,6 +76,10 @@ public class PlayerService {
         validatePlayerIds(playerIds);
         List<Player> players = getPlayersByIds(playerIds);
         return players.stream().allMatch(Player::hasGameObject);
+    }
+
+    public boolean existsById(String playerId) {
+        return playerRepository.existsById(playerId);
     }
 
     public List<Player> saveAll(List<Player> players) {
@@ -89,8 +106,8 @@ public class PlayerService {
     }
 
     public Player recalculateWinrates(String playerId) {
-        Player player = getPlayerById(playerId).orElseThrow(() -> 
-            new IllegalArgumentException("Player not found with ID: " + playerId));
+        Player player = getPlayerById(playerId).orElseThrow(() ->
+                new IllegalArgumentException("Player not found with ID: " + playerId));
         player = winrateService.calculateWinRates(player);
         return savePlayer(player);
     }

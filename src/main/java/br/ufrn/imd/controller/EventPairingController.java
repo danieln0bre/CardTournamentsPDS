@@ -1,10 +1,8 @@
 package br.ufrn.imd.controller;
 
 import br.ufrn.imd.model.Pairing;
-import br.ufrn.imd.model.Player;
 import br.ufrn.imd.service.EventService;
-import br.ufrn.imd.service.PairingService;
-import br.ufrn.imd.service.PlayerService;
+import br.ufrn.imd.service.GenericPairingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,13 +14,11 @@ import java.util.List;
 public class EventPairingController {
 
     private final EventService eventService;
-    private final PlayerService playerService;
-    private final PairingService pairingService;
+    private final GenericPairingService pairingService;
 
     @Autowired
-    public EventPairingController(EventService eventService, PlayerService playerService, PairingService pairingService) {
+    public EventPairingController(EventService eventService, GenericPairingService pairingService) {
         this.eventService = eventService;
-        this.playerService = playerService;
         this.pairingService = pairingService;
     }
 
@@ -34,7 +30,7 @@ public class EventPairingController {
                         return ResponseEntity.badRequest().body("Event has already started.");
                     }
 
-                    if (!playerService.allPlayersHaveDecks(event.getPlayerIds())) {
+                    if (!eventService.allEntitiesHaveDecks(event)) {
                         return ResponseEntity.badRequest().body("Not all players have registered decks.");
                     }
 
@@ -53,8 +49,7 @@ public class EventPairingController {
                         return ResponseEntity.badRequest().body("Event has not started yet.");
                     }
 
-                    List<Player> players = playerService.getPlayersByIds(event.getPlayerIds());
-                    List<Pairing> pairings = pairingService.createPairings(players);
+                    List<Pairing> pairings = pairingService.createPairings(eventId);
                     event.setPairings(pairings);
                     eventService.saveEvent(event);
                     return ResponseEntity.ok("Pairings generated successfully.");

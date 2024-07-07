@@ -37,7 +37,7 @@ public class DefaultRoundAndEventFinalizationStrategy implements RoundAndEventFi
         event.setFinished(true);
         event = eventRepository.save(event);
 
-        List<Player> players = playerRepository.findAllById(event.getPlayerIds());
+        List<Player> players = playerRepository.findAllById(event.getEntityIds());
         if (players.isEmpty()) {
             throw new IllegalStateException("No players found for the event.");
         }
@@ -63,7 +63,7 @@ public class DefaultRoundAndEventFinalizationStrategy implements RoundAndEventFi
             matchUpdateStrategy.updateMatchResult(pairing);
         }
         if (event.getCurrentRound() < event.getNumberOfRounds()) {
-            List<Player> players = playerRepository.findAllById(event.getPlayerIds());
+            List<Player> players = playerRepository.findAllById(event.getEntityIds());
             List<Pairing> newPairings = defaultPairingStrategy.createPairings(players);
             event.setPairings(newPairings);
         }

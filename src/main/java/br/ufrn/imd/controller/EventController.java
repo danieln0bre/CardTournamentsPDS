@@ -2,10 +2,10 @@ package br.ufrn.imd.controller;
 
 import br.ufrn.imd.model.Event;
 import br.ufrn.imd.model.EventResult;
-import br.ufrn.imd.model.Manager;
 import br.ufrn.imd.model.Player;
 import br.ufrn.imd.model.PlayerResult;
-import br.ufrn.imd.repository.EventResultRepository;
+import br.ufrn.imd.model.Team;
+import br.ufrn.imd.model.TeamResult;
 import br.ufrn.imd.service.EventRankingService;
 import br.ufrn.imd.service.EventService;
 import br.ufrn.imd.service.ManagerService;
@@ -25,16 +25,15 @@ public class EventController {
     private final PlayerService playerService;
     private final EventService eventService;
     private final ManagerService managerService;
-    private final EventResultRepository eventResultRepository;
-    private final EventRankingService eventRankingService;
+    private final EventRankingService<Player, PlayerResult> playerEventRankingService;
 
     @Autowired
-    public EventController(PlayerService playerService, EventService eventService, ManagerService managerService, EventResultRepository eventResultRepository, EventRankingService eventRankingService) {
+    public EventController(PlayerService playerService, EventService eventService, ManagerService managerService,
+                           EventRankingService<Player, PlayerResult> playerEventRankingService) {
         this.playerService = playerService;
         this.eventService = eventService;
         this.managerService = managerService;
-        this.eventResultRepository = eventResultRepository;
-        this.eventRankingService = eventRankingService;
+        this.playerEventRankingService = playerEventRankingService;
     }
 
     @PostMapping("/createEvent")
@@ -60,16 +59,6 @@ public class EventController {
         } else {
             return ResponseEntity.notFound().build();
         }
-    }
-
-    private ResponseEntity<Event> updateAndSaveEvent(Event existingEvent, Event eventDetails) {
-        if (eventDetails.getNumberOfRounds() < 0) {
-            return ResponseEntity.badRequest().body(null);
-        }
-        existingEvent.updateDetailsFrom(eventDetails);
-        Event updatedEvent = eventService.saveEvent(existingEvent);
-        managerService.updateManagerEvents(updatedEvent);
-        return ResponseEntity.ok(updatedEvent);
     }
 
     @GetMapping("/")
@@ -113,8 +102,8 @@ public class EventController {
         Optional<Event> eventOpt = eventService.getEventById(id);
         if (eventOpt.isPresent()) {
             Event event = eventOpt.get();
-            List<Player> players = playerService.getPlayersByIds(event.getPlayerIds());
-            return ResponseEntity.ok(eventRankingService.sortByEventPoints(players));
+            List<Player> players = playerService.getPlayersByIds(event.getEntityIds());
+            return ResponseEntity.ok(playerEventRankingService.sortByEventPoints(players));
         } else {
             return ResponseEntity.notFound().build();
         }
@@ -156,8 +145,8 @@ public class EventController {
         }
     }
 
-    @GetMapping("/{id}/deck-matchups")
-    public ResponseEntity<Map<String, Map<String, Double>>> getDeckMatchups(@PathVariable String id) {
+    @GetMapping("/{id}/gameobject-matchups")
+    public ResponseEntity<Map<String, Map<String, Double>>> getGameObjectMatchups(@PathVariable String id) {
         try {
             Map<String, Map<String, Double>> matchups = eventService.getDeckMatchupStatistics(id);
             return ResponseEntity.ok(matchups);

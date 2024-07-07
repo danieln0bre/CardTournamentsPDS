@@ -2,40 +2,57 @@ package br.ufrn.imd.model;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
-
 import java.util.ArrayList;
 import java.util.List;
 
 @Document(collection = "times")
 public class Team {
-
     @Id
     private String id;
     private String name;
     private String ownerId;
-    private List<Player> players;
+    private List<String> eventIds;
+    private List<String> playerIds;
+    private int eventPoints;
 
     public Team(String name, String ownerId) {
         this.name = name;
         this.ownerId = ownerId;
-        this.players = new ArrayList<>(5); // Inicializa a lista com capacidade máxima de 5 jogadores
+        this.playerIds = new ArrayList<>(5);
+        this.eventIds = new ArrayList<>();
     }
 
     public boolean addPlayer(Player player) {
-        if (players.size() < 5) {
-            player.setTeam(this); // Set the team for the player
-            return players.add(player);
+        if (playerIds.size() < 5) {
+            player.setTeamId(this.id);
+            return playerIds.add(player.getId());
         }
-        return false; // Retorna false se já houver 5 jogadores no time
+        return false;
     }
 
     public boolean removePlayer(Player player) {
-        player.setTeam(null); // Remove the team from the player
-        return players.remove(player);
+        player.setTeamId(null);
+        return playerIds.remove(player.getId());
     }
 
-    public List<Player> getPlayers() {
-        return new ArrayList<>(players); // Retorna uma cópia da lista de jogadores
+    public List<String> getPlayerIds() {
+        return new ArrayList<>(playerIds);
+    }
+
+    public List<String> getEventIds() {
+        return eventIds;
+    }
+
+    public void setEventIds(List<String> eventIds) {
+        this.eventIds = eventIds;
+    }
+
+    public void addEventId(String eventId) {
+        if (!this.eventIds.contains(eventId)) {
+            this.eventIds.add(eventId);
+        } else {
+            throw new IllegalArgumentException("Event ID already added.");
+        }
     }
 
     public String getName() {
@@ -63,10 +80,10 @@ public class Team {
     }
 
     public int getEventPoints() {
-        return players.stream().mapToInt(Player::getEventPoints).sum();
+        return eventPoints;
     }
 
-    public double getWinrate() {
-        return players.stream().mapToDouble(Player::getWinrate).average().orElse(0.0);
+    public void setEventPoints(int eventPoints) {
+        this.eventPoints = eventPoints;
     }
 }

@@ -2,15 +2,13 @@ package br.ufrn.imd.service;
 
 import br.ufrn.imd.model.GameObject;
 import br.ufrn.imd.repository.GameObjectRepository;
-
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class GameObjectService {
-
     private final GameObjectRepository deckRepository;
 
     @Autowired
@@ -23,7 +21,7 @@ public class GameObjectService {
     }
 
     public List<GameObject> getAllGameObjects() {
-        return deckRepository.findAll(); // Update this if there's a specific query for winning decks
+        return deckRepository.findAll();
     }
 
     public GameObject saveGameObject(GameObject deck) {

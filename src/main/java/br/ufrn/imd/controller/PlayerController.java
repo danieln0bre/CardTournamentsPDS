@@ -85,11 +85,11 @@ public class PlayerController {
     }
 
     private void checkAndAddEventToPlayer(String playerId, Event event) {
-        if (event.getPlayerIds().contains(playerId)) {
+        if (event.getEntityIds().contains(playerId)) {
             throw new IllegalArgumentException("Player is already registered for this event.");
         }
         playerService.addEventToPlayer(playerId, event.getId());
-        eventService.addPlayerToEvent(event.getId(), playerId);
+        eventService.addEntityToEvent(event.getId(), playerId);
     }
 
     @GetMapping("/rankings")

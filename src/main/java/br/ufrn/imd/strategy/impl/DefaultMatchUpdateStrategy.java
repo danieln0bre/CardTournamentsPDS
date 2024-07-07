@@ -45,21 +45,21 @@ public class DefaultMatchUpdateStrategy implements MatchUpdateStrategy {
 
     @Override
     public void handleByeMatch(Pairing pairing) {
-        if ("Bye".equals(pairing.getPlayerTwoId())) {
-            updatePlayerForBye(pairing.getPlayerOneId());
-        } else if ("Bye".equals(pairing.getPlayerOneId())) {
-            updatePlayerForBye(pairing.getPlayerTwoId());
+        if ("Bye".equals(pairing.getEntityTwoId())) {
+            updatePlayerForBye(pairing.getEntityOneId());
+        } else if ("Bye".equals(pairing.getEntityOneId())) {
+            updatePlayerForBye(pairing.getEntityTwoId());
         }
     }
 
     @Override
     public void updatePlayersResults(Pairing pairing) {
-        if ("Bye".equals(pairing.getPlayerOneId()) || "Bye".equals(pairing.getPlayerTwoId())) {
+        if ("Bye".equals(pairing.getEntityOneId()) || "Bye".equals(pairing.getEntityTwoId())) {
             return;
         }
 
-        Player playerOne = fetchPlayer(pairing.getPlayerOneId());
-        Player playerTwo = fetchPlayer(pairing.getPlayerTwoId());
+        Player playerOne = fetchPlayer(pairing.getEntityOneId());
+        Player playerTwo = fetchPlayer(pairing.getEntityTwoId());
 
         if (pairing.getResult() == 0) {
             playerOne.setEventPoints(playerOne.getEventPoints() + 1);
@@ -76,8 +76,8 @@ public class DefaultMatchUpdateStrategy implements MatchUpdateStrategy {
         Map<String, Map<String, Integer[]>> gameObjectMatchups = new HashMap<>();
 
         for (Pairing pairing : pairings) {
-            String playerOneId = pairing.getPlayerOneId();
-            String playerTwoId = pairing.getPlayerTwoId();
+            String playerOneId = pairing.getEntityOneId();
+            String playerTwoId = pairing.getEntityTwoId();
 
             Player playerOne = playerRepository.findById(playerOneId).orElse(null);
             Player playerTwo = playerRepository.findById(playerTwoId).orElse(null);
