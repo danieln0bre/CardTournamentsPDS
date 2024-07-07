@@ -17,7 +17,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -26,21 +25,24 @@ import java.util.Optional;
 @Service
 public class EventService {
 
-    private final PairingService pairingService;
     private final MatchUpdateStrategy matchUpdateStrategy;
     private final RoundAndEventFinalizationStrategy roundAndEventFinalizationStrategy;
     private final StatisticsGenerationStrategy statisticsGenerationStrategy;
-    private final EventRankingService eventRankingService;
+    private final EventRankingService<Team, TeamResult> eventRankingService;
     private final EventRepository eventRepository;
     private final PlayerRepository playerRepository;
     private final PlayerService playerService;
+    private final TeamService teamService;
 
     @Autowired
-    public EventService(PairingService pairingService, MatchUpdateStrategy matchUpdateStrategy,
+    public EventService(MatchUpdateStrategy matchUpdateStrategy,
                         RoundAndEventFinalizationStrategy roundAndEventFinalizationStrategy,
-                        StatisticsGenerationStrategy statisticsGenerationStrategy, EventRankingService eventRankingService,
-                        EventRepository eventRepository, PlayerRepository playerRepository, PlayerService playerService) {
-        this.pairingService = pairingService;
+                        StatisticsGenerationStrategy statisticsGenerationStrategy,
+                        EventRankingService<Team, TeamResult> eventRankingService,
+                        EventRepository eventRepository,
+                        PlayerRepository playerRepository,
+                        PlayerService playerService,
+                        TeamService teamService) {
         this.matchUpdateStrategy = matchUpdateStrategy;
         this.roundAndEventFinalizationStrategy = roundAndEventFinalizationStrategy;
         this.statisticsGenerationStrategy = statisticsGenerationStrategy;
@@ -48,6 +50,7 @@ public class EventService {
         this.eventRepository = eventRepository;
         this.playerRepository = playerRepository;
         this.playerService = playerService;
+        this.teamService = teamService;
     }
 
     public Event saveEvent(Event event) {
@@ -66,6 +69,14 @@ public class EventService {
 
     public Optional<Event> getEventByName(String name) {
         return eventRepository.findByName(name);
+    }
+    
+    public boolean allEntitiesHaveDecks(Event event) {
+        if (event.isTeamEvent()) {
+            return teamService.allTeamsHaveDecks(event.getEntityIds());
+        } else {
+            return playerService.allPlayersHaveDecks(event.getEntityIds());
+        }
     }
 
     public Optional<Event> getEventById(String id) {
@@ -112,7 +123,7 @@ public class EventService {
         return eventResult;
     }
 
-    public List<PlayerResult> getEventResultRanking(String eventId) {
+    public List<TeamResult> getEventResultRanking(String eventId) {
         EventResult eventResult = getEventResultByEventId(eventId);
         return eventRankingService.sortByResultEventPoints(eventResult.getTeamResults());
     }

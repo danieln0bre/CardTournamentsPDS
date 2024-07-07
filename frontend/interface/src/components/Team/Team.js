@@ -16,24 +16,33 @@ function Teams() {
 
     useEffect(() => {
         fetchPlayerTeam(user.id)
-            .then(teamId => {
-                if (teamId) {
-                    fetchTeamById(teamId)
+            .then(team => {
+                if (team && team.id) {
+                    fetchTeamById(team.id)
                         .then(fetchedTeam => {
                             setTeam(fetchedTeam);
                             fetchTeamPlayers(fetchedTeam.playerIds);
                         })
-                        .catch(err => console.error('Failed to fetch team by ID:', err));
+                        .catch(err => {
+                            console.error('Failed to fetch team by ID:', err);
+                            setError('Failed to fetch team by ID: ' + err.message);
+                        });
                 } else {
                     console.error('No team found for user.');
+                    setError('No team found for user.');
                 }
             })
-            .catch(err => console.error('Failed to fetch team:', err));
-
+            .catch(err => {
+                console.error('Failed to fetch team:', err);
+                setError('Failed to fetch team: ' + err.message);
+            });
+    
         fetchWinningDeckNames()
             .then(data => setDecks(data))
             .catch(err => setError('Failed to fetch decks: ' + err.message));
     }, [user.id]);
+    
+    
 
     const fetchTeamPlayers = (playerIds) => {
         if (!playerIds) {

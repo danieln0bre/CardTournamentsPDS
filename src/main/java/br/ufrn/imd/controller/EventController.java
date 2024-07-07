@@ -2,14 +2,12 @@ package br.ufrn.imd.controller;
 
 import br.ufrn.imd.model.Event;
 import br.ufrn.imd.model.EventResult;
-import br.ufrn.imd.model.Manager;
-import br.ufrn.imd.model.Player;
-import br.ufrn.imd.model.PlayerResult;
-import br.ufrn.imd.repository.EventResultRepository;
+import br.ufrn.imd.model.Team;
+import br.ufrn.imd.model.TeamResult;
 import br.ufrn.imd.service.EventRankingService;
 import br.ufrn.imd.service.EventService;
 import br.ufrn.imd.service.ManagerService;
-import br.ufrn.imd.service.PlayerService;
+import br.ufrn.imd.service.TeamService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -22,19 +20,18 @@ import java.util.Optional;
 @RequestMapping("/api/events")
 public class EventController {
 
-    private final PlayerService playerService;
     private final EventService eventService;
     private final ManagerService managerService;
-    private final EventResultRepository eventResultRepository;
-    private final EventRankingService eventRankingService;
+    private final TeamService teamService;
+    private final EventRankingService<Team, TeamResult> teamEventRankingService;
 
     @Autowired
-    public EventController(PlayerService playerService, EventService eventService, ManagerService managerService, EventResultRepository eventResultRepository, EventRankingService eventRankingService) {
-        this.playerService = playerService;
+    public EventController(EventService eventService, ManagerService managerService, TeamService teamService,
+                           EventRankingService<Team, TeamResult> teamEventRankingService) {
         this.eventService = eventService;
         this.managerService = managerService;
-        this.eventResultRepository = eventResultRepository;
-        this.eventRankingService = eventRankingService;
+        this.teamService = teamService;
+        this.teamEventRankingService = teamEventRankingService;
     }
 
     @PostMapping("/createEvent")
@@ -60,16 +57,6 @@ public class EventController {
         } else {
             return ResponseEntity.notFound().build();
         }
-    }
-
-    private ResponseEntity<Event> updateAndSaveEvent(Event existingEvent, Event eventDetails) {
-        if (eventDetails.getNumberOfRounds() < 0) {
-            return ResponseEntity.badRequest().body(null);
-        }
-        existingEvent.updateDetailsFrom(eventDetails);
-        Event updatedEvent = eventService.saveEvent(existingEvent);
-        managerService.updateManagerEvents(updatedEvent);
-        return ResponseEntity.ok(updatedEvent);
     }
 
     @GetMapping("/")
@@ -109,12 +96,12 @@ public class EventController {
     }
 
     @GetMapping("/{id}/rankings")
-    public ResponseEntity<List<Player>> getEventRankings(@PathVariable String id) {
+    public ResponseEntity<List<Team>> getEventRankings(@PathVariable String id) {
         Optional<Event> eventOpt = eventService.getEventById(id);
         if (eventOpt.isPresent()) {
             Event event = eventOpt.get();
-            List<Player> players = playerService.getPlayersByIds(event.getEntityIds());
-            return ResponseEntity.ok(eventRankingService.sortByEventPoints(players));
+            List<Team> teams = teamService.getTeamsByIds(event.getEntityIds());
+            return ResponseEntity.ok(teamEventRankingService.sortByEventPoints(teams));
         } else {
             return ResponseEntity.notFound().build();
         }
@@ -145,9 +132,9 @@ public class EventController {
     }
 
     @GetMapping("/{id}/result-ranking")
-    public ResponseEntity<List<PlayerResult>> getEventResultRanking(@PathVariable String id) {
+    public ResponseEntity<List<TeamResult>> getEventResultRanking(@PathVariable String id) {
         try {
-            List<PlayerResult> ranking = eventService.getEventResultRanking(id);
+            List<TeamResult> ranking = eventService.getEventResultRanking(id);
             return ResponseEntity.ok(ranking);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(null);

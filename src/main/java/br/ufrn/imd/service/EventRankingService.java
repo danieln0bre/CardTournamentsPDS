@@ -8,7 +8,6 @@ import java.util.List;
 
 @Service
 public class EventRankingService<T, R> {
-
     private final EventRankingStrategy<T, R> eventRankingStrategy;
 
     @Autowired
@@ -19,7 +18,7 @@ public class EventRankingService<T, R> {
     public List<R> sortByResultEventPoints(List<R> entityResults) {
         return eventRankingStrategy.rankEntityResults(entityResults);
     }
-    
+
     public List<T> sortByEventPoints(List<T> entities) {
         return eventRankingStrategy.rankEntities(entities);
     }

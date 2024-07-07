@@ -9,7 +9,6 @@ public class PlayerResult {
     private List<String> opponentIds;
     private String deckId;
 
-    // Getters and Setters
     public String getPlayerId() {
         return playerId;
     }

@@ -8,7 +8,6 @@ public class TeamResult {
     private double winrate;
     private List<String> opponentTeamIds;
 
-    // Getters and Setters
     public String getTeamId() {
         return teamId;
     }

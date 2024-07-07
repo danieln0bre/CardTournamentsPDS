@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { fetchEventByName, fetchPlayerTeam, fetchTeamById, fetchPlayerById, addEventToEntity, startEvent, finalizeEvent } from '../../services/api';
+import { fetchEventByName, fetchPlayerTeam, fetchTeamById, fetchPlayerById, addEventToEntity, startEvent, finalizeEvent, fetchEventRankings, fetchEventPairings, fetchDeckMatchups } from '../../services/api';
 import { useUser } from '../../contexts/UserContext';
 import './EventDetail.css';
 
@@ -22,24 +22,28 @@ function EventDetail() {
         fetchEventByName(eventName)
             .then(async eventData => {
                 setEvent(eventData);
-                
-                // Buscar times inscritos no evento
-                const teamDataArray = await Promise.all(
-                    eventData.entityIds.map(entityId => 
-                        fetchTeamById(entityId).catch(() => null)
-                    )
-                );
 
-                // Buscar detalhes dos jogadores em cada time
-                const teamsWithPlayers = await Promise.all(teamDataArray.map(async team => {
-                    if (team) {
-                        const playerDetails = await Promise.all(team.playerIds.map(playerId => fetchPlayerById(playerId)));
-                        return { ...team, players: playerDetails };
-                    }
-                    return null;
-                }));
+                if (eventData.isTeamEvent) {
+                    const teamDataArray = await Promise.all(
+                        eventData.entityIds.map(entityId => fetchTeamById(entityId).catch(() => null))
+                    );
 
-                setTeams(teamsWithPlayers.filter(team => team !== null));
+                    const teamsWithPlayers = await Promise.all(teamDataArray.map(async team => {
+                        if (team) {
+                            const playerDetails = await Promise.all(team.playerIds.map(playerId => fetchPlayerById(playerId)));
+                            return { ...team, players: playerDetails };
+                        }
+                        return null;
+                    }));
+
+                    setTeams(teamsWithPlayers.filter(team => team !== null));
+                } else {
+                    const playerDataArray = await Promise.all(
+                        eventData.entityIds.map(entityId => fetchPlayerById(entityId).catch(() => null))
+                    );
+                    setPlayers(playerDataArray.filter(player => player !== null));
+                }
+
                 setLoading(false);
             })
             .catch(err => {
@@ -115,6 +119,24 @@ function EventDetail() {
         }
     };
 
+    const handleViewRankings = () => {
+        if (event) {
+            navigate(`/events/${event.id}/ranking`);
+        }
+    };
+
+    const handleViewPairings = () => {
+        if (event) {
+            navigate(`/events/${event.id}/pairing`);
+        }
+    };
+
+    const handleViewStatistics = () => {
+        if (event) {
+            navigate(`/events/${event.id}/statistics`);
+        }
+    };
+
     if (loading) return <p>Loading event...</p>;
     if (error) return <p>Error loading event: {error}</p>;
     if (!event) return <p>No event found</p>;
@@ -129,48 +151,45 @@ function EventDetail() {
             <div><strong>Started:</strong> {event.hasStarted ? 'Sim' : 'Não'}</div>
             <div><strong>Current Round:</strong> {event.currentRound}</div>
 
-            <h2 className="entity-list-title">Teams</h2>
+            <h2 className="entity-list-title">{event.isTeamEvent ? 'Teams' : 'Players'}</h2>
             <ul>
-                {teams.map(team => (
-                    <li key={team.id}>
-                        <strong>{team.name}</strong>
-                        <ul>
-                            {team.players.map(player => (
-                                <li key={player.id}>{player.username}</li>
-                            ))}
-                        </ul>
-                    </li>
-                ))}
+                {event.isTeamEvent ? (
+                    teams.map(team => (
+                        <li key={team.id}>
+                            <strong>{team.name}</strong>
+                            <ul>
+                                {team.players.map(player => (
+                                    <li key={player.id}>{player.username}</li>
+                                ))}
+                            </ul>
+                        </li>
+                    ))
+                ) : (
+                    players.map(player => (
+                        <li key={player.id}>{player.username}</li>
+                    ))
+                )}
             </ul>
 
             <div className="button-group">
-                {user.role === 'ROLE_MANAGER' ? (
+                {(user.role === 'ROLE_MANAGER' || user.role === 'ROLE_PLAYER') && (
                     <div>
-                        <button onClick={() => navigate(`/events/${event.id}/ranking`)}>Ranking</button>
-                        <button onClick={() => navigate(`/events/${event.id}/pairing`)}>Pareamento</button>
-                        {event.finished && <button onClick={() => navigate(`/events/${event.id}/statistics`)}>Statistics</button>}
+                        <button onClick={handleViewRankings}>Ranking</button>
+                        <button onClick={handleViewPairings}>Pareamento</button>
+                        {event.finished && <button onClick={handleViewStatistics}>Statistics</button>}
+                    </div>
+                )}
+                {user.role === 'ROLE_MANAGER' && (
+                    <div>
                         <button onClick={() => navigate(`/update-event/${event.id}`)}>Update Event</button>
                         {!event.hasStarted && <button onClick={handleStartEvent}>Start Event</button>}
                         {event.currentRound >= event.numberOfRounds && !event.finished && (
                             <button onClick={handleFinalizeEvent}>Finalize Event</button>
                         )}
                     </div>
-                ) : (
-                    <>
-                        {event.entityIds.includes(user.id) || (teamId && event.entityIds.includes(teamId)) ? (
-                            event.hasStarted ? (
-                                <div>
-                                    <button onClick={() => navigate(`/events/${event.id}/ranking`)}>Ranking</button>
-                                    <button onClick={() => navigate(`/events/${event.id}/pairing`)}>Pareamento</button>
-                                    {event.finished && <button onClick={() => navigate(`/events/${event.id}/statistics`)}>Statistics</button>}
-                                </div>
-                            ) : (
-                                <p>Aguarde o torneio começar</p>
-                            )
-                        ) : (
-                            !event.hasStarted && <button onClick={handleRegistration}>Se Inscrever</button>
-                        )}
-                    </>
+                )}
+                {user.role === 'ROLE_PLAYER' && !event.entityIds.includes(user.id) && !event.entityIds.includes(teamId) && !event.hasStarted && (
+                    <button onClick={handleRegistration}>Se Inscrever</button>
                 )}
                 {registrationError && <p className="error-message">{registrationError}</p>}
                 {startError && <p className="error-message">{startError}</p>}

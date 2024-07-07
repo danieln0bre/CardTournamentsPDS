@@ -9,14 +9,23 @@ const axiosInstance = axios.create({
     withCredentials: true // Include credentials to send the session cookie
 });
 
-// Function to check response status and throw an error if the response is not successful
 const checkResponseStatus = (res) => {
+    if (!res) {
+        console.error('Response is undefined');
+        throw new Error('Response is undefined');
+    }
+    if (res.status === undefined || res.statusText === undefined) {
+        console.error('Response status or statusText is undefined:', res);
+        throw new Error('Response status or statusText is undefined');
+    }
     if (res.status >= 200 && res.status < 300) {
         return res.data;
     } else {
+        console.error('Failed to fetch data:', res.status, res.statusText);
         throw new Error(`Failed to fetch data: ${res.status} ${res.statusText}`);
     }
 };
+
 
 export const fetchEvents = () => {
     return axiosInstance.get('/events/')
@@ -197,8 +206,16 @@ export const removePlayerFromTeam = async (teamId, playerId) => {
 
 export const fetchPlayerTeam = (playerId) => {
     return axiosInstance.get(`/teams/${playerId}/team`)
-        .then(checkResponseStatus);
+        .then(response => {
+            console.log('Fetched team response:', response);
+            return checkResponseStatus(response);
+        })
+        .catch(error => {
+            console.error('Error fetching player team:', error);
+            throw error;
+        });
 };
+
 
 export const getUserIdByName = (username) => {
     return axiosInstance.get(`/users/getUserIdByName`, {

@@ -1,31 +1,25 @@
 package br.ufrn.imd.model;
 
 import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
-
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-
 import java.util.ArrayList;
 import java.util.List;
 
 @Document(collection = "times")
 public class Team {
-
     @Id
     private String id;
     private String name;
     private String ownerId;
     private List<String> eventIds;
-    @JsonManagedReference
-    private List<String> playerIds = new ArrayList<>(5);
+    private List<String> playerIds;
     private int eventPoints;
 
     public Team(String name, String ownerId) {
         this.name = name;
         this.ownerId = ownerId;
-        this.playerIds = new ArrayList<>(5); // Inicializa a lista com capacidade máxima de 5 jogadores
-        this.eventIds = new ArrayList<String>();
+        this.playerIds = new ArrayList<>(5);
+        this.eventIds = new ArrayList<>();
     }
 
     public boolean addPlayer(Player player) {
@@ -44,16 +38,15 @@ public class Team {
     public List<String> getPlayerIds() {
         return new ArrayList<>(playerIds);
     }
-    
-    public List<String> getEventIds() { // Adicione este getter
+
+    public List<String> getEventIds() {
         return eventIds;
     }
 
-    public void setEventIds(List<String> eventIds) { // Adicione este setter
+    public void setEventIds(List<String> eventIds) {
         this.eventIds = eventIds;
     }
 
-    // Adicione o método addEventId
     public void addEventId(String eventId) {
         if (!this.eventIds.contains(eventId)) {
             this.eventIds.add(eventId);
@@ -61,7 +54,7 @@ public class Team {
             throw new IllegalArgumentException("Event ID already added.");
         }
     }
-    
+
     public String getName() {
         return name;
     }
@@ -86,12 +79,11 @@ public class Team {
         this.id = id;
     }
 
-	public void setEventPoints(int eventPoints) {
-		this.eventPoints = eventPoints;
-	}
+    public int getEventPoints() {
+        return eventPoints;
+    }
 
-	public int getEventPoints() {
-		return this.eventPoints;
-	}
-
+    public void setEventPoints(int eventPoints) {
+        this.eventPoints = eventPoints;
+    }
 }

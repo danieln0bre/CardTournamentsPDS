@@ -11,11 +11,15 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Component
+@Component("defaultTeamEventRankingStrategy")
 public class DefaultTeamEventRankingStrategy implements EventRankingStrategy<Team, TeamResult> {
 
+    private final TeamService teamService;
+
     @Autowired
-    private TeamService teamService;
+    public DefaultTeamEventRankingStrategy(TeamService teamService) {
+        this.teamService = teamService;
+    }
 
     @Override
     public List<Team> rankEntities(List<Team> teams) {

@@ -7,10 +7,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-/**
- * Represents an event stored in MongoDB. Each event includes details such as
- * name, date, location, number of rounds, and lists of player IDs and pairings.
- */
 @Document(collection = "event")
 public class Event {
     @Id
@@ -24,16 +20,9 @@ public class Event {
     private boolean finished;
     private List<String> entityIds;
     private List<Pairing> pairings;
-    private String managerId; 
+    private boolean isTeamEvent;
+    private String managerId;
 
-    /**
-     * Constructor for creating a new Event with initial details.
-     *
-     * @param name            the name of the event
-     * @param date            the date of the event
-     * @param location        the location of the event
-     * @param numberOfRounds  the total number of rounds in the event
-     */
     public Event(String name, String date, String location, int numberOfRounds, String managerId) {
         this.name = name;
         this.date = date;
@@ -47,12 +36,6 @@ public class Event {
         this.managerId = managerId;
     }
 
-    /**
-     * Updates event details from another event object.
-     * This method copies all properties from the source event into this event.
-     *
-     * @param source the source event to copy properties from
-     */
     public void updateDetailsFrom(Event source) {
         this.name = source.name;
         this.date = source.date;
@@ -65,19 +48,12 @@ public class Event {
         setPairings(new ArrayList<>(source.pairings));
     }
 
-    /**
-     * Adds a player ID to the event if it is not already included.
-     *
-     * @param playerId the ID of the player to add
-     */
     public void addEntityId(String entityId) {
         if (!entityIds.contains(entityId)) {
-        	entityIds.add(entityId);
+            entityIds.add(entityId);
         }
     }
 
-    // Standard getters and setters
-        
     public String getName() {
         return name;
     }
@@ -146,14 +122,14 @@ public class Event {
         return Collections.unmodifiableList(entityIds);
     }
 
-    public void setEntityIds(List<String> playerIds) {
-        this.entityIds = new ArrayList<>(playerIds);
+    public void setEntityIds(List<String> entityIds) {
+        this.entityIds = new ArrayList<>(entityIds);
     }
-    
+
     public List<Pairing> getPairings() {
         return Collections.unmodifiableList(pairings);
     }
-    
+
     public void setPairings(List<Pairing> pairings) {
         this.pairings = new ArrayList<>(pairings);
     }
@@ -165,4 +141,12 @@ public class Event {
     public void setManagerId(String managerId) {
         this.managerId = managerId;
     }
+
+	public boolean isTeamEvent() {
+		return isTeamEvent;
+	}
+
+	public void setTeamEvent(boolean isTeamEvent) {
+		this.isTeamEvent = isTeamEvent;
+	}
 }
