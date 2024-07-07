@@ -90,4 +90,8 @@ public class Team {
 		this.eventPoints = eventPoints;
 	}
 
+	public int getEventPoints() {
+		return this.eventPoints;
+	}
+
 }

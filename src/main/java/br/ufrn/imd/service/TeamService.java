@@ -92,6 +92,10 @@ public class TeamService {
         return teamRepository.findById(teamId);
     }
 
+    public List<Team> getTeamsByIds(List<String> teamIds) {
+        return teamRepository.findAllById(teamIds);
+    }
+
     public Team addPlayerToTeam(String teamId, String playerId) {
         Optional<Team> teamOptional = teamRepository.findById(teamId);
         Optional<Player> playerOptional = playerService.getPlayerById(playerId);

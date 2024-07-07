@@ -103,7 +103,7 @@ public class DefaultTeamRoundAndEventFinalizationStrategy implements RoundAndEve
     private void resetTeamAttributes(List<Team> teams, String eventId) {
         for (Team team : teams) {
             for (Player player : teamService.getPlayers(team)) {
-                player.setRankPoints(player.getRankPoints() + player.getEventPoints());
+                player.setRankPoints(player.getRankPoints() + team.getEventPoints());
                 player.setEventPoints(0);
                 player.setWinrate(0);
                 player.setOpponentsMatchWinrate(0);

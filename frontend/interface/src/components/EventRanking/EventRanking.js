@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { fetchEventResultRanking, fetchEventRankings, fetchEventById, fetchPlayerById } from '../../services/api';
+import { fetchEventResultRanking, fetchEventRankings, fetchEventById, fetchTeamById } from '../../services/api';
 import './EventRanking.css';
 
 function EventRanking() {
@@ -19,17 +19,17 @@ function EventRanking() {
                 }
             })
             .then(async data => {
-                const playerIds = data.map(result => result.playerId);
-                const players = await Promise.all(playerIds.map(playerId => fetchPlayerById(playerId)));
-                const playerMap = players.reduce((acc, player) => {
-                    acc[player.id] = player.username;
+                const teamIds = data.map(result => result.teamId);
+                const teams = await Promise.all(teamIds.map(teamId => fetchTeamById(teamId)));
+                const teamMap = teams.reduce((acc, team) => {
+                    acc[team.id] = team.name;
                     return acc;
                 }, {});
-                const rankingWithUsernames = data.map(result => ({
+                const rankingWithTeamNames = data.map(result => ({
                     ...result,
-                    username: playerMap[result.playerId] || 'Unknown'
+                    teamName: teamMap[result.teamId] || 'Unknown'
                 }));
-                setRanking(rankingWithUsernames);
+                setRanking(rankingWithTeamNames);
                 setLoading(false);
             })
             .catch(err => {
@@ -48,18 +48,18 @@ function EventRanking() {
                 <thead>
                     <tr>
                         <th>Position</th>
-                        <th>Player</th>
+                        <th>Team</th>
                         <th>Event Points</th>
                         <th>Winrate</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {ranking.map((playerResult, index) => (
-                        <tr key={playerResult.playerId}>
+                    {ranking.map((teamResult, index) => (
+                        <tr key={teamResult.teamId}>
                             <td>{index + 1}</td>
-                            <td>{playerResult.username}</td>
-                            <td>{playerResult.eventPoints}</td>
-                            <td>{playerResult.winrate}%</td>
+                            <td>{teamResult.teamName}</td>
+                            <td>{teamResult.eventPoints}</td>
+                            <td>{teamResult.winrate}%</td>
                         </tr>
                     ))}
                 </tbody>

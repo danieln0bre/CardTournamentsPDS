@@ -18,7 +18,7 @@ public class PairingService {
         this.pairingStrategy = pairingStrategy;
     }
 
-    public List<Pairing> createPairings(List<Player> players) {
+    public <T> List<Pairing> createPairings(List<T> players) {
         return pairingStrategy.createPairings(players);
     }
 }

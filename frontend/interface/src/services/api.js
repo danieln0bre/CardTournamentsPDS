@@ -87,7 +87,7 @@ export const fetchEventResultRanking = (eventId) => {
 };
 
 export const fetchEventPairings = (eventId) => {
-    return axiosInstance.get(`/events/${eventId}/pairings`).then(response => response.data);
+    return axiosInstance.get(`/event-pairings/${eventId}/pairings`).then(response => response.data);
 };
 
 export const loginUser = (credentials) => {
@@ -129,7 +129,7 @@ export const fetchLoggedInPlayerEvents = () => {
 };
 
 export const startEvent = (eventId) => {
-    return axiosInstance.post(`/events/${eventId}/start`).then(response => response.data);
+    return axiosInstance.post(`/event-pairings/${eventId}/start`).then(response => response.data);
 };
 
 export const addEventToEntity = (entityId, eventId) => {
@@ -146,21 +146,21 @@ export const fetchGeneralRankings = async () => {
 };
 
 export const generatePairings = (eventId) => {
-    return axiosInstance.post(`/events/${eventId}/generatePairings`).then(response => response.data);
+    return axiosInstance.post(`/event-pairings/${eventId}/generate-pairings`).then(response => response.data);
 };
 
 export const savePairings = (eventId, pairings) => {
-    return axiosInstance.post(`/events/${eventId}/savePairings`, pairings)
+    return axiosInstance.post(`/event-pairings/${eventId}/save-pairings`, pairings)
         .then(response => response.data);
 };
 
 export const recalculateWinrates = (playerId) => {
-    return axiosInstance.post(`/players/${playerId}/recalculateWinrates`)
+    return axiosInstance.post(`/players/${playerId}/recalculate-winrates`)
         .then(response => response.data);
 };
 
 export const finalizeRound = (eventId) => {
-    return axiosInstance.post(`/events/${eventId}/finalizeRound`)
+    return axiosInstance.post(`/event-pairings/${eventId}/finalize-round`)
         .then(response => response.data);
 };
 
@@ -168,8 +168,13 @@ export const fetchManagerById = managerId => {
     return axiosInstance.get(`/users/manager/${managerId}`).then(checkResponseStatus);
 };
 
+export const fetchGameObjectById = async (gameObjectId) => {
+    const response = await axiosInstance.get(`/players/game-objects/${gameObjectId}`);
+    return response.data;
+};
+
 export const fetchDeckById = (deckId) => {
-    return axiosInstance.get(`/players/game-object/${deckId}`).then(checkResponseStatus);
+    return axiosInstance.get(`/players/game-objects/${deckId}`).then(checkResponseStatus);
 };
 export const createTeam = (name, ownerId) => {
     return axiosInstance.post(`/teams/create`, null, {
@@ -205,4 +210,3 @@ export const fetchTeamById = (teamId) => {
     return axiosInstance.get(`/teams/${teamId}`)
         .then(checkResponseStatus);
 };
-

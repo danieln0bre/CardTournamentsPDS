@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { fetchEventById, fetchEventPairings, generatePairings, fetchPlayerById, savePairings, recalculateWinrates, finalizeRound, updateEvent } from '../../services/api';
+import { fetchEventById, fetchEventPairings, generatePairings, fetchTeamById, savePairings, recalculateWinrates, finalizeRound } from '../../services/api';
 import { useUser } from '../../contexts/UserContext';
 import './EventPairing.css';
 
@@ -9,7 +9,7 @@ function EventPairing() {
     const navigate = useNavigate();
     const { user } = useUser();
     const [pairings, setPairings] = useState([]);
-    const [players, setPlayers] = useState({});
+    const [teams, setTeams] = useState({});
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [generateError, setGenerateError] = useState(null);
@@ -25,19 +25,19 @@ function EventPairing() {
             })
             .then(data => {
                 setPairings(data);
-                const playerIds = new Set();
+                const teamIds = new Set();
                 data.forEach(pairing => {
-                    if (pairing.playerOneId !== 'Bye') playerIds.add(pairing.playerOneId);
-                    if (pairing.playerTwoId !== 'Bye') playerIds.add(pairing.playerTwoId);
+                    if (pairing.entityOneId !== 'Bye') teamIds.add(pairing.entityOneId);
+                    if (pairing.entityTwoId !== 'Bye') teamIds.add(pairing.entityTwoId);
                 });
-                return Promise.all(Array.from(playerIds).map(playerId => fetchPlayerById(playerId)));
+                return Promise.all(Array.from(teamIds).map(teamId => fetchTeamById(teamId)));
             })
-            .then(playersData => {
-                const playersMap = playersData.reduce((acc, player) => {
-                    acc[player.id] = player.username;
+            .then(teamsData => {
+                const teamsMap = teamsData.reduce((acc, team) => {
+                    acc[team.id] = team;
                     return acc;
                 }, {});
-                setPlayers(playersMap);
+                setTeams(teamsMap);
                 setLoading(false);
             })
             .catch(err => {
@@ -63,7 +63,6 @@ function EventPairing() {
         setPairings(prevPairings => {
             const updatedPairings = [...prevPairings];
             updatedPairings[index].result = result;
-            console.log('Updated pairings:', updatedPairings); // Debugging line
             return updatedPairings;
         });
     };
@@ -71,19 +70,16 @@ function EventPairing() {
     const handleSaveResults = async () => {
         try {
             const validPairings = pairings.filter(pairing => pairing.result !== -1);
-    
-            console.log('Valid pairings to save:', validPairings); // Debugging line
-    
+
             await savePairings(eventId, validPairings);
             const recalculatePromises = validPairings.flatMap(pairing => [
-                recalculateWinrates(pairing.playerOneId),
-                recalculateWinrates(pairing.playerTwoId)
+                ...teams[pairing.entityOneId].playerIds.map(playerId => recalculateWinrates(playerId)),
+                ...teams[pairing.entityTwoId].playerIds.map(playerId => recalculateWinrates(playerId))
             ]);
-    
+
             await Promise.all(recalculatePromises);
             await finalizeRound(eventId);
 
-            // Reload the event details to get the updated current round
             const updatedEventDetails = await fetchEventById(eventId);
 
             if (updatedEventDetails.currentRound >= updatedEventDetails.numberOfRounds) {
@@ -91,11 +87,10 @@ function EventPairing() {
             } else {
                 setEventDetails(updatedEventDetails);
             }
-    
+
             setSaveSuccess("Pairings and results saved successfully. Round finalized.");
             setSaveError(null);
-    
-            // Reload the page after successful save
+
             window.location.reload();
         } catch (err) {
             setSaveError("Error saving pairings and results: " + err.message);
@@ -118,8 +113,8 @@ function EventPairing() {
             <ul>
                 {pairings.map((pairing, index) => (
                     <li key={index} className="pairing-item">
-                        <div>{players[pairing.playerOneId]} vs {pairing.playerTwoId === 'Bye' ? 'Bye' : players[pairing.playerTwoId]}</div>
-                        {user.role === 'ROLE_MANAGER' && pairing.playerTwoId !== 'Bye' && (
+                        <div>{teams[pairing.entityOneId].name} vs {pairing.entityTwoId === 'Bye' ? 'Bye' : teams[pairing.entityTwoId].name}</div>
+                        {user.role === 'ROLE_MANAGER' && pairing.entityTwoId !== 'Bye' && (
                             <div>
                                 <label>
                                     <input
@@ -129,7 +124,7 @@ function EventPairing() {
                                         checked={pairing.result === 0}
                                         onChange={() => handleResultChange(index, 0)}
                                     />
-                                    {players[pairing.playerOneId]} venceu
+                                    {teams[pairing.entityOneId].name} venceu
                                 </label>
                                 <label>
                                     <input
@@ -139,7 +134,7 @@ function EventPairing() {
                                         checked={pairing.result === 1}
                                         onChange={() => handleResultChange(index, 1)}
                                     />
-                                    {players[pairing.playerTwoId]} venceu
+                                    {teams[pairing.entityTwoId].name} venceu
                                 </label>
                             </div>
                         )}

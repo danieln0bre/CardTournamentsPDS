@@ -1,14 +1,13 @@
-// EventStatistics.js
-
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { fetchDeckMatchups, fetchDeckById } from '../../services/api';
+import { fetchDeckMatchups, fetchGameObjectById, fetchTeamById, fetchPlayerById } from '../../services/api';
 import './EventStatistics.css';
 
 function EventStatistics() {
     const { eventId } = useParams();
     const [statistics, setStatistics] = useState({});
-    const [deckNames, setDeckNames] = useState({});
+    const [gameObjects, setGameObjects] = useState({});
+    const [teamNames, setTeamNames] = useState({});
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
@@ -16,21 +15,31 @@ function EventStatistics() {
         fetchDeckMatchups(eventId)
             .then(data => {
                 setStatistics(data);
-                const deckIds = new Set();
-                Object.keys(data).forEach(deckId => {
-                    deckIds.add(deckId);
-                    Object.keys(data[deckId]).forEach(opponentId => {
-                        deckIds.add(opponentId);
-                    });
-                });
-                return Promise.all(Array.from(deckIds).map(deckId => fetchDeckById(deckId)));
+                const teamIds = new Set(Object.keys(data));
+                return Promise.all(Array.from(teamIds).map(teamId => fetchTeamById(teamId)));
             })
-            .then(decks => {
-                const deckNameMap = decks.reduce((acc, deck) => {
-                    acc[deck.id] = deck.deckName;
+            .then(teams => {
+                const playerIds = new Set();
+                const teamNameMap = teams.reduce((acc, team) => {
+                    acc[team.id] = team.name;
+                    team.playerIds.forEach(playerId => {
+                        playerIds.add(playerId);
+                    });
                     return acc;
                 }, {});
-                setDeckNames(deckNameMap);
+                setTeamNames(teamNameMap);
+                return Promise.all(Array.from(playerIds).map(playerId => fetchPlayerById(playerId)));
+            })
+            .then(players => {
+                const gameObjectIds = new Set(players.map(player => player.gameObjectId));
+                return Promise.all(Array.from(gameObjectIds).map(gameObjectId => fetchGameObjectById(gameObjectId)));
+            })
+            .then(gameObjects => {
+                const gameObjectMap = gameObjects.reduce((acc, gameObject) => {
+                    acc[gameObject.id] = gameObject;
+                    return acc;
+                }, {});
+                setGameObjects(gameObjectMap);
                 setLoading(false);
             })
             .catch(err => {
@@ -44,27 +53,27 @@ function EventStatistics() {
 
     return (
         <div className="event-statistics-container">
-            <h1>Deck Matchup Statistics</h1>
+            <h1>Game Object Matchup Statistics</h1>
             {Object.keys(statistics).length === 0 ? (
                 <p>No statistics available.</p>
             ) : (
                 <table>
                     <thead>
                         <tr>
-                            <th>Deck</th>
-                            {Object.keys(deckNames).map(deckId => (
-                                <th key={deckId}>{deckNames[deckId] || deckId}</th>
+                            <th>Team</th>
+                            {Object.keys(gameObjects).map(gameObjectId => (
+                                <th key={gameObjectId}>{gameObjects[gameObjectId].deckName || gameObjectId}</th>
                             ))}
                         </tr>
                     </thead>
                     <tbody>
-                        {Object.keys(statistics).map(deckId => (
-                            <tr key={deckId}>
-                                <td>{deckNames[deckId] || deckId}</td>
-                                {Object.keys(deckNames).map(opponentId => (
-                                    <td key={`${deckId}-${opponentId}`}>
-                                        {statistics[deckId][opponentId] !== undefined
-                                            ? statistics[deckId][opponentId].toFixed(2) + '%'
+                        {Object.keys(statistics).map(teamId => (
+                            <tr key={teamId}>
+                                <td>{teamNames[teamId] || teamId}</td>
+                                {Object.keys(gameObjects).map(opponentId => (
+                                    <td key={`${teamId}-${opponentId}`}>
+                                        {statistics[teamId][opponentId] !== undefined
+                                            ? statistics[teamId][opponentId].toFixed(2) + '%'
                                             : '-'}
                                     </td>
                                 ))}

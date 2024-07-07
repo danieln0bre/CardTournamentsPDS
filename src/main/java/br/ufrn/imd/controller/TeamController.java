@@ -64,10 +64,28 @@ public class TeamController {
     }
 
     @GetMapping("/{playerId}/team")
-    public ResponseEntity<String> getPlayerTeam(@PathVariable String playerId) {
+    public ResponseEntity<Team> getPlayerTeam(@PathVariable String playerId) {
+        System.out.println("Recebendo solicitação para obter o time do jogador com ID: " + playerId);
         Player player = playerService.getPlayerById(playerId)
-                .orElseThrow(() -> new IllegalArgumentException("Player not found with ID: " + playerId));
+                .orElseThrow(() -> {
+                    System.out.println("Jogador não encontrado com o ID: " + playerId);
+                    return new IllegalArgumentException("Player not found with ID: " + playerId);
+                });
         String teamId = player.getTeamId();
-        return teamId != null ? ResponseEntity.ok(teamId) : ResponseEntity.notFound().build();
+        if (teamId != null) {
+            Team team = teamService.getTeamById(teamId)
+                    .orElseThrow(() -> {
+                        System.out.println("Time não encontrado com o ID: " + teamId);
+                        return new IllegalArgumentException("Team not found with ID: " + teamId);
+                    });
+            System.out.println("Time encontrado para o jogador com ID: " + playerId);
+            return ResponseEntity.ok(team);
+        } else {
+            System.out.println("Time não encontrado para o jogador com ID: " + playerId);
+            return ResponseEntity.notFound().build();
+        }
     }
+
+
+
 }

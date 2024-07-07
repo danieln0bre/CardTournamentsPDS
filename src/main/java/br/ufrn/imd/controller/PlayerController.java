@@ -124,10 +124,10 @@ public class PlayerController {
     }
 
     @GetMapping("/game-objects/{gameObjectId}")
-    public ResponseEntity<GameObject> getGameObjectById(@PathVariable String deckId) {
-        GameObject deck = gameObjectService.getGameObjectById(deckId);
-        if (deck != null) {
-            return ResponseEntity.ok(deck);
+    public ResponseEntity<GameObject> getGameObjectById(@PathVariable String gameObjectId) {
+        GameObject gameObject = gameObjectService.getGameObjectById(gameObjectId);
+        if (gameObject != null) {
+            return ResponseEntity.ok(gameObject);
         } else {
             return ResponseEntity.notFound().build();
         }

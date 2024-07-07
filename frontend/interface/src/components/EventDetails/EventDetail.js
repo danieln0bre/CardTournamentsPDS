@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { fetchEventByName, fetchPlayerById, startEvent, finalizeEvent, fetchPlayerTeam, addEventToEntity } from '../../services/api';
+import { fetchEventByName, fetchPlayerTeam, fetchTeamById, fetchPlayerById, addEventToEntity, startEvent, finalizeEvent } from '../../services/api';
 import { useUser } from '../../contexts/UserContext';
 import './EventDetail.css';
 
@@ -10,6 +10,7 @@ function EventDetail() {
     const { user } = useUser();
     const [event, setEvent] = useState(null);
     const [players, setPlayers] = useState([]);
+    const [teams, setTeams] = useState([]);
     const [teamId, setTeamId] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -19,12 +20,26 @@ function EventDetail() {
 
     useEffect(() => {
         fetchEventByName(eventName)
-            .then(eventData => {
+            .then(async eventData => {
                 setEvent(eventData);
-                return Promise.all(eventData.entityIds.map(entityId => fetchPlayerById(entityId)));
-            })
-            .then(playerDataArray => {
-                setPlayers(playerDataArray);
+                
+                // Buscar times inscritos no evento
+                const teamDataArray = await Promise.all(
+                    eventData.entityIds.map(entityId => 
+                        fetchTeamById(entityId).catch(() => null)
+                    )
+                );
+
+                // Buscar detalhes dos jogadores em cada time
+                const teamsWithPlayers = await Promise.all(teamDataArray.map(async team => {
+                    if (team) {
+                        const playerDetails = await Promise.all(team.playerIds.map(playerId => fetchPlayerById(playerId)));
+                        return { ...team, players: playerDetails };
+                    }
+                    return null;
+                }));
+
+                setTeams(teamsWithPlayers.filter(team => team !== null));
                 setLoading(false);
             })
             .catch(err => {
@@ -114,10 +129,17 @@ function EventDetail() {
             <div><strong>Started:</strong> {event.hasStarted ? 'Sim' : 'Não'}</div>
             <div><strong>Current Round:</strong> {event.currentRound}</div>
 
-            <h2 className="player-list-title">Players</h2>
+            <h2 className="entity-list-title">Teams</h2>
             <ul>
-                {players.map(player => (
-                    <li key={player.id}>{player.username}</li>
+                {teams.map(team => (
+                    <li key={team.id}>
+                        <strong>{team.name}</strong>
+                        <ul>
+                            {team.players.map(player => (
+                                <li key={player.id}>{player.username}</li>
+                            ))}
+                        </ul>
+                    </li>
                 ))}
             </ul>
 
