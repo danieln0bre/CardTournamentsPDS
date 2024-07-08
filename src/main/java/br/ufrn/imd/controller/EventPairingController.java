@@ -2,7 +2,7 @@ package br.ufrn.imd.controller;
 
 import br.ufrn.imd.model.Pairing;
 import br.ufrn.imd.service.EventService;
-import br.ufrn.imd.service.GenericPairingService;
+import br.ufrn.imd.service.PairingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,10 +14,10 @@ import java.util.List;
 public class EventPairingController {
 
     private final EventService eventService;
-    private final GenericPairingService pairingService;
+    private final PairingService pairingService;
 
     @Autowired
-    public EventPairingController(EventService eventService, GenericPairingService pairingService) {
+    public EventPairingController(EventService eventService, PairingService pairingService) {
         this.eventService = eventService;
         this.pairingService = pairingService;
     }
@@ -31,7 +31,7 @@ public class EventPairingController {
                     }
 
                     if (!eventService.allEntitiesHaveDecks(event)) {
-                        return ResponseEntity.badRequest().body("Not all players have registered decks.");
+                        return ResponseEntity.badRequest().body("Not all players/teams have registered decks.");
                     }
 
                     event.setHasStarted(true);

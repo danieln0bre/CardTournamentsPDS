@@ -8,7 +8,6 @@ import br.ufrn.imd.model.PlayerResult;
 import br.ufrn.imd.model.Team;
 import br.ufrn.imd.model.TeamResult;
 import br.ufrn.imd.repository.EventRepository;
-import br.ufrn.imd.repository.EventResultRepository;
 import br.ufrn.imd.repository.PlayerRepository;
 import br.ufrn.imd.strategy.MatchUpdateStrategy;
 import br.ufrn.imd.strategy.RoundAndEventFinalizationStrategy;
@@ -17,7 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -31,6 +29,7 @@ public class EventService {
     private final RoundAndEventFinalizationStrategy roundAndEventFinalizationStrategy;
     private final StatisticsGenerationStrategy statisticsGenerationStrategy;
     private final EventRankingService<Player, PlayerResult> playerEventRankingService;
+    private final EventRankingService<Team, TeamResult> teamEventRankingService;
     private final EventRepository eventRepository;
     private final PlayerRepository playerRepository;
     private final PlayerService playerService;
@@ -39,13 +38,17 @@ public class EventService {
     @Autowired
     public EventService(GenericPairingService pairingService, MatchUpdateStrategy matchUpdateStrategy,
                         RoundAndEventFinalizationStrategy roundAndEventFinalizationStrategy,
-                        StatisticsGenerationStrategy statisticsGenerationStrategy, EventRankingService<Player, PlayerResult> playerEventRankingService,
-                        EventRepository eventRepository, PlayerRepository playerRepository, PlayerService playerService, TeamService teamService) {
+                        StatisticsGenerationStrategy statisticsGenerationStrategy, 
+                        EventRankingService<Player, PlayerResult> playerEventRankingService,
+                        EventRankingService<Team, TeamResult> teamEventRankingService,
+                        EventRepository eventRepository, PlayerRepository playerRepository,
+                        PlayerService playerService, TeamService teamService) {
         this.pairingService = pairingService;
         this.matchUpdateStrategy = matchUpdateStrategy;
         this.roundAndEventFinalizationStrategy = roundAndEventFinalizationStrategy;
         this.statisticsGenerationStrategy = statisticsGenerationStrategy;
         this.playerEventRankingService = playerEventRankingService;
+        this.teamEventRankingService = teamEventRankingService;
         this.eventRepository = eventRepository;
         this.playerRepository = playerRepository;
         this.playerService = playerService;
@@ -71,7 +74,11 @@ public class EventService {
     }
     
     public boolean allEntitiesHaveDecks(Event event) {
-        return playerService.allPlayersHaveDecks(event.getEntityIds());
+        if (event.isTeamEvent()) {
+            return teamService.allTeamsHaveDecks(event.getEntityIds());
+        } else {
+            return playerService.allPlayersHaveDecks(event.getEntityIds());
+        }
     }
 
     public Optional<Event> getEventById(String id) {
@@ -93,34 +100,53 @@ public class EventService {
     public EventResult getEventResultByEventId(String eventId) {
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new IllegalArgumentException("Event not found with ID: " + eventId));
-        // Preencher EventResult com os dados do evento
         EventResult eventResult = new EventResult();
         eventResult.setEventId(eventId);
-        List<PlayerResult> playerResults = new ArrayList<>();
-        
-        List<String> playerIds = event.getEntityIds(); // Obter os IDs dos jogadores do evento
-        
-        // Preencher playerResults com todos os PlayerResults e seus opponentPlayerIds
-        for (String playerId : playerIds) {
-            PlayerResult playerResult = new PlayerResult();
-            playerResult.setPlayerId(playerId);
-            // Preencher opponentPlayerIds com os IDs dos jogadores oponentes
-            List<String> opponentPlayerIds = new ArrayList<>();
-            for (String opponentId : playerIds) {
-                if (!opponentId.equals(playerId)) {
-                    opponentPlayerIds.add(opponentId);
+
+        if (event.isTeamEvent()) {
+            List<TeamResult> teamResults = new ArrayList<>();
+            List<String> teamIds = event.getEntityIds();
+            for (String teamId : teamIds) {
+                TeamResult teamResult = new TeamResult();
+                teamResult.setTeamId(teamId);
+                List<String> opponentTeamIds = new ArrayList<>();
+                for (String opponentId : teamIds) {
+                    if (!opponentId.equals(teamId)) {
+                        opponentTeamIds.add(opponentId);
+                    }
                 }
+                teamResult.setOpponentTeamIds(opponentTeamIds);
+                teamResults.add(teamResult);
             }
-            playerResult.setOpponentIds(opponentPlayerIds);
-            playerResults.add(playerResult);
+            eventResult.setTeamResults(teamResults);
+        } else {
+            List<PlayerResult> playerResults = new ArrayList<>();
+            List<String> playerIds = event.getEntityIds();
+            for (String playerId : playerIds) {
+                PlayerResult playerResult = new PlayerResult();
+                playerResult.setPlayerId(playerId);
+                List<String> opponentPlayerIds = new ArrayList<>();
+                for (String opponentId : playerIds) {
+                    if (!opponentId.equals(playerId)) {
+                        opponentPlayerIds.add(opponentId);
+                    }
+                }
+                playerResult.setOpponentIds(opponentPlayerIds);
+                playerResults.add(playerResult);
+            }
+            eventResult.setPlayerResults(playerResults);
         }
-        eventResult.setPlayerResults(playerResults);
         return eventResult;
     }
 
-    public List<PlayerResult> getEventResultRanking(String eventId) {
+    public List<PlayerResult> getPlayerEventResultRanking(String eventId) {
         EventResult eventResult = getEventResultByEventId(eventId);
         return playerEventRankingService.sortByResultEventPoints(eventResult.getPlayerResults());
+    }
+
+    public List<TeamResult> getTeamEventResultRanking(String eventId) {
+        EventResult eventResult = getEventResultByEventId(eventId);
+        return teamEventRankingService.sortByResultEventPoints(eventResult.getTeamResults());
     }
 
     public void updateMatchResult(Pairing pairing) {
@@ -131,7 +157,7 @@ public class EventService {
         Optional<Event> optionalEvent = eventRepository.findById(eventId);
         if (optionalEvent.isPresent()) {
             Event event = optionalEvent.get();
-            List<String> entityIds = new ArrayList<>(event.getEntityIds()); // Ensure the collection is mutable
+            List<String> entityIds = new ArrayList<>(event.getEntityIds());
             entityIds.add(entityId);
             event.setEntityIds(entityIds);
             eventRepository.save(event);
@@ -147,12 +173,34 @@ public class EventService {
     public Map<String, Map<String, Double>> getDeckMatchupStatistics(String eventId) {
         try {
             EventResult eventResult = getEventResultByEventId(eventId);
-            System.out.println("EventResult encontrado para o Event ID: " + eventId);
             return statisticsGenerationStrategy.generateStatistics(eventResult);
         } catch (Exception e) {
-            System.err.println("Erro ao gerar estatísticas: " + e.getMessage());
-            e.printStackTrace();
-            throw e;
+            throw new RuntimeException("Error generating statistics: " + e.getMessage(), e);
+        }
+    }
+
+    public Event addPlayerToEvent(String eventId, String playerId) {
+        Event event = getEventById(eventId).orElseThrow(() ->
+            new IllegalArgumentException("Event not found with ID: " + eventId));
+        
+        if (event.getEntityIds().contains(playerId)) {
+            throw new IllegalArgumentException("Player already added to the event.");
+        }
+
+        event.addEntityId(playerId);
+        return eventRepository.save(event);
+    }
+
+    public void addTeamToEvent(String eventId, String teamId) {
+        Optional<Event> optionalEvent = eventRepository.findById(eventId);
+        if (optionalEvent.isPresent()) {
+            Event event = optionalEvent.get();
+            List<String> entityIds = new ArrayList<>(event.getEntityIds());
+            entityIds.add(teamId);
+            event.setEntityIds(entityIds);
+            eventRepository.save(event);
+        } else {
+            throw new NoSuchElementException("Event not found");
         }
     }
 }

@@ -26,14 +26,17 @@ public class EventController {
     private final EventService eventService;
     private final ManagerService managerService;
     private final EventRankingService<Player, PlayerResult> playerEventRankingService;
+    private final EventRankingService<Team, TeamResult> teamEventRankingService;
 
     @Autowired
     public EventController(PlayerService playerService, EventService eventService, ManagerService managerService,
-                           EventRankingService<Player, PlayerResult> playerEventRankingService) {
+                           EventRankingService<Player, PlayerResult> playerEventRankingService,
+                           EventRankingService<Team, TeamResult> teamEventRankingService) {
         this.playerService = playerService;
         this.eventService = eventService;
         this.managerService = managerService;
         this.playerEventRankingService = playerEventRankingService;
+        this.teamEventRankingService = teamEventRankingService;
     }
 
     @PostMapping("/createEvent")
@@ -98,12 +101,17 @@ public class EventController {
     }
 
     @GetMapping("/{id}/rankings")
-    public ResponseEntity<List<Player>> getEventRankings(@PathVariable String id) {
+    public ResponseEntity<List<?>> getEventRankings(@PathVariable String id) {
         Optional<Event> eventOpt = eventService.getEventById(id);
         if (eventOpt.isPresent()) {
             Event event = eventOpt.get();
-            List<Player> players = playerService.getPlayersByIds(event.getEntityIds());
-            return ResponseEntity.ok(playerEventRankingService.sortByEventPoints(players));
+            if (event.isTeamEvent()) {
+                List<Team> teams = teamService.getTeamsByIds(event.getEntityIds());
+                return ResponseEntity.ok(teamEventRankingService.sortByEventPoints(teams));
+            } else {
+                List<Player> players = playerService.getPlayersByIds(event.getEntityIds());
+                return ResponseEntity.ok(playerEventRankingService.sortByEventPoints(players));
+            }
         } else {
             return ResponseEntity.notFound().build();
         }
@@ -134,9 +142,9 @@ public class EventController {
     }
 
     @GetMapping("/{id}/result-ranking")
-    public ResponseEntity<List<PlayerResult>> getEventResultRanking(@PathVariable String id) {
+    public ResponseEntity<List<?>> getEventResultRanking(@PathVariable String id) {
         try {
-            List<PlayerResult> ranking = eventService.getEventResultRanking(id);
+            List<?> ranking = eventService.getEventResultRanking(id);
             return ResponseEntity.ok(ranking);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(null);

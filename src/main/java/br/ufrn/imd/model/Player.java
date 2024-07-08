@@ -11,12 +11,12 @@ public class Player extends User {
     private int rankPoints;
     private int eventPoints;
     private double winrate;
-    private String gameObjectId;  // Changed from Deck object to String deckId
+    private String gameObjectId;
     private List<String> appliedEventsId;
     private List<String> opponentIds;
     private List<Event> historicoEventos;
     private double opponentsMatchWinrate;
-    private String teamId; // Adiciona o atributo team
+    private String teamId;
 
     public Player(String name, String username, String email, String password) {
         super(name, username, email, password, Role.ROLE_PLAYER);
