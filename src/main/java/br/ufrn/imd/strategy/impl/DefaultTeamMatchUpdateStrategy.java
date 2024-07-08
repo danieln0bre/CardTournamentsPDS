@@ -1,7 +1,6 @@
 package br.ufrn.imd.strategy.impl;
 
 import br.ufrn.imd.model.Pairing;
-import br.ufrn.imd.model.Player;
 import br.ufrn.imd.model.Team;
 import br.ufrn.imd.repository.TeamRepository;
 import br.ufrn.imd.service.TeamService;
@@ -18,12 +17,13 @@ public class DefaultTeamMatchUpdateStrategy implements MatchUpdateStrategy {
 
     private final TeamRepository teamRepository;
     private final TeamService teamService;
-    private final Map<String, Map<String, Integer[]>> gameObjectMatchups = new HashMap<>();
+    private Map<String, Map<String, Map<String, Integer[]>>> eventTeamMatchups;
 
     @Autowired
     public DefaultTeamMatchUpdateStrategy(TeamRepository teamRepository, TeamService teamService) {
         this.teamRepository = teamRepository;
         this.teamService = teamService;
+        this.eventTeamMatchups = new HashMap<>();
     }
 
     @Override
@@ -45,10 +45,10 @@ public class DefaultTeamMatchUpdateStrategy implements MatchUpdateStrategy {
 
     @Override
     public void handleByeMatch(Pairing pairing) {
-        if ("Bye".equals(pairing.getEntityTwoId())) {
-            updateTeamForBye(pairing.getEntityOneId());
-        } else if ("Bye".equals(pairing.getEntityOneId())) {
+        if ("Bye".equals(pairing.getEntityOneId())) {
             updateTeamForBye(pairing.getEntityTwoId());
+        } else if ("Bye".equals(pairing.getEntityTwoId())) {
+            updateTeamForBye(pairing.getEntityOneId());
         }
     }
 
@@ -66,18 +66,34 @@ public class DefaultTeamMatchUpdateStrategy implements MatchUpdateStrategy {
         Team teamTwo = fetchTeam(pairing.getEntityTwoId());
 
         if (pairing.getResult() == 0) {
-            teamOne.setEventPoints(teamService.getEventPoints(teamOne) + 1);
+            teamOne.setEventPoints(teamOne.getEventPoints() + 1); // Vitória do time 1
+            teamTwo.setEventPoints(teamTwo.getEventPoints() + 0); // Derrota do time 2
         } else if (pairing.getResult() == 1) {
-            teamTwo.setEventPoints(teamService.getEventPoints(teamTwo) + 1);
+            teamTwo.setEventPoints(teamTwo.getEventPoints() + 1); // Vitória do time 2
+            teamOne.setEventPoints(teamOne.getEventPoints() + 0); // Derrota do time 1
         }
+
+        updateWinrate(teamOne);
+        updateWinrate(teamTwo);
 
         teamRepository.save(teamOne);
         teamRepository.save(teamTwo);
     }
 
+    private void updateWinrate(Team team) {
+        List<String> opponentTeamIds = team.getOpponentTeamIds();
+        int numberOfMatches = opponentTeamIds != null ? opponentTeamIds.size() : 0;
+        if (numberOfMatches > 0) {
+            double winrate = (double) team.getEventPoints() / numberOfMatches;
+            team.setWinrate((int) winrate);
+        } else {
+            team.setWinrate(0);
+        }
+    }
+
     @Override
     public void updateGameObjectMatchups(String eventId, List<Pairing> pairings) {
-        Map<String, Map<String, Integer[]>> gameObjectMatchups = new HashMap<>();
+        Map<String, Map<String, Integer[]>> teamMatchups = eventTeamMatchups.getOrDefault(eventId, new HashMap<>());
 
         for (Pairing pairing : pairings) {
             String teamOneId = pairing.getEntityOneId();
@@ -88,36 +104,29 @@ public class DefaultTeamMatchUpdateStrategy implements MatchUpdateStrategy {
 
             if (teamOne == null || teamTwo == null) continue;
 
-            for (Player playerOne : teamService.getPlayers(teamOne)) {
-                for (Player playerTwo : teamService.getPlayers(teamTwo)) {
-                    String playerOneGameObjectId = playerOne.getGameObjectId();
-                    String playerTwoGameObjectId = playerTwo.getGameObjectId();
+            teamMatchups.putIfAbsent(teamOneId, new HashMap<>());
+            teamMatchups.putIfAbsent(teamTwoId, new HashMap<>());
 
-                    gameObjectMatchups.putIfAbsent(playerOneGameObjectId, new HashMap<>());
-                    gameObjectMatchups.putIfAbsent(playerTwoGameObjectId, new HashMap<>());
+            teamMatchups.get(teamOneId).putIfAbsent(teamTwoId, new Integer[]{0, 0});
+            teamMatchups.get(teamTwoId).putIfAbsent(teamOneId, new Integer[]{0, 0});
 
-                    gameObjectMatchups.get(playerOneGameObjectId).putIfAbsent(playerTwoGameObjectId, new Integer[]{0, 0});
-                    gameObjectMatchups.get(playerTwoGameObjectId).putIfAbsent(playerOneGameObjectId, new Integer[]{0, 0});
+            Integer[] resultsTeamOne = teamMatchups.get(teamOneId).get(teamTwoId);
+            Integer[] resultsTeamTwo = teamMatchups.get(teamTwoId).get(teamOneId);
 
-                    Integer[] resultsPlayerOne = gameObjectMatchups.get(playerOneGameObjectId).get(playerTwoGameObjectId);
-                    Integer[] resultsPlayerTwo = gameObjectMatchups.get(playerTwoGameObjectId).get(playerOneGameObjectId);
-
-                    if (pairing.getResult() == 0) {
-                        resultsPlayerOne[0]++;
-                    } else if (pairing.getResult() == 1) {
-                        resultsPlayerTwo[0]++;
-                    }
-
-                    resultsPlayerOne[1]++;
-                    resultsPlayerTwo[1]++;
-
-                    gameObjectMatchups.get(playerOneGameObjectId).put(playerTwoGameObjectId, resultsPlayerOne);
-                    gameObjectMatchups.get(playerTwoGameObjectId).put(playerOneGameObjectId, resultsPlayerTwo);
-                }
+            if (pairing.getResult() == 0) {
+                resultsTeamOne[0]++;
+            } else if (pairing.getResult() == 1) {
+                resultsTeamTwo[0]++;
             }
+
+            resultsTeamOne[1]++;
+            resultsTeamTwo[1]++;
+
+            teamMatchups.get(teamOneId).put(teamTwoId, resultsTeamOne);
+            teamMatchups.get(teamTwoId).put(teamOneId, resultsTeamTwo);
         }
 
-        // Save or update the matchups in the repository or other storage if needed.
+        eventTeamMatchups.put(eventId, teamMatchups);
     }
 
     private Team fetchTeam(String teamId) {
@@ -127,7 +136,8 @@ public class DefaultTeamMatchUpdateStrategy implements MatchUpdateStrategy {
 
     private void updateTeamForBye(String teamId) {
         Team team = fetchTeam(teamId);
-        team.setEventPoints(teamService.getEventPoints(team) + 1);
+        team.setEventPoints(team.getEventPoints() + 1); // Vitória automática para Bye
+        updateWinrate(team);
         teamRepository.save(team);
     }
 }

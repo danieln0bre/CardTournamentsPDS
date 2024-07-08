@@ -12,6 +12,7 @@ import java.util.Optional;
 
 @Service
 public class UserService {
+
     private final PlayerRepository playerRepository;
     private final ManagerRepository managerRepository;
 

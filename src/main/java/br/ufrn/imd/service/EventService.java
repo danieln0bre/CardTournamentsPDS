@@ -8,7 +8,6 @@ import br.ufrn.imd.model.PlayerResult;
 import br.ufrn.imd.model.Team;
 import br.ufrn.imd.model.TeamResult;
 import br.ufrn.imd.repository.EventRepository;
-import br.ufrn.imd.repository.EventResultRepository;
 import br.ufrn.imd.repository.PlayerRepository;
 import br.ufrn.imd.strategy.MatchUpdateStrategy;
 import br.ufrn.imd.strategy.RoundAndEventFinalizationStrategy;
@@ -25,28 +24,31 @@ import java.util.Optional;
 @Service
 public class EventService {
 
+    private final GenericPairingService pairingService;
     private final MatchUpdateStrategy matchUpdateStrategy;
     private final RoundAndEventFinalizationStrategy roundAndEventFinalizationStrategy;
     private final StatisticsGenerationStrategy statisticsGenerationStrategy;
-    private final EventRankingService<Team, TeamResult> eventRankingService;
+    private final EventRankingService<Player, PlayerResult> playerEventRankingService;
+    private final EventRankingService<Team, TeamResult> teamEventRankingService;
     private final EventRepository eventRepository;
     private final PlayerRepository playerRepository;
     private final PlayerService playerService;
     private final TeamService teamService;
 
     @Autowired
-    public EventService(MatchUpdateStrategy matchUpdateStrategy,
+    public EventService(GenericPairingService pairingService, MatchUpdateStrategy matchUpdateStrategy,
                         RoundAndEventFinalizationStrategy roundAndEventFinalizationStrategy,
-                        StatisticsGenerationStrategy statisticsGenerationStrategy,
-                        EventRankingService<Team, TeamResult> eventRankingService,
-                        EventRepository eventRepository,
-                        PlayerRepository playerRepository,
-                        PlayerService playerService,
-                        TeamService teamService) {
+                        StatisticsGenerationStrategy statisticsGenerationStrategy, 
+                        EventRankingService<Player, PlayerResult> playerEventRankingService,
+                        EventRankingService<Team, TeamResult> teamEventRankingService,
+                        EventRepository eventRepository, PlayerRepository playerRepository,
+                        PlayerService playerService, TeamService teamService) {
+        this.pairingService = pairingService;
         this.matchUpdateStrategy = matchUpdateStrategy;
         this.roundAndEventFinalizationStrategy = roundAndEventFinalizationStrategy;
         this.statisticsGenerationStrategy = statisticsGenerationStrategy;
-        this.eventRankingService = eventRankingService;
+        this.playerEventRankingService = playerEventRankingService;
+        this.teamEventRankingService = teamEventRankingService;
         this.eventRepository = eventRepository;
         this.playerRepository = playerRepository;
         this.playerService = playerService;
@@ -98,46 +100,65 @@ public class EventService {
     public EventResult getEventResultByEventId(String eventId) {
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new IllegalArgumentException("Event not found with ID: " + eventId));
-        // Preencher EventResult com os dados do evento
         EventResult eventResult = new EventResult();
         eventResult.setEventId(eventId);
-        List<TeamResult> teamResults = new ArrayList<>();
-        
-        List<String> teamIds = event.getEntityIds(); // Obter os IDs dos times do evento
-        
-        // Preencher teamResults com todos os TeamResults e seus opponentTeamIds
-        for (String teamId : teamIds) {
-            TeamResult teamResult = new TeamResult();
-            teamResult.setTeamId(teamId);
-            // Preencher opponentTeamIds com os IDs dos times oponentes
-            List<String> opponentTeamIds = new ArrayList<>();
-            for (String opponentId : teamIds) {
-                if (!opponentId.equals(teamId)) {
-                    opponentTeamIds.add(opponentId);
+
+        if (event.isTeamEvent()) {
+            List<TeamResult> teamResults = new ArrayList<>();
+            List<String> teamIds = event.getEntityIds();
+            for (String teamId : teamIds) {
+                TeamResult teamResult = new TeamResult();
+                teamResult.setTeamId(teamId);
+                List<String> opponentTeamIds = new ArrayList<>();
+                for (String opponentId : teamIds) {
+                    if (!opponentId.equals(teamId)) {
+                        opponentTeamIds.add(opponentId);
+                    }
                 }
+                teamResult.setOpponentTeamIds(opponentTeamIds);
+                teamResults.add(teamResult);
             }
-            teamResult.setOpponentTeamIds(opponentTeamIds);
-            teamResults.add(teamResult);
+            eventResult.setTeamResults(teamResults);
+        } else {
+            List<PlayerResult> playerResults = new ArrayList<>();
+            List<String> playerIds = event.getEntityIds();
+            for (String playerId : playerIds) {
+                PlayerResult playerResult = new PlayerResult();
+                playerResult.setPlayerId(playerId);
+                List<String> opponentPlayerIds = new ArrayList<>();
+                for (String opponentId : playerIds) {
+                    if (!opponentId.equals(playerId)) {
+                        opponentPlayerIds.add(opponentId);
+                    }
+                }
+                playerResult.setOpponentIds(opponentPlayerIds);
+                playerResults.add(playerResult);
+            }
+            eventResult.setPlayerResults(playerResults);
         }
-        eventResult.setTeamResults(teamResults);
         return eventResult;
     }
 
-    public List<TeamResult> getEventResultRanking(String eventId) {
+    public List<PlayerResult> getPlayerEventResultRanking(String eventId) {
         EventResult eventResult = getEventResultByEventId(eventId);
-        return eventRankingService.sortByResultEventPoints(eventResult.getTeamResults());
+        return playerEventRankingService.sortByResultEventPoints(eventResult.getPlayerResults());
+    }
+
+    public List<TeamResult> getTeamEventResultRanking(String eventId) {
+        EventResult eventResult = getEventResultByEventId(eventId);
+        return teamEventRankingService.sortByResultEventPoints(eventResult.getTeamResults());
     }
 
     public void updateMatchResult(Pairing pairing) {
         matchUpdateStrategy.updateMatchResult(pairing);
     }
     
-    public void addTeamToEvent(String eventId, String teamId) {
+    public void addEntityToEvent(String eventId, String entityId) {
         Optional<Event> optionalEvent = eventRepository.findById(eventId);
         if (optionalEvent.isPresent()) {
             Event event = optionalEvent.get();
-            List<String> entityIds = new ArrayList<>(event.getEntityIds()); // Garante que a coleção é mutável
-            entityIds.add(teamId);
+            List<String> entityIds = new ArrayList<>(event.getEntityIds());
+            entityIds.add(entityId);
             event.setEntityIds(entityIds);
             eventRepository.save(event);
         } else {
@@ -152,15 +173,11 @@ public class EventService {
     public Map<String, Map<String, Double>> getDeckMatchupStatistics(String eventId) {
         try {
             EventResult eventResult = getEventResultByEventId(eventId);
-            System.out.println("EventResult encontrado para o Event ID: " + eventId);
             return statisticsGenerationStrategy.generateStatistics(eventResult);
         } catch (Exception e) {
-            System.err.println("Erro ao gerar estatísticas: " + e.getMessage());
-            e.printStackTrace();
-            throw e;
+            throw new RuntimeException("Error generating statistics: " + e.getMessage(), e);
         }
     }
-
 
     public Event addPlayerToEvent(String eventId, String playerId) {
         Event event = getEventById(eventId).orElseThrow(() ->
@@ -172,5 +189,18 @@ public class EventService {
 
         event.addEntityId(playerId);
         return eventRepository.save(event);
+    }
+
+    public void addTeamToEvent(String eventId, String teamId) {
+        Optional<Event> optionalEvent = eventRepository.findById(eventId);
+        if (optionalEvent.isPresent()) {
+            Event event = optionalEvent.get();
+            List<String> entityIds = new ArrayList<>(event.getEntityIds());
+            entityIds.add(teamId);
+            event.setEntityIds(entityIds);
+            eventRepository.save(event);
+        } else {
+            throw new NoSuchElementException("Event not found");
+        }
     }
 }

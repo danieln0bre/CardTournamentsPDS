@@ -20,16 +20,14 @@ public class PlayerController {
     private final PlayerService playerService;
     private final EventService eventService;
     private final GameObjectService gameObjectService;
-    private final TeamService teamService;
 
     @Autowired
     public PlayerController(GeneralRankingService generalRankingService, PlayerService playerService,
-                            EventService eventService, GameObjectService gameObjectService, TeamService teamService) {
+                            EventService eventService, GameObjectService gameObjectService) {
         this.generalRankingService = generalRankingService;
         this.playerService = playerService;
         this.eventService = eventService;
         this.gameObjectService = gameObjectService;
-        this.teamService = teamService;
     }
 
     @PutMapping("/{id}/update")
@@ -76,30 +74,22 @@ public class PlayerController {
                 .collect(Collectors.toList());
     }
 
-    @PutMapping("/{id}/entities/add")
-    public ResponseEntity<String> addEventToEntity(@PathVariable String id, @RequestBody String eventId) {
+    @PutMapping("/{id}/events/add")
+    public ResponseEntity<String> addEventToPlayer(@PathVariable String id, @RequestBody String eventId) {
         return eventService.getEventById(eventId.trim())
                 .map(event -> {
-                    checkAndAddEventToEntity(id, event);
-                    return ResponseEntity.ok("Entity and Event updated successfully!");
+                    checkAndAddEventToPlayer(id, event);
+                    return ResponseEntity.ok("Player and Event updated successfully!");
                 })
                 .orElseGet(() -> ResponseEntity.badRequest().body("Event not found."));
     }
 
-    private void checkAndAddEventToEntity(String entityId, Event event) {
-        if (event.getEntityIds().contains(entityId)) {
-            throw new IllegalArgumentException("Entity is already registered for this event.");
+    private void checkAndAddEventToPlayer(String playerId, Event event) {
+        if (event.getEntityIds().contains(playerId)) {
+            throw new IllegalArgumentException("Player is already registered for this event.");
         }
-
-        if (playerService.existsById(entityId)) {
-            playerService.addEventToPlayer(entityId, event.getId());
-            eventService.addPlayerToEvent(event.getId(), entityId);
-        } else if (teamService.existsById(entityId)) {
-            teamService.addEventToTeam(entityId, event.getId());
-            eventService.addTeamToEvent(event.getId(), entityId);
-        } else {
-            throw new IllegalArgumentException("Entity not found.");
-        }
+        playerService.addEventToPlayer(playerId, event.getId());
+        eventService.addEntityToEvent(event.getId(), playerId);
     }
 
     @GetMapping("/rankings")
@@ -124,10 +114,10 @@ public class PlayerController {
     }
 
     @GetMapping("/game-objects/{gameObjectId}")
-    public ResponseEntity<GameObject> getGameObjectById(@PathVariable String gameObjectId) {
-        GameObject gameObject = gameObjectService.getGameObjectById(gameObjectId);
-        if (gameObject != null) {
-            return ResponseEntity.ok(gameObject);
+    public ResponseEntity<GameObject> getGameObjectById(@PathVariable String deckId) {
+        GameObject deck = gameObjectService.getGameObjectById(deckId);
+        if (deck != null) {
+            return ResponseEntity.ok(deck);
         } else {
             return ResponseEntity.notFound().build();
         }

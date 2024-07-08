@@ -80,23 +80,6 @@ public class TeamService {
         }
     }
 
-    public int getEventPoints(Team team) {
-        return team.getPlayerIds().stream()
-                .map(playerRepository::findById)
-                .filter(Optional::isPresent)
-                .mapToInt(player -> player.get().getEventPoints())
-                .sum();
-    }
-
-    public double getWinrate(Team team) {
-        return team.getPlayerIds().stream()
-                .map(playerRepository::findById)
-                .filter(Optional::isPresent)
-                .mapToDouble(player -> player.get().getWinrate())
-                .average()
-                .orElse(0.0);
-    }
-
     public boolean existsById(String teamId) {
         return teamRepository.existsById(teamId);
     }

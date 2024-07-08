@@ -1,6 +1,7 @@
 package br.ufrn.imd.service;
 
 import br.ufrn.imd.model.Pairing;
+import br.ufrn.imd.model.Player;
 import br.ufrn.imd.model.Team;
 import br.ufrn.imd.strategy.PairingStrategy;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,12 +12,19 @@ import java.util.List;
 @Service
 public class GenericPairingService {
 
+    private final PairingStrategy<Player> playerPairingStrategy;
     private final PairingStrategy<Team> teamPairingStrategy;
+    private final PlayerService playerService;
     private final TeamService teamService;
 
     @Autowired
-    public GenericPairingService(PairingStrategy<Team> teamPairingStrategy, TeamService teamService) {
+    public GenericPairingService(PairingStrategy<Player> playerPairingStrategy,
+                                 PairingStrategy<Team> teamPairingStrategy,
+                                 PlayerService playerService,
+                                 TeamService teamService) {
+        this.playerPairingStrategy = playerPairingStrategy;
         this.teamPairingStrategy = teamPairingStrategy;
+        this.playerService = playerService;
         this.teamService = teamService;
     }
 
@@ -25,7 +33,8 @@ public class GenericPairingService {
             List<Team> teams = teamService.getTeamsByEventId(eventId);
             return teamPairingStrategy.createPairings(teams);
         } else {
-            throw new UnsupportedOperationException("Player pairings not supported in this implementation.");
+            List<Player> players = playerService.getPlayersByEventId(eventId);
+            return playerPairingStrategy.createPairings(players);
         }
     }
 }

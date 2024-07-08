@@ -20,7 +20,13 @@ function CreateEvent() {
         setSuccess(null);
 
         try {
-            const newEvent = { name: eventName, date: eventDate, location: eventLocation, numberOfRounds };
+            const newEvent = { 
+                name: eventName, 
+                date: eventDate, 
+                location: eventLocation, 
+                numberOfRounds, 
+                isTeamEvent: true 
+            };
             await createEvent(user.id, newEvent);
             setSuccess('Event created successfully!');
             navigate('/my-events'); // Redirect to my events page after creation

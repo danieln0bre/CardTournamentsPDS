@@ -2,12 +2,14 @@ package br.ufrn.imd.controller;
 
 import br.ufrn.imd.model.Event;
 import br.ufrn.imd.model.EventResult;
+import br.ufrn.imd.model.Player;
+import br.ufrn.imd.model.PlayerResult;
 import br.ufrn.imd.model.Team;
 import br.ufrn.imd.model.TeamResult;
 import br.ufrn.imd.service.EventRankingService;
 import br.ufrn.imd.service.EventService;
 import br.ufrn.imd.service.ManagerService;
-import br.ufrn.imd.service.TeamService;
+import br.ufrn.imd.service.PlayerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,17 +22,20 @@ import java.util.Optional;
 @RequestMapping("/api/events")
 public class EventController {
 
+    private final PlayerService playerService;
     private final EventService eventService;
     private final ManagerService managerService;
-    private final TeamService teamService;
+    private final EventRankingService<Player, PlayerResult> playerEventRankingService;
     private final EventRankingService<Team, TeamResult> teamEventRankingService;
 
     @Autowired
-    public EventController(EventService eventService, ManagerService managerService, TeamService teamService,
+    public EventController(PlayerService playerService, EventService eventService, ManagerService managerService,
+                           EventRankingService<Player, PlayerResult> playerEventRankingService,
                            EventRankingService<Team, TeamResult> teamEventRankingService) {
+        this.playerService = playerService;
         this.eventService = eventService;
         this.managerService = managerService;
-        this.teamService = teamService;
+        this.playerEventRankingService = playerEventRankingService;
         this.teamEventRankingService = teamEventRankingService;
     }
 
@@ -96,12 +101,17 @@ public class EventController {
     }
 
     @GetMapping("/{id}/rankings")
-    public ResponseEntity<List<Team>> getEventRankings(@PathVariable String id) {
+    public ResponseEntity<List<?>> getEventRankings(@PathVariable String id) {
         Optional<Event> eventOpt = eventService.getEventById(id);
         if (eventOpt.isPresent()) {
             Event event = eventOpt.get();
-            List<Team> teams = teamService.getTeamsByIds(event.getEntityIds());
-            return ResponseEntity.ok(teamEventRankingService.sortByEventPoints(teams));
+            if (event.isTeamEvent()) {
+                List<Team> teams = teamService.getTeamsByIds(event.getEntityIds());
+                return ResponseEntity.ok(teamEventRankingService.sortByEventPoints(teams));
+            } else {
+                List<Player> players = playerService.getPlayersByIds(event.getEntityIds());
+                return ResponseEntity.ok(playerEventRankingService.sortByEventPoints(players));
+            }
         } else {
             return ResponseEntity.notFound().build();
         }
@@ -132,9 +142,9 @@ public class EventController {
     }
 
     @GetMapping("/{id}/result-ranking")
-    public ResponseEntity<List<TeamResult>> getEventResultRanking(@PathVariable String id) {
+    public ResponseEntity<List<?>> getEventResultRanking(@PathVariable String id) {
         try {
-            List<TeamResult> ranking = eventService.getEventResultRanking(id);
+            List<?> ranking = eventService.getEventResultRanking(id);
             return ResponseEntity.ok(ranking);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(null);

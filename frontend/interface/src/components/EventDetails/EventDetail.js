@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { fetchEventByName, fetchPlayerTeam, fetchTeamById, fetchPlayerById, addEventToEntity, startEvent, finalizeEvent, fetchEventRankings, fetchEventPairings, fetchDeckMatchups } from '../../services/api';
+import { fetchEventByName, fetchTeamById, fetchPlayerById, addEventToEntity, startEvent, finalizeEvent } from '../../services/api';
 import { useUser } from '../../contexts/UserContext';
 import './EventDetail.css';
 
@@ -19,11 +19,14 @@ function EventDetail() {
     const [finalizeError, setFinalizeError] = useState(null);
 
     useEffect(() => {
-        fetchEventByName(eventName)
-            .then(async eventData => {
+        const fetchData = async () => {
+            try {
+                console.log('Fetching event by name:', eventName);
+                const eventData = await fetchEventByName(eventName);
+                console.log('Event data:', eventData);
                 setEvent(eventData);
 
-                if (eventData.isTeamEvent) {
+                if (eventData.teamEvent) {
                     const teamDataArray = await Promise.all(
                         eventData.entityIds.map(entityId => fetchTeamById(entityId).catch(() => null))
                     );
@@ -36,28 +39,41 @@ function EventDetail() {
                         return null;
                     }));
 
+                    console.log('Teams with players:', teamsWithPlayers);
                     setTeams(teamsWithPlayers.filter(team => team !== null));
                 } else {
                     const playerDataArray = await Promise.all(
                         eventData.entityIds.map(entityId => fetchPlayerById(entityId).catch(() => null))
                     );
+                    console.log('Player data array:', playerDataArray);
                     setPlayers(playerDataArray.filter(player => player !== null));
                 }
 
+                console.log('Fetching player by ID:', user.id);
+                const playerData = await fetchPlayerById(user.id);
+                console.log('Player data:', playerData);
+                if (playerData && playerData.teamId) {
+                    setTeamId(playerData.teamId);
+                    console.log('Team ID set to:', playerData.teamId);
+                } else {
+                    console.log('No team ID found for player');
+                }
+
                 setLoading(false);
-            })
-            .catch(err => {
+            } catch (err) {
+                console.error('Error fetching data:', err);
                 setError(err.message);
                 setLoading(false);
-            });
+            }
+        };
 
-        fetchPlayerTeam(user.id)
-            .then(teamId => setTeamId(teamId))
-            .catch(err => console.error('Failed to fetch team:', err));
+        fetchData();
     }, [eventName, user.id]);
 
     const handleRegistration = () => {
+        console.log('Handling registration:', { user, event, teamId });
         if (user && event && teamId) {
+            console.log('Adding event to entity:', { teamId, eventId: event.id });
             addEventToEntity(teamId, event.id)
                 .then(() => {
                     setEvent(prevEvent => ({
@@ -65,27 +81,20 @@ function EventDetail() {
                         entityIds: [...prevEvent.entityIds, teamId]
                     }));
                     setRegistrationError(null);
+                    console.log('Registration successful');
                 })
                 .catch(err => {
+                    console.error('Error registering for event:', err);
                     setRegistrationError(err.message);
                 });
-        } else if (user && event) {
-            addEventToEntity(user.id, event.id)
-                .then(() => {
-                    setEvent(prevEvent => ({
-                        ...prevEvent,
-                        entityIds: [...prevEvent.entityIds, user.id]
-                    }));
-                    setPlayers(prevPlayers => [...prevPlayers, user]);
-                    setRegistrationError(null);
-                })
-                .catch(err => {
-                    setRegistrationError(err.message);
-                });
+        } else {
+            console.error('Cannot register for the event:', { user, event, teamId });
+            setRegistrationError("Cannot register for the event.");
         }
     };
 
     const handleStartEvent = () => {
+        console.log('Starting event:', event.id);
         if (user && event) {
             startEvent(event.id)
                 .then(() => {
@@ -95,14 +104,17 @@ function EventDetail() {
                     }));
                     setStartError(null);
                     navigate(`/events/${event.id}/pairing`); // Redirect to Pairing page after starting event
+                    console.log('Event started successfully');
                 })
                 .catch(err => {
+                    console.error('Error starting event:', err);
                     setStartError(err.message);
                 });
         }
     };
 
     const handleFinalizeEvent = () => {
+        console.log('Finalizing event:', event.id);
         if (user && event) {
             finalizeEvent(event.id)
                 .then(() => {
@@ -112,8 +124,10 @@ function EventDetail() {
                     }));
                     setFinalizeError(null);
                     navigate(`/events/${event.id}/ranking`); // Redirect to Ranking page after finalizing event
+                    console.log('Event finalized successfully');
                 })
                 .catch(err => {
+                    console.error('Error finalizing event:', err);
                     setFinalizeError(err.message);
                 });
         }
@@ -141,6 +155,8 @@ function EventDetail() {
     if (error) return <p>Error loading event: {error}</p>;
     if (!event) return <p>No event found</p>;
 
+    const isRegistered = event.entityIds.includes(user.id) || (teamId && event.entityIds.includes(teamId));
+
     return (
         <div className="event-detail-container">
             <h1>{event.name}</h1>
@@ -151,9 +167,9 @@ function EventDetail() {
             <div><strong>Started:</strong> {event.hasStarted ? 'Sim' : 'Não'}</div>
             <div><strong>Current Round:</strong> {event.currentRound}</div>
 
-            <h2 className="entity-list-title">{event.isTeamEvent ? 'Teams' : 'Players'}</h2>
+            <h2 className="entity-list-title">{event.teamEvent ? 'Teams' : 'Players'}</h2>
             <ul>
-                {event.isTeamEvent ? (
+                {event.teamEvent ? (
                     teams.map(team => (
                         <li key={team.id}>
                             <strong>{team.name}</strong>
@@ -188,7 +204,7 @@ function EventDetail() {
                         )}
                     </div>
                 )}
-                {user.role === 'ROLE_PLAYER' && !event.entityIds.includes(user.id) && !event.entityIds.includes(teamId) && !event.hasStarted && (
+                {user.role === 'ROLE_PLAYER' && !isRegistered && !event.hasStarted && (
                     <button onClick={handleRegistration}>Se Inscrever</button>
                 )}
                 {registrationError && <p className="error-message">{registrationError}</p>}

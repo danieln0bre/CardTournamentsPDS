@@ -14,12 +14,14 @@ public class Team {
     private List<String> eventIds;
     private List<String> playerIds;
     private int eventPoints;
+    private double winrate;
 
     public Team(String name, String ownerId) {
         this.name = name;
         this.ownerId = ownerId;
         this.playerIds = new ArrayList<>(5);
         this.eventIds = new ArrayList<>();
+        this.winrate = 0.0;
     }
 
     public boolean addPlayer(Player player) {
@@ -85,5 +87,13 @@ public class Team {
 
     public void setEventPoints(int eventPoints) {
         this.eventPoints = eventPoints;
+    }
+
+    public double getWinrate() {
+        return winrate;
+    }
+
+    public void setWinrate(double winrate) {
+        this.winrate = winrate;
     }
 }

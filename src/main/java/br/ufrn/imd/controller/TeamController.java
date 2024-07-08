@@ -32,18 +32,13 @@ public class TeamController {
             throw new IllegalStateException("Player ID cannot be null");
         }
         
-        Team team = teamService.createTeam(name, ownerId);
-        return ResponseEntity.ok(team);
+        Team team = new Team(name, ownerId);
+        return ResponseEntity.ok(teamService.createTeam(name, ownerId));
     }
 
     @PostMapping("/{teamId}/add-player")
     public ResponseEntity<Team> addPlayerToTeam(@PathVariable String teamId, @RequestParam String playerId) {
-        Team updatedTeam = teamService.addPlayerToTeam(teamId, playerId);
-        if (updatedTeam != null) {
-            return ResponseEntity.ok(updatedTeam);
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+        return ResponseEntity.of(Optional.ofNullable(teamService.addPlayerToTeam(teamId, playerId)));
     }
     
     @DeleteMapping("/{teamId}/remove-player/{playerId}")
@@ -63,7 +58,7 @@ public class TeamController {
                    .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    @GetMapping("/player/{playerId}/team")
+    @GetMapping("/{playerId}/team")
     public ResponseEntity<Team> getPlayerTeam(@PathVariable String playerId) {
         Player player = playerService.getPlayerById(playerId)
                 .orElseThrow(() -> new IllegalArgumentException("Player not found with ID: " + playerId));

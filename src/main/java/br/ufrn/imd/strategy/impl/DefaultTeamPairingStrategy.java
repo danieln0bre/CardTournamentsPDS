@@ -3,6 +3,7 @@ package br.ufrn.imd.strategy.impl;
 import br.ufrn.imd.model.Pairing;
 import br.ufrn.imd.model.Player;
 import br.ufrn.imd.model.Team;
+import br.ufrn.imd.repository.TeamRepository;
 import br.ufrn.imd.service.TeamService;
 import br.ufrn.imd.strategy.PairingStrategy;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,10 +15,12 @@ import java.util.*;
 public class DefaultTeamPairingStrategy implements PairingStrategy<Team> {
 
     private final TeamService teamService;
+    private final TeamRepository teamRepository;
 
     @Autowired
-    public DefaultTeamPairingStrategy(TeamService teamService) {
+    public DefaultTeamPairingStrategy(TeamService teamService, TeamRepository teamRepository) {
         this.teamService = teamService;
+        this.teamRepository = teamRepository;
     }
 
     @Override
@@ -35,6 +38,8 @@ public class DefaultTeamPairingStrategy implements PairingStrategy<Team> {
                 pairedTeamIds.add(team1.getId());
                 if (!"Bye".equals(pairing.getEntityTwoId())) {
                     pairedTeamIds.add(pairing.getEntityTwoId());
+                    addOpponentTeamId(team1.getId(), pairing.getEntityTwoId());
+                    addOpponentTeamId(pairing.getEntityTwoId(), team1.getId());
                 }
             }
         }
@@ -82,7 +87,21 @@ public class DefaultTeamPairingStrategy implements PairingStrategy<Team> {
     }
 
     private Comparator<Team> getRankComparator() {
-        return Comparator.comparingInt(teamService::getEventPoints).reversed()
-                         .thenComparingDouble(teamService::getWinrate);
+        return Comparator.comparingInt(Team::getEventPoints).reversed()
+                         .thenComparingDouble(Team::getWinrate);
+    }
+    private void addOpponentTeamId(String teamId, String opponentTeamId) {
+        Team team = teamRepository.findById(teamId).orElse(null);
+        if (team != null) {
+            List<String> opponentTeamIds = team.getOpponentTeamIds();
+            if (opponentTeamIds == null) {
+                opponentTeamIds = new ArrayList<>();
+            }
+            if (!opponentTeamIds.contains(opponentTeamId)) {
+                opponentTeamIds.add(opponentTeamId);
+                team.setOpponentTeamIds(opponentTeamIds);
+                teamRepository.save(team);
+            }
+        }
     }
 }

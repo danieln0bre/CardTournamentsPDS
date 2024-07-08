@@ -10,32 +10,47 @@ function EventRanking() {
     const [error, setError] = useState(null);
 
     useEffect(() => {
-        fetchEventById(eventId)
-            .then(event => {
+        const fetchRanking = async () => {
+            try {
+                const event = await fetchEventById(eventId);
+                console.log('Fetched Event:', event);
+                let rankingData;
+
                 if (event.finished) {
-                    return fetchEventResultRanking(eventId);
+                    rankingData = await fetchEventResultRanking(eventId);
                 } else {
-                    return fetchEventRankings(eventId);
+                    rankingData = await fetchEventRankings(eventId);
                 }
-            })
-            .then(async data => {
-                const teamIds = data.map(result => result.teamId);
+
+                console.log('Fetched Ranking Data:', rankingData);
+
+                const teamIds = rankingData.map(result => result.teamId).filter(Boolean);
+                console.log('Team IDs:', teamIds);
+
                 const teams = await Promise.all(teamIds.map(teamId => fetchTeamById(teamId)));
+                console.log('Fetched Teams:', teams);
+
                 const teamMap = teams.reduce((acc, team) => {
-                    acc[team.id] = team.name;
+                    acc[team.id] = team;
                     return acc;
                 }, {});
-                const rankingWithTeamNames = data.map(result => ({
+                console.log('Team Map:', teamMap);
+
+                const rankingWithTeamNames = rankingData.map(result => ({
                     ...result,
-                    teamName: teamMap[result.teamId] || 'Unknown'
+                    teamName: teamMap[result.teamId]?.name || 'Unknown'
                 }));
+                console.log('Ranking with Team Names:', rankingWithTeamNames);
+
                 setRanking(rankingWithTeamNames);
                 setLoading(false);
-            })
-            .catch(err => {
+            } catch (err) {
                 setError(err.message);
                 setLoading(false);
-            });
+            }
+        };
+
+        fetchRanking();
     }, [eventId]);
 
     if (loading) return <p>Loading ranking...</p>;

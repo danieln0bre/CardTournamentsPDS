@@ -14,7 +14,6 @@ public class PersistentLogin {
     private String token;
     private Date lastUsed;
 
-    // Getters e Setters
     public String getSeries() {
         return series;
     }

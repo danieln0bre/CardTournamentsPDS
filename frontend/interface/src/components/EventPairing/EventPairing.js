@@ -9,7 +9,7 @@ function EventPairing() {
     const navigate = useNavigate();
     const { user } = useUser();
     const [pairings, setPairings] = useState([]);
-    const [teams, setTeams] = useState({});
+    const [entities, setEntities] = useState({});
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [generateError, setGenerateError] = useState(null);
@@ -25,19 +25,19 @@ function EventPairing() {
             })
             .then(data => {
                 setPairings(data);
-                const teamIds = new Set();
+                const entityIds = new Set();
                 data.forEach(pairing => {
-                    if (pairing.entityOneId !== 'Bye') teamIds.add(pairing.entityOneId);
-                    if (pairing.entityTwoId !== 'Bye') teamIds.add(pairing.entityTwoId);
+                    if (pairing.entityOneId !== 'Bye') entityIds.add(pairing.entityOneId);
+                    if (pairing.entityTwoId !== 'Bye') entityIds.add(pairing.entityTwoId);
                 });
-                return Promise.all(Array.from(teamIds).map(teamId => fetchTeamById(teamId)));
+                return Promise.all(Array.from(entityIds).map(entityId => fetchTeamById(entityId)));
             })
-            .then(teamsData => {
-                const teamsMap = teamsData.reduce((acc, team) => {
-                    acc[team.id] = team;
+            .then(entitiesData => {
+                const entitiesMap = entitiesData.reduce((acc, entity) => {
+                    acc[entity.id] = entity;
                     return acc;
                 }, {});
-                setTeams(teamsMap);
+                setEntities(entitiesMap);
                 setLoading(false);
             })
             .catch(err => {
@@ -73,8 +73,8 @@ function EventPairing() {
 
             await savePairings(eventId, validPairings);
             const recalculatePromises = validPairings.flatMap(pairing => [
-                ...teams[pairing.entityOneId].playerIds.map(playerId => recalculateWinrates(playerId)),
-                ...teams[pairing.entityTwoId].playerIds.map(playerId => recalculateWinrates(playerId))
+                ...entities[pairing.entityOneId]?.playerIds.map(playerId => recalculateWinrates(playerId)) || [],
+                ...entities[pairing.entityTwoId]?.playerIds.map(playerId => recalculateWinrates(playerId)) || []
             ]);
 
             await Promise.all(recalculatePromises);
@@ -113,7 +113,7 @@ function EventPairing() {
             <ul>
                 {pairings.map((pairing, index) => (
                     <li key={index} className="pairing-item">
-                        <div>{teams[pairing.entityOneId].name} vs {pairing.entityTwoId === 'Bye' ? 'Bye' : teams[pairing.entityTwoId].name}</div>
+                        <div>{entities[pairing.entityOneId]?.name || 'Unknown'} vs {pairing.entityTwoId === 'Bye' ? 'Bye' : entities[pairing.entityTwoId]?.name || 'Unknown'}</div>
                         {user.role === 'ROLE_MANAGER' && pairing.entityTwoId !== 'Bye' && (
                             <div>
                                 <label>
@@ -124,7 +124,7 @@ function EventPairing() {
                                         checked={pairing.result === 0}
                                         onChange={() => handleResultChange(index, 0)}
                                     />
-                                    {teams[pairing.entityOneId].name} venceu
+                                    {entities[pairing.entityOneId]?.name} venceu
                                 </label>
                                 <label>
                                     <input
@@ -134,7 +134,7 @@ function EventPairing() {
                                         checked={pairing.result === 1}
                                         onChange={() => handleResultChange(index, 1)}
                                     />
-                                    {teams[pairing.entityTwoId].name} venceu
+                                    {entities[pairing.entityTwoId]?.name} venceu
                                 </label>
                             </div>
                         )}

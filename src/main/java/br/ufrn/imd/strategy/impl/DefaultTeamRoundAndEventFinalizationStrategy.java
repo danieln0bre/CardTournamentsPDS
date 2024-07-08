@@ -2,6 +2,7 @@ package br.ufrn.imd.strategy.impl;
 
 import br.ufrn.imd.model.*;
 import br.ufrn.imd.repository.*;
+import br.ufrn.imd.service.PlayerService;
 import br.ufrn.imd.service.TeamService;
 import br.ufrn.imd.strategy.RoundAndEventFinalizationStrategy;
 import br.ufrn.imd.strategy.MatchUpdateStrategy;
@@ -21,17 +22,19 @@ public class DefaultTeamRoundAndEventFinalizationStrategy implements RoundAndEve
     private final MatchUpdateStrategy matchUpdateStrategy;
     private final PairingStrategy pairingStrategy;
     private final TeamService teamService;
+    private final PlayerService playerService;
 
     @Autowired
     public DefaultTeamRoundAndEventFinalizationStrategy(EventRepository eventRepository, EventResultRepository eventResultRepository,
                                                         TeamRepository teamRepository, MatchUpdateStrategy matchUpdateStrategy,
-                                                        PairingStrategy pairingStrategy, TeamService teamService) {
+                                                        PairingStrategy pairingStrategy, TeamService teamService, PlayerService playerService) {
         this.eventRepository = eventRepository;
         this.eventResultRepository = eventResultRepository;
         this.teamRepository = teamRepository;
         this.matchUpdateStrategy = matchUpdateStrategy;
         this.pairingStrategy = pairingStrategy;
         this.teamService = teamService;
+        this.playerService = playerService;
     }
 
     @Override
@@ -47,10 +50,14 @@ public class DefaultTeamRoundAndEventFinalizationStrategy implements RoundAndEve
             throw new IllegalStateException("No teams found for the event.");
         }
 
+        // Create team results first
         List<TeamResult> teamResults = createTeamResults(teams, eventId);
-        resetTeamAttributes(teams, eventId);
 
+        // Save event results before resetting attributes
         saveEventResults(eventId, teamResults);
+
+        // Now reset team and player attributes
+        resetTeamAttributes(teams, eventId);
 
         return event;
     }
@@ -93,8 +100,9 @@ public class DefaultTeamRoundAndEventFinalizationStrategy implements RoundAndEve
         for (Team team : teams) {
             TeamResult result = new TeamResult();
             result.setTeamId(team.getId());
-            result.setEventPoints(teamService.getEventPoints(team));
-            result.setWinrate(teamService.getWinrate(team));
+            result.setEventPoints(team.getEventPoints());
+            result.setWinrate(team.getWinrate());
+            result.setOpponentTeamIds(team.getOpponentTeamIds());
             teamResults.add(result);
         }
         return teamResults;
@@ -110,7 +118,11 @@ public class DefaultTeamRoundAndEventFinalizationStrategy implements RoundAndEve
                 player.clearOpponents();
                 player.getAppliedEventsId().remove(eventId);
                 player.addEventId(eventId);
+                playerService.savePlayer(player);
             }
+            team.setEventPoints(0);
+            team.setWinrate(0);
+            team.clearOpponentTeamIds();
             teamRepository.save(team);
         }
     }

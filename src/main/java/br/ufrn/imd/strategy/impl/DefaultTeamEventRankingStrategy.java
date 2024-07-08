@@ -39,11 +39,11 @@ public class DefaultTeamEventRankingStrategy implements EventRankingStrategy<Tea
     private class TeamPointsAndWinrateComparator implements Comparator<Team> {
         @Override
         public int compare(Team t1, Team t2) {
-            int eventPointsComparison = Integer.compare(teamService.getEventPoints(t2), teamService.getEventPoints(t1));
+            int eventPointsComparison = Integer.compare(t2.getEventPoints(), t1.getEventPoints());
             if (eventPointsComparison != 0) {
                 return eventPointsComparison;
             }
-            return Double.compare(teamService.getWinrate(t2), teamService.getWinrate(t1));
+            return Double.compare(t2.getEventPoints(), t1.getEventPoints());
         }
     }
 }

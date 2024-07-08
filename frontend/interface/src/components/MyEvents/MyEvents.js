@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { fetchPlayerEvents, fetchManagerEvents, fetchEventById } from '../../services/api';
+import { fetchPlayerEvents, fetchManagerEvents, fetchEventById, fetchPlayerTeam, fetchTeamById } from '../../services/api';
 import { useUser } from '../../contexts/UserContext';
 import { generateUrlFriendlyName } from '../utils/utils';
 import './MyEvents.css';
@@ -19,16 +19,24 @@ function MyEvents() {
 
             const fetchEvents = user.role === 'ROLE_MANAGER' ? fetchManagerEvents : fetchPlayerEvents;
             fetchEvents(user.id)
-                .then(data => {
-                    if (user.role === 'ROLE_MANAGER') {
-                        const eventPromises = data.map(event => fetchEventById(event.id));
-                        return Promise.all(eventPromises);
+                .then(async data => {
+                    let playerEvents = data;
+
+                    if (user.role === 'ROLE_PLAYER') {
+                        const teamResponse = await fetchPlayerTeam(user.id);
+                        if (teamResponse && teamResponse.data && teamResponse.data.id) {
+                            const teamId = teamResponse.data.id;
+                            const team = await fetchTeamById(teamId);
+                            const teamEventPromises = team.eventIds.map(eventId => fetchEventById(eventId));
+                            const teamEvents = await Promise.all(teamEventPromises);
+                            playerEvents = [...playerEvents, ...teamEvents];
+                        }
                     } else {
-                        return data; // Player events are already fully fetched
+                        const eventPromises = data.map(event => fetchEventById(event.id));
+                        playerEvents = await Promise.all(eventPromises);
                     }
-                })
-                .then(fetchedEvents => {
-                    const uniqueEvents = filterUniqueEvents(fetchedEvents);
+
+                    const uniqueEvents = filterUniqueEvents(playerEvents);
                     const sortedEvents = uniqueEvents.sort((a, b) => a.finished - b.finished);
                     setEvents(sortedEvents);
                     setLoading(false);
@@ -58,7 +66,7 @@ function MyEvents() {
     };
 
     if (loading) return <p>Loading events...</p>;
-    if (error) return <p>Error loading events: {error.message}</p>;
+    if (error) return <p>Error loading events: {error}</p>;
 
     return (
         <div className="my-events-container">
