@@ -21,7 +21,7 @@ public class TeamPairingService implements PairingService {
     }
 
     @Override
-    public List<Pairing> createPairings(String eventId) {
+    public List<Pairing> createPairings(String eventId, boolean isTeamEvent) {
         List<Team> teams = teamService.getEventTeams(eventId);
         return pairingStrategy.createPairings(teams);
     }

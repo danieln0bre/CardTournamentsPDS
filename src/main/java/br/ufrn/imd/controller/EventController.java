@@ -10,6 +10,8 @@ import br.ufrn.imd.service.EventRankingService;
 import br.ufrn.imd.service.EventService;
 import br.ufrn.imd.service.ManagerService;
 import br.ufrn.imd.service.PlayerService;
+import br.ufrn.imd.service.TeamService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -27,16 +29,18 @@ public class EventController {
     private final ManagerService managerService;
     private final EventRankingService<Player, PlayerResult> playerEventRankingService;
     private final EventRankingService<Team, TeamResult> teamEventRankingService;
+    private final TeamService teamService;
 
     @Autowired
     public EventController(PlayerService playerService, EventService eventService, ManagerService managerService,
                            EventRankingService<Player, PlayerResult> playerEventRankingService,
-                           EventRankingService<Team, TeamResult> teamEventRankingService) {
+                           EventRankingService<Team, TeamResult> teamEventRankingService, TeamService teamService) {
         this.playerService = playerService;
         this.eventService = eventService;
         this.managerService = managerService;
         this.playerEventRankingService = playerEventRankingService;
         this.teamEventRankingService = teamEventRankingService;
+        this.teamService = teamService;
     }
 
     @PostMapping("/createEvent")
@@ -144,7 +148,7 @@ public class EventController {
     @GetMapping("/{id}/result-ranking")
     public ResponseEntity<List<?>> getEventResultRanking(@PathVariable String id) {
         try {
-            List<?> ranking = eventService.getEventResultRanking(id);
+            List<?> ranking = eventService.getPlayerEventResultRanking(id);
             return ResponseEntity.ok(ranking);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(null);

@@ -49,7 +49,7 @@ public class EventPairingController {
                         return ResponseEntity.badRequest().body("Event has not started yet.");
                     }
 
-                    List<Pairing> pairings = pairingService.createPairings(eventId);
+                    List<Pairing> pairings = pairingService.createPairings(eventId, false);
                     event.setPairings(pairings);
                     eventService.saveEvent(event);
                     return ResponseEntity.ok("Pairings generated successfully.");
